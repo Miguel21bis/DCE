@@ -752,7 +752,8 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 					end
 
 					-- affichage final
-					for _, line in ipairs(lines) do
+					-- APRÈS
+					for idx, line in ipairs(lines) do
 						
 						local parts = {}
 						
@@ -773,7 +774,19 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 							finalLine = truncateMiddle(finalLine, MAX_LINE_LEN)
 						end
 						
+-- APRÈS
 						print(finalLine)
+
+						if DCEM_MachineMode then
+							-- Ligne technique pour DCE_Manager : ne pas supprimer.
+							-- Format : ##DCEM_FLIGHTOPT##selectable(0/1)|idx|nb|base|type|groupName|target
+							local selectableFlag = tabIndex[idx] and 1 or 0
+							print("##DCEM_FLIGHTOPT##"..selectableFlag.."|"..idx.."|"..playable[idx].number
+								.."|"..AliasBaseName(playable[idx].base)
+								.."|"..AliasTypeName(playable[idx].type)
+								.."|"..(playable[idx].groupName or "")
+								.."|"..(playable[idx].target_name or ""))
+						end
 					end
 
 

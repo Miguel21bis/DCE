@@ -19,17 +19,38 @@ function Try_dofile(path)
 end
 
 
-function loadDataFile(path, globalName)
+-- function loadDataFile(path, globalName)
+-- 	local ok, err = pcall(dofile, path)
+-- 	if not ok then
+-- 		return nil, "impossible de charger " .. path .. " globalName: " .. globalName .. " (" .. tostring(err) .. ")"
+-- 	end
+-- 	if _G[globalName] == nil then
+-- 		return nil, path .. " ne définit pas " .. globalName
+-- 	end
+-- 	return _G[globalName]
+-- end
+
+local function loadDataFile(path, globalName)
+	-- Sauvegarde/restauration de la variable globale visée : si un état vivant
+	-- (ex: camp = { mission = 7, ... } chargé depuis Active/camp_status.lua)
+	-- porte déjà ce nom, le dofile() ci-dessous ne doit jamais l'écraser.
+	-- Seule la valeur nouvellement chargée doit être renvoyée à l'appelant.
+	local previousValue = _G[globalName]
+	_G[globalName] = nil
+
 	local ok, err = pcall(dofile, path)
+	local loadedValue = _G[globalName]
+
+	_G[globalName] = previousValue
+
 	if not ok then
 		return nil, "impossible de charger " .. path .. " globalName: " .. globalName .. " (" .. tostring(err) .. ")"
 	end
-	if _G[globalName] == nil then
+	if loadedValue == nil then
 		return nil, path .. " ne définit pas " .. globalName
 	end
-	return _G[globalName]
+	return loadedValue
 end
-
 
 -- Fonction pour vérifier l'existence d'un fichier
 function FileExists(path)
@@ -638,12 +659,113 @@ end
 
 
 
-function ModifiCampInit()
+-- function ModifiCampInit()
 
-	if not REF_PATH then
-		print("[ModifiCampInit] UTIL_REF_camp_init.lua introuvable (racine testée : " .. MOD_PATH .. ")")
-		return false
-	end
+-- 	if not REF_PATH then
+-- 		print("[ModifiCampInit] UTIL_REF_camp_init.lua introuvable (racine testée : " .. MOD_PATH .. ")")
+-- 		return false
+-- 	end
+
+-- 	local REF_camp, refErr = loadDataFile(REF_PATH, REF_ROOT_NAME)
+-- 	if not REF_camp then print("[ModifiCampInit] " .. refErr) return false end
+
+-- 	local camp, campErr = loadDataFile(CAMP_INIT_PATH, LOCAL_ROOT_NAME)
+-- 	if not camp then print("[ModifiCampInit] " .. campErr) return false end
+
+-- 	local refFile = io.open(REF_PATH, "r")
+-- 	if not refFile then print("[ModifiCampInit] impossible d'ouvrir " .. REF_PATH) return false end
+
+-- 	local localFlat   = flatten(camp, nil, {})
+-- 	local visited     = {}
+-- 	local pathStack   = {}
+-- 	local skippingList = false
+-- 	local outLines    = {}
+
+-- 	local function currentPath()
+-- 		return table.concat(pathStack, ".")
+-- 	end
+
+-- 	local isRootLine = true -- traite la toute première ligne "REF_camp = {" à part
+
+-- 	for line in refFile:lines() do
+
+-- 		local key = line:match("^%s*([%a_][%w_]*)%s*=")
+
+-- 		if isRootLine and key == REF_ROOT_NAME then
+-- 			-- la ligne d'ouverture porte le nom de la référence (REF_camp) ;
+-- 			-- on la réécrit avec le nom réellement utilisé dans camp_init.lua (camp)
+-- 			outLines[#outLines + 1] = line:gsub("^(%s*)" .. REF_ROOT_NAME, "%1" .. LOCAL_ROOT_NAME)
+-- 			isRootLine = false
+
+-- 		elseif skippingList then
+-- 			-- on saute les lignes d'exemple d'une liste déjà régénérée
+-- 			if line:match("^%s*}") then
+-- 				outLines[#outLines + 1] = line
+-- 				pathStack[#pathStack] = nil
+-- 				skippingList = false
+-- 			end
+
+-- 		elseif key and line:match("=%s*{") then
+-- 			-- ouverture d'une sous-table
+-- 			pathStack[#pathStack + 1] = key
+-- 			outLines[#outLines + 1] = line
+
+-- 			-- ne régénère que si la donnée locale à ce chemin est un vrai
+-- 			-- tableau-liste ; sinon ce n'est qu'un conteneur (ex: pictureBrief
+-- 			-- au-dessus de blue/red), on continue la récursion normalement
+-- 			local path = currentPath()
+-- 			local values = localFlat[path]
+-- 			if type(values) == "table" and values[1] ~= nil then
+-- 				local indent = (line:match("^(%s*)") or "") .. "\t"
+-- 				for _, picName in ipairs(values) do
+-- 					outLines[#outLines + 1] = indent .. serializeScalar(picName) .. ","
+-- 				end
+-- 				skippingList = true
+-- 			end
+
+-- 		elseif key then
+-- 			-- ligne "clé = valeur, -- commentaire"
+-- 			local path = currentPath() ~= "" and (currentPath() .. "." .. key) or key
+-- 			visited[path] = true
+-- 			local value = localFlat[path]
+-- 			outLines[#outLines + 1] = (value ~= nil) and setValueOnLine(line, value) or line
+
+-- 		else
+-- 			outLines[#outLines + 1] = line
+-- 			if line:match("^%s*}") and #pathStack > 0 then
+-- 				pathStack[#pathStack] = nil
+-- 			end
+-- 		end
+-- 	end
+-- 	refFile:close()
+
+-- 	-- variables locales absentes de REF_camp : à porter, ou obsolètes
+-- 	local portable = {}
+-- 	for path, value in pairs(localFlat) do
+-- 		if not visited[path] then
+-- 			local target = MIGRATE_TO_CONFMOD[path]
+-- 			if target then
+-- 				portable[#portable + 1] = { fromPath = path, toPath = target, value = value }
+-- 			else
+-- 				-- print("[ModifiCampInit] variable obsolète supprimée : " .. path)
+-- 			end
+-- 		end
+-- 	end
+
+-- 	local outFile = io.open(CAMP_INIT_PATH, "w")
+-- 	if not outFile then print("[ModifiCampInit] impossible d'écrire " .. CAMP_INIT_PATH) return false end
+-- 	outFile:write(table.concat(outLines, "\n"))
+-- 	outFile:close()
+
+-- 	if #portable > 0 then
+-- 		PortLegacyFieldsToConfMod(CONF_MOD_PATH, portable)
+-- 	end
+
+-- 	dofile(CAMP_INIT_PATH)
+-- 	return true
+-- end
+
+function ModifiCampInit()
 
 	local REF_camp, refErr = loadDataFile(REF_PATH, REF_ROOT_NAME)
 	if not REF_camp then print("[ModifiCampInit] " .. refErr) return false end
@@ -740,7 +862,11 @@ function ModifiCampInit()
 		PortLegacyFieldsToConfMod(CONF_MOD_PATH, portable)
 	end
 
-	dofile(CAMP_INIT_PATH)
+	-- NE PAS faire dofile(CAMP_INIT_PATH) ici : ça écraserait la variable
+	-- globale "camp" (état vivant de campagne : mission en cours, date, etc.)
+	-- avec le template de départ de campagne. Init/camp_init.lua a été
+	-- réécrit sur disque ci-dessus, c'est suffisant : il sera relu au
+	-- prochain BAT_FirstMission. Ici on ne veut RIEN en mémoire.
 	return true
 end
 

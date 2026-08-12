@@ -1,5 +1,14 @@
 --To manually generate the first campaign mission and reset the campaign to initial status. For manual use by campaign designer only, not required for normal campaign play.
 --Initiated by FirstMission.bat
+
+
+io.stdout:setvbuf("no")
+
+-- Vrai uniquement quand ce script est piloté par DCE_Manager (variable posée par
+-- ProcessConsoleBridge.Start côté C#). Sert à activer les lignes techniques ##DCEM_AC##
+-- etc., invisibles/inutiles pour quelqu'un qui double-clique FirstMission.bat directement.
+DCEM_MachineMode = (os.getenv("DCEM_MACHINE_MODE") == "1")
+
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_FirstMission.lua"] = "2.16.102"
@@ -28,7 +37,11 @@ oob_air = {}					--pour declarer la table globale et calmer les inquietudes d'ID
 local function acceptMission()
     local m
     repeat
+-- APRÈS
         print("\n\n Night or Day ? : " .. Daytime)
+        if DCEM_MachineMode then
+            print("##DCEM_DAYNIGHT##"..tostring(Daytime))
+        end
         print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
         print("\n\nAccept Mission ?:")
         print("a - Accept mission")
@@ -262,6 +275,9 @@ if VersionPackageICM then
 	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
 	print("========================================================================================================================")
 	print()
+	if DCEM_MachineMode then
+		print("##DCEM_HEADER##"..tostring(camp.title).."|"..tostring(camp.version).."|"..tostring(playerInfo.planeBAT).."|"..tostring(playerInfo.squadBAT).."|"..tostring(playerInfo.countryBAT).."|"..(Debug.debug and "DEBUG ON" or ""))
+	end
 
 else
 	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
@@ -317,13 +333,13 @@ repeat
 			print()
 			print(" [S] Singleplayer")
 			print()
-			print(" [C] Change aircraft type")
-			print()
+			-- print(" [C] Change aircraft type")
+			-- print()
 			print(" [T] Multiplayer by Target")
 			print(" [N] Multiplayer by NATO package")
 			print()
-			print(" [O] Tools / CampaignMaker")
-			print()
+			-- print(" [O] Tools / CampaignMaker")
+			-- print()
 
 			choix1 = io.stdin:read()
 		end
@@ -450,12 +466,7 @@ repeat
 						if Playable_m[unit.type] and unit.inactive ~= true then
 
 							tabTaskAvailable[nSide] = tabTaskAvailable[nSide] or {}
-							-- tabTaskAvailable[nSide][unit.name] = {
-							-- 	type = unit.type,
-							-- 	base = unit.base,
-							-- 	tasks = {},
-							-- }
-
+							
 							table.insert(tabTaskAvailable[nSide], {
 								name = unit.name,
 								type = unit.type,
@@ -473,6 +484,8 @@ repeat
 						end
 					end
 				end
+				
+				
 				-- display le tableau des choix d'avion et de task
 				local tabBug = {}
 
@@ -512,34 +525,12 @@ repeat
 						playable_type[indexStringType]["base"] = unit.base
 						playable_type[indexStringType]["unitName"] = unit.name
 
-						-- io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || "..unit.name)
-
-						-- for taskN, taskStr in PairsByKeys(unit.tasks) do
-
-						-- 	if TabTask[taskStr] then
-						-- 		io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-						-- 		-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-						-- 		tabIndex[tostring(1)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(2)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(3)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(4)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(5)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(6)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
-
-						-- 	-- elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
-						-- 	elseif not TabTask[taskStr] and string.lower(taskStr) ~= "spotter" then
-						-- 		table.insert(tabBug,taskStr )
-						-- 	end
-						-- end
-						-- io.write("\n")
-
-
 						-- local shortTasks = buildTaskList(unit.tasks)
 						local shortTasks = {}
 						local displayTasks = {}
+						local machineTasks = {}
 
+						-- APRÈS
 						for _, taskStr in PairsByKeys(unit.tasks) do
 
 							if TabTask[taskStr] then
@@ -551,6 +542,11 @@ repeat
 									.."("
 									..string.lower(TabTask[taskStr])
 									..")"
+
+								machineTasks[#machineTasks + 1] =
+									taskToShort(taskStr)
+									..":"
+									..string.lower(TabTask[taskStr])
 							end
 						end
 
@@ -567,7 +563,14 @@ repeat
 								shortTaskText
 							)
 
-						print(line)
+						
+						if DCEM_MachineMode then
+							-- Ligne technique pour DCE_Manager (capture automatique) : ne pas supprimer.
+							-- Format : ##DCEM_AC##side|id|type|base|squadron|CODE1:x,CODE2:y,...
+							print("##DCEM_AC##"..nSide.."|"..indexStringType.."|"..unit.type.."|"..unit.base.."|"..unit.name.."|"..table.concat(machineTasks, ","))
+						else
+							print(line)
+						end
 
 						for taskN, taskStr in PairsByKeys(unit.tasks) do
 
@@ -780,6 +783,9 @@ repeat
 			print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
 			print("============================================================================================================================")
 			print()
+			if DCEM_MachineMode then
+				print("##DCEM_HEADER##"..tostring(camp.title).."|"..tostring(camp.version).."|"..tostring(playerInfo.planeBAT).."|"..tostring(playerInfo.squadBAT).."|"..tostring(playerInfo.countryBAT).."|"..(Debug.debug and "DEBUG ON" or ""))
+			end
 
 		else
 			print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
@@ -791,5 +797,9 @@ repeat
 
 until 1 == 2
 
-os.execute 'pause'																					--pause command window for user to read text
-os.exit()
+if DCEM_MachineMode then
+	os.exit(0)
+else
+	os.execute 'pause'																					--pause command window for user to read text
+	os.exit()
+end

@@ -1,5 +1,13 @@
 --To manually re-generate and replace the current campaign mission. For contingency only, not required for normal campaign play.
 --Initiated by RedoMission.bat
+
+io.stdout:setvbuf("no")
+
+-- Vrai uniquement quand ce script est piloté par DCE_Manager (variable posée par
+-- ProcessConsoleBridge.Start côté C#). Sert à activer les lignes techniques ##DCEM_AC##
+-- etc., invisibles/inutiles pour quelqu'un qui double-clique FirstMission.bat directement.
+DCEM_MachineMode = (os.getenv("DCEM_MACHINE_MODE") == "1")
+
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_SkipMission.lua"] = "2.18.103"
@@ -23,7 +31,11 @@ MissionAccepted = nil
 local function acceptMission()
     local m
     repeat
+-- APRÈS
         print("\n\n Night or Day ? : " .. Daytime)
+        if DCEM_MachineMode then
+            print("##DCEM_DAYNIGHT##"..tostring(Daytime))
+        end
         print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
         print("\n\nAccept Mission ?:")
         print("a - Accept mission")
@@ -210,11 +222,7 @@ end
 
 
 if VersionPackageICM then
-	-- print("0B0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
-	-- print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
-	-- print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
-	-- print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
-	-- print()
+
 	print("========================================================================================================================")
 	print(" DCE CAMPAIGN GENERATOR")
 	print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
@@ -230,6 +238,10 @@ if VersionPackageICM then
 	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
 	print("========================================================================================================================")
 	print()
+	
+	if DCEM_MachineMode then
+		print("##DCEM_HEADER##"..tostring(camp.title).."|"..tostring(camp.version).."|"..tostring(playerInfo.planeBAT).."|"..tostring(playerInfo.squadBAT).."|"..tostring(playerInfo.countryBAT).."|"..(Debug.debug and "DEBUG ON" or ""))
+	end
 
 else
 	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
@@ -240,7 +252,11 @@ local input
 local choix1
 
 if not ChangePlane then
+-- APRÈS
 	print("Actual time: " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
+	if DCEM_MachineMode then
+		print("##DCEM_TIME##"..FormatTime(camp.time, "hh:mm").."|"..camp.date.day.."."..camp.date.month.."."..camp.date.year)
+	end
 	print("Skip current mission and generate next campaign mission. Continue? y(es)/n(o):\n")
 
 	SinglePlayer = false
@@ -295,13 +311,13 @@ if input == "y" or input == "yes" then
 			print()
 			print(" [S] Singleplayer")
 			print()
-			print(" [C] Change aircraft type")
-			print()
+			-- print(" [C] Change aircraft type")
+			-- print()
 			print(" [T] Multiplayer by Target")
 			print(" [N] Multiplayer by NATO package")
 			print()
-			print(" [O] Tools / CampaignMaker")
-			print()
+			-- print(" [O] Tools / CampaignMaker")
+			-- print()
 
 			choix1 = io.stdin:read()
 			choix1 = string.lower(choix1)
@@ -390,9 +406,14 @@ if input == "y" or input == "yes" then
 							and (string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CAP" or target.task == "Fighter Sweep" or target.task == "Transport")
 							and target.type ~= "Ejected Pilot"
 							then
+								-- APRÈS
 								Ckey = key
 								io.write(Ckey.." "..eniSide.." "..tostring(target.titleName).."  "..tostring(target.alive).."%  X"..tostring(target.priority).."\n")
 								tabIndex[Ckey] = target
+
+								if DCEM_MachineMode then
+									print("##DCEM_TARGET##"..Ckey.."|"..eniSide.."|"..tostring(target.titleName).."|"..tostring(target.alive).."|"..tostring(target.priority))
+								end
 							end
 						end
 
@@ -414,9 +435,14 @@ if input == "y" or input == "yes" then
 						for key, target in ipairs(targetlist[targetSide]) do
 							if not target.inactive and target.ATO and (target.task == "CSAR" or target.task == "SAR") then
 								-- Ckey = key
+								-- APRÈS
 								local mgrsInfo = target.MGRS_Chute_1km or target.MGRS_Chute or 0
 								io.write(key.." "..tostring(target.titleName).." "..tostring(mgrsInfo).."\n")
 								tabIndex[key] = target
+
+								if DCEM_MachineMode then
+									print("##DCEM_CSARTARGET##"..key.."|"..tostring(target.titleName).."|"..tostring(mgrsInfo))
+								end
 							end
 						end
 
@@ -497,9 +523,6 @@ if input == "y" or input == "yes" then
 						end
 					end
 
-					-- print("Choose your aircraft type for Flight n°"..i)
-					-- print("(number of aircraft) (type of aircraft) (type of mission)")
-					-- print("example for (4 "..ExPlaneA..": Escort): 4ae or 4AE")
 
 					print("Select your flight:")
 					print("Format: [1-8 aircraft][ID][Task code]")
@@ -528,11 +551,6 @@ if input == "y" or input == "yes" then
 							if Playable_m[unit.type] and unit.inactive ~= true then
 
 								tabTaskAvailable[nSide] = tabTaskAvailable[nSide] or {}
-								-- tabTaskAvailable[nSide][unit.name] = {
-								-- 	type = unit.type,
-								-- 	base = unit.base,
-								-- 	tasks = {},
-								-- }
 
 								table.insert(tabTaskAvailable[nSide], {
 									name = unit.name,
@@ -551,6 +569,8 @@ if input == "y" or input == "yes" then
 							end
 						end
 					end
+					
+					
 
 					-- display le tableau des choix d'avion et de task
 					local tabBug = {}
@@ -574,30 +594,9 @@ if input == "y" or input == "yes" then
 							playable_type[indexStringType]["base"] = unit.base
 							playable_type[indexStringType]["unitName"] = unit.name
 
-							-- io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || ")
-
-							-- for taskN, taskStr in PairsByKeys(unit.tasks) do
-
-							-- 	if TabTask[taskStr] then
-							-- 		io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-							-- 		-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-							-- 		tabIndex[tostring(1)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(2)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(3)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(4)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(5)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(6)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
-
-							-- 	elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
-							-- 		table.insert(tabBug,taskStr )
-							-- 	end
-							-- end
-							-- io.write("\n")
-
 							local shortTasks = {}
 							local displayTasks = {}
+							local machineTasks = {}
 
 							for _, taskStr in PairsByKeys(unit.tasks) do
 
@@ -610,6 +609,11 @@ if input == "y" or input == "yes" then
 										.."("
 										..string.lower(TabTask[taskStr])
 										..")"
+
+									machineTasks[#machineTasks + 1] =
+										taskToShort(taskStr)
+										..":"
+										..string.lower(TabTask[taskStr])
 								end
 							end
 
@@ -626,7 +630,13 @@ if input == "y" or input == "yes" then
 									shortTaskText
 								)
 
-							print(line)
+							if DCEM_MachineMode then
+								-- Ligne technique pour DCE_Manager (capture automatique) : ne pas supprimer.
+								-- Format : ##DCEM_AC##side|id|type|base|squadron|CODE1:x,CODE2:y,...
+								print("##DCEM_AC##"..nSide.."|"..indexStringType.."|"..unit.type.."|"..unit.base.."|"..unit.name.."|"..table.concat(machineTasks, ","))
+							else
+								print(line)
+							end
 
 							for taskN, taskStr in PairsByKeys(unit.tasks) do
 
@@ -834,97 +844,6 @@ if input == "y" or input == "yes" then
 					PrintPlayerRejectionMP()
 				end
 
-				-- for _, crit in ipairs(Playability_criterium) do
-				-- 	if crit.key == "active_unit" and crit.value == nil then
-				-- 		print("Player unit is not active.\n\n")
-				-- 	elseif crit.key == "base" and crit.value == nil then
-				-- 		print("Player airbase is not operational.\n\n")
-				-- 	elseif crit.key == "ready_aircraft" and crit.value == nil then
-				-- 		print("Player unit has no ready aircraft.\n\n")
-				-- 	elseif crit.key == "tot" and crit.value == nil then
-				-- 		print("Player aircraft type cannot operate at this time of day.\n\n")
-				-- 	elseif crit.key == "target" and crit.value == nil then
-				-- 		print("No eligible mission available for player.\n\n")
-				-- 	elseif crit.key == "target_firepower" and crit.value == nil then
-				-- 		print("Not enough ready aircraft for this mission.\n\n")
-				-- 	elseif crit.key == "weather" and crit.value == nil then
-				-- 		print("Player aircraft type cannot operate in this weather.\n\n")
-				-- 	elseif crit.key == "target_range" and crit.value == nil then
-				-- 		print("No eligible mission available for player.\n\n")
-				-- 	elseif crit.key == "intercept" and crit.value == nil then
-				-- 		print("Ground alert intercept duty without launch.\n\n")
-				-- 	-- else
-				-- 	-- 	print("No eligible mission available.\n\n")
-				-- 	end
-				-- end
-
-
-				-- if Multi.NbGroup and not PlayerFlight then
-
-				-- 	print("Mission generation failed:\n")
-				-- 	print("ID  Aircraft     Base                Squadron        Tasks")
-				-- 	print("----------------------------------------------------------------")
-
-
-				-- 	if PlayerAssignFailure then
-
-				-- 		for _, failData in pairs(PlayerAssignFailure) do
-
-				-- 			local shortTasks = failData.generatedTasksShort or "---"
-
-				-- 			local line =
-				-- 				string.format(
-				-- 					"%-3s %-12s %-19s %-15s %s",
-				-- 					tostring(failData.id or "?"),
-				-- 					tostring(failData.requestedPlane or "---"),
-				-- 					tostring(failData.baseShort or "---"),
-				-- 					tostring(failData.squadronShort or "---"),
-				-- 					shortTasks
-				-- 				)
-
-				-- 			print(line)
-
-				-- 			if failData.reason == "no_main_task_generated" then
-
-				-- 				print(" -> Requested main task never generated.")
-
-				-- 			elseif failData.reason == "task_filtered" then
-
-				-- 				print(" -> Main task generated but filtered during Block A.")
-
-				-- 			elseif failData.reason == "task_not_generated" then
-
-				-- 				print(" -> Aircraft generated but requested task unavailable.")
-
-				-- 			elseif failData.reason == "insufficient_aircraft" then
-
-				-- 				print(
-				-- 					" -> Generated "
-				-- 					..tostring(failData.foundAircraft or 0)
-				-- 					.." / "
-				-- 					..tostring(failData.requestedNb or "?")
-				-- 					.." aircraft."
-				-- 				)
-
-				-- 			elseif failData.reason == "no_aircraft_generated" then
-
-				-- 				print(" -> No compatible aircraft generated.")
-
-				-- 			end
-
-				-- 			if failData.debugReason then
-				-- 				print(" -> "..tostring(failData.debugReason))
-				-- 			end
-
-				-- 			print()
-				-- 		end
-
-				-- 		CheckAssignments()
-						
-						
-				-- 	end
-				-- end
-
 				os.execute 'timeout /t 4'
 
 			end
@@ -945,6 +864,9 @@ if input == "y" or input == "yes" then
 				print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
 				print("============================================================================================================================")
 				print()
+				if DCEM_MachineMode then
+					print("##DCEM_HEADER##"..tostring(camp.title).."|"..tostring(camp.version).."|"..tostring(playerInfo.planeBAT).."|"..tostring(playerInfo.squadBAT).."|"..tostring(playerInfo.countryBAT).."|"..(Debug.debug and "DEBUG ON" or ""))
+				end
 
 			else
 				print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
@@ -958,5 +880,10 @@ if input == "y" or input == "yes" then
 	until 1 == 2
 
 end
-os.execute 'pause'																					--pause command window for user to read text
-os.exit()
+
+if DCEM_MachineMode then
+	os.exit(0)
+else
+	os.execute 'pause'																					--pause command window for user to read text
+	os.exit()
+end
