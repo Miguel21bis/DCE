@@ -1,7 +1,7 @@
 
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["DCEM_Function.lua"] = "1.2.7"
+versionDCE["DCEM_Function.lua"] = "1.2.8"
 -------------------------------------------------------------------------------------------------------
 
 
@@ -16,7 +16,18 @@ pathScriptsMod = pathScriptsMod or  "C:/Users/miguel/Saved Games/DCS/Mods/tech/D
 -- pathCampaign = pathCampaign or  "C:/Users/miguel/Saved Games/DCS/Mods/tech/DCE/Missions/Campaigns/Hot War in The Cold - Fishbed"
 
 -- print("debug pathCampaign "..tostring(pathCampaign))
-dofile(pathScriptsMod.."/UTIL_Data.lua")
+-- Si UTIL_Include.lua est déjà chargé (cas DCE_Manager, qui passe par
+-- DCEM_Bootstrap.lua), on utilise IncludeOnce : le fichier est trouvé où qu'il
+-- soit rangé, et il n'est pas rechargé s'il l'est déjà - ce qui évite au passage
+-- de déclencher un faux avertissement de compatibilité via le relais resté à la
+-- racine. Sinon (chaîne .bat -> luae.exe), on garde l'appel historique.
+-- Écrit pour rester valable en Lua 5.1 comme en 5.4.
+if type(IncludeOnce) == "function" then
+	IncludeOnce("UTIL_Data.lua")
+else
+	dofile(pathScriptsMod.."/UTIL_Data.lua")
+end
+
 dofile(pathCampaign.."/Init/oob_air_init.lua")
 
 local debugTab = {}

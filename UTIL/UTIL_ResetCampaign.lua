@@ -19,7 +19,8 @@ if not ChangePlane then
 end
 require("Init/db_airbases")
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataRadio.lua")
+IncludeOnce("UTIL_DataRadio.lua")
 
 if Firstmission_flag then																				--if the script is called by BAT_FirstMission.lua, then FirstMission is true and camp_status is reset to init. When called by DEBRIEF_Master.lua, block is skipped and camp_camp status carried over in mission is used.
 	local camp_str = "camp = " .. TableSerialization(camp, 0)										--make a string of campaign initial status table

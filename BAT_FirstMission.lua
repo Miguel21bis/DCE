@@ -1,5 +1,14 @@
 --To manually generate the first campaign mission and reset the campaign to initial status. For manual use by campaign designer only, not required for normal campaign play.
 --Initiated by FirstMission.bat
+
+
+io.stdout:setvbuf("no")
+
+-- Vrai uniquement quand ce script est piloté par DCE_Manager (variable posée par
+-- ProcessConsoleBridge.Start côté C#). Sert à activer les lignes techniques ##DCEM_AC##
+-- etc., invisibles/inutiles pour quelqu'un qui double-clique FirstMission.bat directement.
+DCEM_MachineMode = (os.getenv("DCEM_MACHINE_MODE") == "1")
+
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
 versionDCE["BAT_FirstMission.lua"] = "2.16.102"
@@ -12,6 +21,7 @@ SinglePlayer = false
 MissionInstance = 0
 Briefing_text = ""
 PlayerSide = nil
+MissionAccepted = nil
 
 
 Multi =
@@ -25,32 +35,31 @@ oob_air = {}					--pour declarer la table globale et calmer les inquietudes d'ID
 
 
 local function acceptMission()
-	local m = ""
-	repeat
-		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
-		print("\n\nAccept Mission ?:")
+    local m
+    repeat
+-- APRÈS
+        print("\n\n Night or Day ? : " .. Daytime)
+        if DCEM_MachineMode then
+            print("##DCEM_DAYNIGHT##"..tostring(Daytime))
+        end
+        print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
+        print("\n\nAccept Mission ?:")
+        print("a - Accept mission")
+        print("s - Skip mission")
 
-		print("a".." - Accept mission")
-		print("s".." - Skip mission")
+        m = string.lower(io.read() or "")
 
-		-- m = tostring(io.read())
-		m = tostring(io.stdin:read())
-		m = string.lower(m)
+        if m == "d" then
+            os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight.txt"')
+        elseif m ~= "a" and m ~= "s" then
+            print("\nInvalid entry.\n")
+        end
+    -- La boucle continue tant que l'utilisateur n'a pas saisi "a" ou "s"
+    until m == "a" or m == "s"
 
-		if not ( m ~= nil and ( m == "a" or m == "s" or m == "d")) then
-			print("\nInvalid entry.\n")
-		end
-	until m ~= nil and ( m == "a" or m == "s" or m == "d")
-
-	if  m == "s" then
-		TaskRefused = true
-		return false
-	elseif  m == "d" then
-		os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight' .. '.txt"')
-		return true
-	else
-		return true
-	end
+    TaskRefused = (m == "s")
+    MissionAccepted = (m == "a")
+    return MissionAccepted
 end
 
 -- Convertit les tasks longues en codes courts lisibles console
@@ -113,21 +122,6 @@ local function fitString(txt, maxLen)
 end
 
 
--- -- Construit une chaine compacte des tasks disponibles
--- local function buildTaskList(tasks)
-
--- 	local result = {}
-
--- 	for _, taskStr in PairsByKeys(tasks) do
-
--- 		if TabTask[taskStr] then
--- 			result[#result + 1] = taskToShort(taskStr)
--- 		end
--- 	end
-
--- 	return table.concat(result, " ")
--- end
-
 -- random seed -----
 local seed = os.time() -- Récupérer un timestamp en secondes
 math.randomseed(seed)  -- Initialiser le générateur pseudo-aléatoire
@@ -151,16 +145,41 @@ else
 end
 
 dofile("Init/db_airbases.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+
+
+
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
+IncludeOnce("UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+
+--met à jour le fichier camp_init en fonction du template UTIL_REF_camp_init.lua
+ModifiCampInit()
+
+if not camp.dateInit then
+	local tempCamp = camp
+	dofile("Init/camp_init.lua")
+	local campInit = DeepCopy(camp)
+	-- print("BAT_SkipMission campInit.date.day = "..tostring(campInit.date.day))
+	
+	camp = tempCamp
+	camp.dateInit = {
+		day = campInit.date.day,
+		year = campInit.date.year,
+		month = campInit.date.month,
+	}
+end
+
+
 dofile("Init/targetlist_init.lua")--ne pas supprimé, util pour inscrire targetlist dans Active
 if not targetlist.blue[1] then
 	TargetlistToNum(targetlist)
 end
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ResetCampaign.lua")					--reset campaign status files. Required for first mission to generate according to initial status	
+IncludeOnce("UTIL_ResetCampaign.lua")
 
 --affiche le type d'avion selectionné et son squadrons
-local playerInfo = {
+playerInfo = {
 	planeBAT = "",
 	squadBAT = "",
 	countryBAT = "",
@@ -241,10 +260,10 @@ if VersionPackageICM then
 	-- print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
 	-- print()
 
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print(" DCE CAMPAIGN GENERATOR")
 	print(" "..tostring(camp.title).."   |   "..tostring(camp.version))
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print()
 	print(" Script : "..tostring(showVersion))
 	-- print(" Lua    : "..tostring(_VERSION))
@@ -254,8 +273,11 @@ if VersionPackageICM then
 	print(" Country          : "..tostring(playerInfo.countryBAT))
 	print()
 	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
-	print("============================================================================================================================")
+	print("========================================================================================================================")
 	print()
+	if DCEM_MachineMode then
+		print("##DCEM_HEADER##"..tostring(camp.title).."|"..tostring(camp.version).."|"..tostring(playerInfo.planeBAT).."|"..tostring(playerInfo.squadBAT).."|"..tostring(playerInfo.countryBAT).."|"..(Debug.debug and "DEBUG ON" or ""))
+	end
 
 else
 	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
@@ -311,13 +333,13 @@ repeat
 			print()
 			print(" [S] Singleplayer")
 			print()
-			print(" [C] Change aircraft type")
-			print()
+			-- print(" [C] Change aircraft type")
+			-- print()
 			print(" [T] Multiplayer by Target")
 			print(" [N] Multiplayer by NATO package")
 			print()
-			print(" [O] Tools / CampaignMaker")
-			print()
+			-- print(" [O] Tools / CampaignMaker")
+			-- print()
 
 			choix1 = io.stdin:read()
 		end
@@ -444,12 +466,7 @@ repeat
 						if Playable_m[unit.type] and unit.inactive ~= true then
 
 							tabTaskAvailable[nSide] = tabTaskAvailable[nSide] or {}
-							-- tabTaskAvailable[nSide][unit.name] = {
-							-- 	type = unit.type,
-							-- 	base = unit.base,
-							-- 	tasks = {},
-							-- }
-
+							
 							table.insert(tabTaskAvailable[nSide], {
 								name = unit.name,
 								type = unit.type,
@@ -467,6 +484,8 @@ repeat
 						end
 					end
 				end
+				
+				
 				-- display le tableau des choix d'avion et de task
 				local tabBug = {}
 
@@ -506,34 +525,12 @@ repeat
 						playable_type[indexStringType]["base"] = unit.base
 						playable_type[indexStringType]["unitName"] = unit.name
 
-						-- io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || "..unit.name)
-
-						-- for taskN, taskStr in PairsByKeys(unit.tasks) do
-
-						-- 	if TabTask[taskStr] then
-						-- 		io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-						-- 		-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-						-- 		tabIndex[tostring(1)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(2)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(3)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(4)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(5)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(6)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
-						-- 		tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
-
-						-- 	-- elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
-						-- 	elseif not TabTask[taskStr] and string.lower(taskStr) ~= "spotter" then
-						-- 		table.insert(tabBug,taskStr )
-						-- 	end
-						-- end
-						-- io.write("\n")
-
-
 						-- local shortTasks = buildTaskList(unit.tasks)
 						local shortTasks = {}
 						local displayTasks = {}
+						local machineTasks = {}
 
+						-- APRÈS
 						for _, taskStr in PairsByKeys(unit.tasks) do
 
 							if TabTask[taskStr] then
@@ -545,6 +542,11 @@ repeat
 									.."("
 									..string.lower(TabTask[taskStr])
 									..")"
+
+								machineTasks[#machineTasks + 1] =
+									taskToShort(taskStr)
+									..":"
+									..string.lower(TabTask[taskStr])
 							end
 						end
 
@@ -561,7 +563,14 @@ repeat
 								shortTaskText
 							)
 
-						print(line)
+						
+						if DCEM_MachineMode then
+							-- Ligne technique pour DCE_Manager (capture automatique) : ne pas supprimer.
+							-- Format : ##DCEM_AC##side|id|type|base|squadron|CODE1:x,CODE2:y,...
+							print("##DCEM_AC##"..nSide.."|"..indexStringType.."|"..unit.type.."|"..unit.base.."|"..unit.name.."|"..table.concat(machineTasks, ","))
+						else
+							print(line)
+						end
 
 						for taskN, taskStr in PairsByKeys(unit.tasks) do
 
@@ -722,10 +731,12 @@ repeat
 		print("Generating First Mission.\n")
 
 		MissionInstance = MissionInstance + 1															--count the number of times the mission is generated
-		dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")						--generate mission
-
+		-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")						--generate mission
+		Include("MAIN_NextMission.lua")
+		
 		if Multi.NbGroup >= 1 and PlayerFlight then
 			if acceptMission() then
+				ShowBugsWindows()
 				BackupFilesMission() 
 				print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 				 break
@@ -733,6 +744,7 @@ repeat
 		elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
 			if acceptMission() then
 				BackupFilesMission() 
+				ShowBugsWindows()
 				print("\nCampaign reset and first campaign mission re-generated.\n")					--confirmation text
 				 break
 			end
@@ -745,94 +757,10 @@ repeat
 			break
 		else																							--no player flight could be assigned, advance time and try again
 
-			for _, crit in ipairs(Playability_criterium) do
-				if crit.key == "active_unit" and crit.value == nil then
-					print("Player unit is not active.\n\n")
-				elseif crit.key == "base" and crit.value == nil then
-					print("Player airbase is not operational.\n\n")
-				elseif crit.key == "ready_aircraft" and crit.value == nil then
-					print("Player unit has no ready aircraft.\n\n")
-				elseif crit.key == "tot" and crit.value == nil then
-					print("Player aircraft type cannot operate at this time of day.\n\n")
-				elseif crit.key == "target" and crit.value == nil then
-					print("No eligible mission available for player.\n\n")
-				elseif crit.key == "target_firepower" and crit.value == nil then
-					print("Not enough ready aircraft for this mission.\n\n")
-				elseif crit.key == "weather" and crit.value == nil then
-					print("Player aircraft type cannot operate in this weather.\n\n")
-				elseif crit.key == "target_range" and crit.value == nil then
-					print("No eligible mission available for player.\n\n")
-				elseif crit.key == "intercept" and crit.value == nil then
-					print("Ground alert intercept duty without launch.\n\n")
-				-- else
-				-- 	print("No eligible mission available.\n\n")
-				end
-			end
-
-			if Multi.NbGroup and not PlayerFlight then
-
-				print("Mission generation failed:\n")
-				print("ID  Aircraft     Base                Squadron        Tasks")
-				print("----------------------------------------------------------------")
-
-
-				if PlayerAssignFailure then
-
-					for _, failData in pairs(PlayerAssignFailure) do
-
-						local shortTasks = failData.generatedTasksShort or "---"
-
-						local line =
-							string.format(
-								"%-3s %-12s %-19s %-15s %s",
-								tostring(failData.id or "?"),
-								tostring(failData.requestedPlane or "---"),
-								tostring(failData.baseShort or "---"),
-								tostring(failData.squadronShort or "---"),
-								shortTasks
-							)
-
-						print(line)
-
-						if failData.reason == "no_main_task_generated" then
-
-							print(" -> Requested main task never generated.")
-
-						elseif failData.reason == "task_filtered" then
-
-							print(" -> Main task generated but filtered during Block A.")
-
-						elseif failData.reason == "task_not_generated" then
-
-							print(" -> Aircraft generated but requested task unavailable.")
-
-						elseif failData.reason == "insufficient_aircraft" then
-
-							print(
-								" -> Generated "
-								..tostring(failData.foundAircraft or 0)
-								.." / "
-								..tostring(failData.requestedNb or "?")
-								.." aircraft."
-							)
-
-						elseif failData.reason == "no_aircraft_generated" then
-
-							print(" -> No compatible aircraft generated.")
-
-						end
-
-						if failData.debugReason then
-							print(" -> "..tostring(failData.debugReason))
-						end
-
-						print()
-					end
-
-					CheckAssignments()
-					
-					
-				end
+			if SinglePlayer then
+				PrintPlayerRejectionSP()
+			else
+				PrintPlayerRejectionMP()
 			end
 
 			os.execute 'timeout /t 4'
@@ -855,6 +783,9 @@ repeat
 			print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
 			print("============================================================================================================================")
 			print()
+			if DCEM_MachineMode then
+				print("##DCEM_HEADER##"..tostring(camp.title).."|"..tostring(camp.version).."|"..tostring(playerInfo.planeBAT).."|"..tostring(playerInfo.squadBAT).."|"..tostring(playerInfo.countryBAT).."|"..(Debug.debug and "DEBUG ON" or ""))
+			end
 
 		else
 			print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
@@ -866,5 +797,9 @@ repeat
 
 until 1 == 2
 
-os.execute 'pause'																					--pause command window for user to read text
-os.exit()
+if DCEM_MachineMode then
+	os.exit(0)
+else
+	os.execute 'pause'																					--pause command window for user to read text
+	os.exit()
+end

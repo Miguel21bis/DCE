@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Mods.lua"] = "1.3.202"
+versionDCE["db_loadouts/db_loadouts_Mods.lua"] = "1.3.203"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V203 - F-111C update
 -- V202 - New UH2 SH2 
 -- V201 - Transport for SH-3D
 -- V200 - only Mods
@@ -5598,7 +5599,7 @@ db_loadouts = {
 					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "Structure", "Bridge" },
-				code_loadout =  { "All" },
+				code_loadout =  { "NAM" },
 				weaponType = "Bombs",
 				expend = "All",
 				night = true,
@@ -5612,7 +5613,7 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-						[1] = {
+				[1] = {
 					["CLSID"] = "{F111C_ELINT}",
 					["num"] = 12,
 				},
@@ -5621,14 +5622,14 @@ db_loadouts = {
 					["num"] = 11,
 				},
 				[3] = {
-					["CLSID"] = "{TER_9A_3*MK-82_Snakeye}",
+					["CLSID"] = "{HB_F4E_MK-82_Snakeye_6x}",
 					["num"] = 9,
 					["settings"] = {
 						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5636,14 +5637,14 @@ db_loadouts = {
 					},
 				},
 				[4] = {
-					["CLSID"] = "{TER_9A_3*MK-82_Snakeye}",
+					["CLSID"] = "{HB_F4E_MK-82_Snakeye_6x}",
 					["num"] = 8,
 					["settings"] = {
 						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5651,14 +5652,14 @@ db_loadouts = {
 					},
 				},
 				[5] = {
-					["CLSID"] = "{TER_9A_3*MK-82_Snakeye}",
+					["CLSID"] = "{HB_F4E_MK-82_Snakeye_6x}",
 					["num"] = 5,
 					["settings"] = {
 						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5666,16 +5667,165 @@ db_loadouts = {
 					},
 				},
 				[6] = {
-					["CLSID"] = "{TER_9A_3*MK-82_Snakeye}",
+					["CLSID"] = "{HB_F4E_MK-82_Snakeye_6x}",
 					["num"] = 4,
 					["settings"] = {
 						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[7] = {
+					["CLSID"] = "{Mk_83AIR}",
+					["num"] = 7,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[8] = {
+					["CLSID"] = "{Mk_83AIR}",
+					["num"] = 6,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+					},
+					fuel = 14860,
+					flare = 100,
+					chaff = 100,
+					gun = 100,
+				},
+			},
+			["NAM AG Low Heavy"] = {
+				minscore = 0.3,
+				support = {
+					SEAD = true,
+					Escort = true,
+					["Escort Jammer"] = true,
+				},
+				attributes =  { "soft", "Parked Aircraft", "SAM", "Structure", "Bridge" },
+				code_loadout =  { "NAM" },
+				weaponType = "Bombs",
+				expend = "All",
+				night = true,
+				adverseWeather = true,
+				range = 1000000,
+				firepower = 1,
+				vCruise = 245,
+				vAttack = 277.5,
+				hCruise = 500,
+				hAttack = 200,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{F111C_ELINT}",
+					["num"] = 12,
+				},
+				[2] = {
+					["CLSID"] = "{F111C_FLIR}",
+					["num"] = 11,
+				},
+				[3] = {
+					["CLSID"] = "{Mk_84AIR_GP}",
+					["num"] = 9,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[4] = {
+					["CLSID"] = "{Mk_84AIR_GP}",
+					["num"] = 8,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[5] = {
+					["CLSID"] = "{Mk_84AIR_GP}",
+					["num"] = 5,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[6] = {
+					["CLSID"] = "{Mk_84AIR_GP}",
+					["num"] = 4,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[7] = {
+					["CLSID"] = "{Mk_83AIR}",
+					["num"] = 7,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[8] = {
+					["CLSID"] = "{Mk_83AIR}",
+					["num"] = 6,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPHD",
+						["NFP_PRESVER"] = 2,
 						["NFP_fuze_type_nose"] = "M904E4",
 						["NFP_fuze_type_tail"] = "M905",
 					},
@@ -5695,7 +5845,7 @@ db_loadouts = {
 					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "Bridge" },
-				code_loadout =  { "All" },
+				code_loadout =  { "NAM" },
 				weaponType = "Bombs",
 				expend = "All",
 								range = 500000,
@@ -5707,7 +5857,7 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-						[1] = {
+				[1] = {
 					["CLSID"] = "{F111C_ELINT}",
 					["num"] = 12,
 				},
@@ -5723,7 +5873,7 @@ db_loadouts = {
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5738,7 +5888,7 @@ db_loadouts = {
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5753,7 +5903,7 @@ db_loadouts = {
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5768,7 +5918,37 @@ db_loadouts = {
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[7] = {
+					["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
+					["num"] = 7,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[8] = {
+					["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
+					["num"] = 6,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5790,7 +5970,7 @@ db_loadouts = {
 					["Escort Jammer"] = true,
 				},
 				attributes =  { "soft", "Parked Aircraft", "SAM", "Structure", "Bridge" },
-				code_loadout =  { "All" },
+				code_loadout =  { "NAM" },
 				weaponType = "Bombs",
 				expend = "All",
 								range = 1000000,
@@ -5802,15 +5982,11 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-						[1] = {
+				[1] = {
 					["CLSID"] = "{F111C_ELINT}",
 					["num"] = 12,
 				},
 				[2] = {
-					["CLSID"] = "{F111C_FLIR}",
-					["num"] = 11,
-				},
-				[3] = {
 					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
 					["num"] = 9,
 					["settings"] = {
@@ -5818,7 +5994,22 @@ db_loadouts = {
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[3] = {
+					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
+					["num"] = 8,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5827,13 +6018,13 @@ db_loadouts = {
 				},
 				[4] = {
 					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 8,
+					["num"] = 5,
 					["settings"] = {
 						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5842,13 +6033,13 @@ db_loadouts = {
 				},
 				[5] = {
 					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 5,
+					["num"] = 4,
 					["settings"] = {
 						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
@@ -5856,19 +6047,38 @@ db_loadouts = {
 					},
 				},
 				[6] = {
-					["CLSID"] = "{AB8B8299-F1CC-4359-89B5-2172E0CF4A5A}",
-					["num"] = 4,
+					["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
+					["num"] = 7,
 					["settings"] = {
 						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
 						["00_prfx_function_delay_ctrl_M904E4"] = 0,
 						["01_prfx_arm_delay_ctrl_M905"] = 4,
 						["01_prfx_function_delay_ctrl_M905"] = 0,
-						["NFP_PRESID"] = "MDRN_B_A",
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
 						["NFP_PRESVER"] = 2,
 						["NFP_VIS_DrawArgNo_57"] = 0,
 						["NFP_fuze_type_nose"] = "M904E4",
 						["NFP_fuze_type_tail"] = "M905",
 					},
+				},
+				[7] = {
+					["CLSID"] = "{7A44FF09-527C-4B7E-B42B-3F111CFE50FB}",
+					["num"] = 6,
+					["settings"] = {
+						["00_prfx_arm_delay_ctrl_M904E4"] = 4,
+						["00_prfx_function_delay_ctrl_M904E4"] = 0,
+						["01_prfx_arm_delay_ctrl_M905"] = 4,
+						["01_prfx_function_delay_ctrl_M905"] = 0,
+						["NFP_PRESID"] = "MDRN_B_A_GPLD",
+						["NFP_PRESVER"] = 2,
+						["NFP_VIS_DrawArgNo_57"] = 0,
+						["NFP_fuze_type_nose"] = "M904E4",
+						["NFP_fuze_type_tail"] = "M905",
+					},
+				},
+				[8] = {
+					["CLSID"] = "{F111C_FLIR}",
+					["num"] = 11,
 				},
 					},
 					fuel = 14860,

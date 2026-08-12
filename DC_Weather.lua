@@ -2,21 +2,8 @@
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
 ------------------------------------------------------------------------------------------------------- 
--- last modification: debug_f
-if not versionDCE then versionDCE = {} end
-versionDCE["DC_Weather.lua"] = "1.6.26"
-------------------------------------------------------------------------------------------------------- 
--- cleanCode_f				(e springCleaning)					
--- adjustment_h				(h baseChoice)(f \\\n to \n)(e debug info)(d preset = nil)(c adds METAR to dynamic cloud presets, where possible) (b CampTotalTimeS)(a: high 2 days max)
--- debug_f					(f WeatherParams)(e: cloud/METAR altitudes above 10000ft were not displayed)(d very bad weather during a cold sector)%chance pHigh pLow 
--- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
--- modification M51_c		Moonphase
--- modification M45_e		compatible with 2.7.0s  (e: debug cleaning)(d: less clounds in the PG)(c: debugWeather)
-------------------------------------------------------------------------------------------------------- 
 
-if Debug.debug then
-	print("START DC_Weather.lua "..versionDCE["DC_Weather.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-end
+if Debug.debug then print("START DC_Weather.lua  =-=-=-=-=-=-=-=-=-=-=-=-=-=-=") end
 
 -- weather = {
 --     trend         = 70,   -- (0–100) : 0 = dépression forte / pluie, 100 = anticyclone stable / ciel clair
@@ -962,7 +949,7 @@ local showOneNight = true
 
 if not camp.weather then
 	camp.weather = {
-		refTemp = mission_ini.weather.refTemp
+		refTemp = Weather.refTemp
 	}
 end
 
@@ -1320,11 +1307,12 @@ end
 --------------------------------------------------------------
 
 local function generateDCSweather()
-	local trend = mission_ini.weather.trend
-	local refTemp = mission_ini.weather.refTemp
-	local instability = mission_ini.weather.instability
-	local windActivity = mission_ini.weather.windActivity
-	local winDirection = mission_ini.weather.winDirection
+
+	local trend = Weather.trend
+	local refTemp = Weather.refTemp
+	local instability = Weather.instability
+	local windActivity = Weather.windActivity
+	local winDirection = Weather.winDirection
 
 
     local presetID, category, loc_debugChoice = chooseWeatherPreset(trend)

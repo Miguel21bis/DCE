@@ -28,11 +28,6 @@ if Debug.debug then
 	availableFile:write(available_str)
 	availableFile:close()
 
-	-- local camp_str = "freqence_package_AtoFP = " .. TableSerialization(Package_freq, 0)			--make a string
-	-- local campFile = io.open("Debug/Package_freq__UtilDebug.lua", "w") or error("Failed to open debug Package_freq__UtilDebug file")
-	-- campFile:write(camp_str)																	--save new data
-	-- campFile:close()
-
 	local file_str = "GCI = " .. TableSerialization(GCI, 0)			--make a string
 	local file_File = io.open("Debug/GCI_Data_UtilDebug.lua", "w") or error("Failed to open debug GCI_Data_UtilDebug file")
 	file_File:write(file_str)																	--save new data
@@ -50,11 +45,8 @@ if Debug.debug then
 
 
 	--recherche Debug/BugList.lua
-	local fileName = "Debug/BugList.lua"
-	local testPath = io.open(fileName, "r")										--cette maniere de chercer la presence d un fichier evite un plantage
-	if testPath ~= nil and MissionInstance == 1 then														--check si le fichier existe 
-		io.close(testPath)
-		os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')			--open the BugList file with notepad
+	if (MissionInstance == 1 and not MissionAccepted) then														--check si le fichier existe 
+		ShowBugsWindows()
 	end
 
 end

@@ -1,22 +1,19 @@
--- Targeted flak barrage that follows a specified COALITION's aircraft,
--- ONLY fires when the target aircraft is INSIDE a named trigger zone.
--- Up to MAX_SIMULTANEOUS_TARGETS aircraft can be engaged at once,
+-- Targeted flak barrage that follows aircraft of BOTH coalitions (BLUE and RED),
+-- each with its own preset/settings, ONLY firing when the target aircraft is
+-- INSIDE a named trigger zone.
+-- Up to MAX_SIMULTANEOUS_TARGETS aircraft can be engaged at once per side,
 -- spread across EMITTERS, with sticky targeting to avoid constant retarget jitter.
 -------------------------------------------------------------------------------------------------------
--- Grateful thanks to Bandit648 for allowing the use and adaptation of his mod. 
+-- Grateful thanks to Bandit648 for allowing the use and adaptation of his mod.
 -- His work delivers a true FPS‑like solution with immersive flak effects.
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.2.6"
+versionDCE["Mission Scripts/AAA_barrage.lua"] = "1.3.0"
 -------------------------------------------------------------------------------------------------------
 
 env.info("DCE START LOADING AAA_barrage.lua " .. tostring(versionDCE["Mission Scripts/AAA_barrage.lua"]))
 
 env.info("AAA_barrage START ")
-
---TODO reste à integrer le camp automatiquement
--- Which coalition to target:
-local TARGET_COALITION         = coalition.side.BLUE -- coalition.side.RED
 
 -- Zone restriction:
 local FIRE_ONLY_IN_ZONE        = true
@@ -24,17 +21,13 @@ local FIRE_ONLY_IN_ZONE        = true
 -- (Optional) prefer airplanes, then helicopters if no airplanes exist
 local PREFER_AIRPLANES         = true
 
--- Density / pattern
-local EMITTERS                 = (campL.AAA_Barrage and campL.AAA_Barrage.EMITTERS) or 6 --* number of parallel emitters (set to 6 to match your goal)
+-- Density / pattern (timing partagé, pas besoin d'un réglage distinct par camp)
 local EVENT_MIN_DT             = 0.5 -- seconds between events per emitter
 local EVENT_MAX_DT             = 1.1
-local CLUSTER_MIN              = (campL.AAA_Barrage and campL.AAA_Barrage.CLUSTER_MIN) or 4 --* bursts per event
-local CLUSTER_MAX              = (campL.AAA_Barrage and campL.AAA_Barrage.CLUSTER_MAX) or 4 --*
 local CLUSTER_RADIUS_M         = 160 -- burst spread around event center (meters)
 
 -- Offset / aim around the aircraft
 local AIM_RADIUS_M             = 650 -- how far from the aircraft the event center can be
-local LEAD_SECONDS             = (campL.AAA_Barrage and campL.AAA_Barrage.LEAD_SECONDS) or 0.6 --* lead target based on velocity (0 to disable)
 
 -- Altitude behavior
 local ALTITUDE_MODE            = "AGL" -- "MSL" or "AGL"
@@ -42,25 +35,32 @@ local ALT_JITTER_M             = 220   -- +/- meters around target altitude
 local ALT_MIN_MSL              = 700   -- clamp for safety (MSL meters)
 local ALT_MAX_MSL              = 7000
 
--- Explosion strength
-local POWER_MIN                = (campL.AAA_Barrage and campL.AAA_Barrage.POWER_MIN) or 4  --*
-local POWER_MAX                = (campL.AAA_Barrage and campL.AAA_Barrage.POWER_MAX) or 12  --*
-
--- Multi-target behavior
-local MAX_SIMULTANEOUS_TARGETS = (campL.AAA_Barrage and campL.AAA_Barrage.MAX_SIMULTANEOUS_TARGETS) or 6     --* cap number of distinct aircraft we engage at once
+-- Multi-target behavior (timing partagé)
 local STICKY_TARGET_SECONDS    = 3.0   -- how long each emitter keeps its chosen aircraft before retargeting
 local ALLOW_SAME_TARGET        = false -- if false, emitters will try to avoid sharing targets
 
 -- Debug
 local DEBUG_TEXT               = false
 
+-- Convention de nommage des zones : AAA_ZONE_<CAMP>_<nom>, ex: AAA_ZONE_BLUE_Town01, AAA_ZONE_RED_Harbor
+-- <CAMP> = camp PROPRIETAIRE de la DCA dans cette zone ; elle engage donc le camp OPPOSE.
+-- Une zone "AAA_ZONE_<nom>" sans camp reste supportée (ancien format) : elle tire alors
+-- pour les deux camps actifs (comportement de compatibilité).
+local function parseZoneOwner(zoneName)
+	local owner = zoneName:match("^AAA_ZONE_(BLUE)_") or zoneName:match("^AAA_ZONE_(RED)_")
+	return owner
+end
+
 local aaaZones                 = {}
 
 for zoneN, zone in pairs(env.mission.triggers.zones) do
 	env.info("AAA_barrage A :check zone name " .. tostring(zone.name))
 	if string.sub(zone.name, 1, 9) == "AAA_ZONE_" then
-		aaaZones[#aaaZones + 1] = zone.name
-		env.info("AAA_barrage B :is  AAA_ZONE_: " .. tostring(zone.name))
+		-- Rétrocompatibilité : "AAA_ZONE_xxx" sans camp explicite est traitée
+		-- comme "AAA_ZONE_RED_xxx" (comportement des anciennes missions).
+		local owner = parseZoneOwner(zone.name) or "RED"
+		aaaZones[#aaaZones + 1] = { name = zone.name, owner = owner }
+		env.info("AAA_barrage B :is  AAA_ZONE_: " .. tostring(zone.name) .. " (owner: " .. owner .. ")")
 	end
 end
 
@@ -103,7 +103,19 @@ local function spawnExplosionAt(x, z, altMSL, power)
 end
 
 
-local function createAAAZone(zoneName)
+-- zoneName : nom de la zone AAA_ZONE_*
+-- side     : coalition.side.BLUE ou coalition.side.RED
+-- sideName : "BLUE" ou "RED" (pour les logs/debug)
+-- cfg      : table de preset (EMITTERS, CLUSTER_MIN/MAX, LEAD_SECONDS, POWER_MIN/MAX, MAX_SIMULTANEOUS_TARGETS)
+local function createAAAZone(zoneName, side, sideName, cfg)
+	local EMITTERS                 = (cfg and cfg.EMITTERS) or 6
+	local CLUSTER_MIN              = (cfg and cfg.CLUSTER_MIN) or 4
+	local CLUSTER_MAX              = (cfg and cfg.CLUSTER_MAX) or 4
+	local LEAD_SECONDS             = (cfg and cfg.LEAD_SECONDS) or 0.6
+	local POWER_MIN                = (cfg and cfg.POWER_MIN) or 4
+	local POWER_MAX                = (cfg and cfg.POWER_MAX) or 12
+	local MAX_SIMULTANEOUS_TARGETS = (cfg and cfg.MAX_SIMULTANEOUS_TARGETS) or 6
+
 	local ZONE = trigger.misc.getZone(zoneName)
 	local emitterState = {}
 
@@ -173,10 +185,10 @@ local function createAAAZone(zoneName)
         emitterState[emitterId] = { unitName = u:getName(), untilT = t + STICKY_TARGET_SECONDS }
         return u
     end
-	
+
 
 	-- Return a list of eligible aircraft units (alive; if zone restricted, inside zone)
-	local function getEligibleAircraft(side)
+	local function getEligibleAircraft()
 		local results = {}
 
 		local cats = {}
@@ -266,18 +278,15 @@ local function createAAAZone(zoneName)
 				return t + 2
 			end
 
-			local eligible = getEligibleAircraft(TARGET_COALITION)
+			local eligible = getEligibleAircraft()
 			if #eligible == 0 then
 				if DEBUG_TEXT then
-					local sideName = (TARGET_COALITION == coalition.side.BLUE and "BLUE")
-						or (TARGET_COALITION == coalition.side.RED and "RED")
-						or tostring(TARGET_COALITION)
 					if FIRE_ONLY_IN_ZONE and ZONE then
 						trigger.action.outText("FLAK: No eligible " .. sideName .. " aircraft in zone, holding fire.", 2)
 						env.info("AAA_barrage FLAK: No eligible " .. sideName .. " aircraft in zone, holding fire.")
 					else
 						trigger.action.outText("FLAK: No alive aircraft found for coalition " .. sideName, 2)
-						env.info("AAA_barrage FLAK: No alive aircraft found for coalition " .. tostring(sideName))
+						env.info("AAA_barrage FLAK: No alive aircraft found for coalition " .. sideName)
 					end
 				end
 				emitterState[emitterId] = nil
@@ -286,7 +295,7 @@ local function createAAAZone(zoneName)
 				-- env.info("AAA_barrage FLAK: #eligible " .. tostring(#eligible))
 			end
 
-			-- Cap how many aircraft we engage at once (<= 6)
+			-- Cap how many aircraft we engage at once
 			local engagementSet = pickEngagementSet(eligible)
 
 			-- Reserve other emitters' sticky targets (best-effort deconfliction)
@@ -334,11 +343,11 @@ local function createAAAZone(zoneName)
 
 			if DEBUG_TEXT then
 				trigger.action.outText(
-					string.format("FLAK E%d: %d bursts near %s (%s) @ ~%.0fm MSL in zone %s",
-						emitterId, n, tgt.unitName, tgt.groupName, tgt.altMSL, zoneName),
+					string.format("FLAK [%s] E%d: %d bursts near %s (%s) @ ~%.0fm MSL in zone %s",
+						sideName, emitterId, n, tgt.unitName, tgt.groupName, tgt.altMSL, zoneName),
 					1)
-				env.info("AAA_barrage " .. string.format("FLAK E%d: %d bursts near %s (%s) @ ~%.0fm MSL in zone %s",
-					emitterId, n, tgt.unitName, tgt.groupName, tgt.altMSL, zoneName))
+				env.info("AAA_barrage " .. string.format("FLAK [%s] E%d: %d bursts near %s (%s) @ ~%.0fm MSL in zone %s",
+					sideName, emitterId, n, tgt.unitName, tgt.groupName, tgt.altMSL, zoneName))
 			end
 
 			return t + (EVENT_MIN_DT + math.random() * (EVENT_MAX_DT - EVENT_MIN_DT))
@@ -350,8 +359,28 @@ local function createAAAZone(zoneName)
 	end
 end
 
-for _, name in ipairs(aaaZones) do
-    createAAAZone(name)
+local function sideByName(name)
+	if name == "BLUE" then return coalition.side.BLUE end
+	if name == "RED" then return coalition.side.RED end
+	return nil
 end
 
-env.info("AAA_barrage loading complete, POWER_MAX: " .. tostring(POWER_MAX))
+local function cfgForOwner(ownerName)
+	return campL.AAA_Barrage and campL.AAA_Barrage[ownerName]
+end
+
+-- Pour chaque zone : le camp indiqué dans le nom (ou BLUE par défaut pour une zone
+-- legacy sans camp) POSSEDE la DCA, elle engage donc le camp OPPOSE.
+for _, z in ipairs(aaaZones) do
+	local opposingName = (z.owner == "BLUE") and "RED" or "BLUE"
+	local cfg = cfgForOwner(z.owner)
+	if cfg then
+		env.info("AAA_barrage FLAK: zone " .. z.name .. " defendue par " .. z.owner ..
+			", engage " .. opposingName)
+		createAAAZone(z.name, sideByName(opposingName), opposingName, cfg)
+	else
+		env.info("AAA_barrage FLAK: zone " .. z.name .. " ignoree, pas de preset actif pour " .. z.owner)
+	end
+end
+
+env.info("AAA_barrage loading complete")

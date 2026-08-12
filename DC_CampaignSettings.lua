@@ -277,7 +277,7 @@ for side,unit in pairs(oob_air) do
 			elseif unit[n].reserve then
 
 				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
-				if not unit[n].InitReserve then
+				if not unit[n].InitReserve or Firstmission_flag then
 					unit[n].InitReserve = unit[n].reserve
 				end
 				unit[n].roster.reserve =  math.ceil(( unit[n].InitReserve/3) * mission_ini.slider_CampaignDuration) - unit[n].roster.trans
@@ -375,7 +375,7 @@ for side,unit in pairs(oob_air) do
 			end
 			if unit[n].reserve then
 				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
-				if not unit[n].InitNumber then
+				if not unit[n].InitNumber or Firstmission_flag then
 					unit[n].InitNumber = unit[n].number
 				end
 
@@ -389,9 +389,9 @@ for side,unit in pairs(oob_air) do
 
 
 					--change la valeur ready:
-					unit[n].roster.ready =   unit[n].InitNumber  - unit[n].roster.lost  - unit[n].roster.damaged + unit[n].roster.trans
+					unit[n].roster.ready = unit[n].InitNumber - unit[n].roster.lost  - unit[n].roster.damaged + unit[n].roster.trans
 					--change la valeur number, qui sert de reference pour le recompletement
-					unit[n].number =  unit[n].InitNumber
+					unit[n].number = unit[n].InitNumber
 
 					-- print("DcCampaignSetting slider_EnemyLevel "..unit[n].name.." InitNumber: "..unit[n].InitNumber.." number: "..unit[n].number)	
 				end
@@ -409,7 +409,7 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 			if 	not unit[n].inactive then
 
 				--créer une clef init qui fera reference, puisque l'on touchera é celui reserve
-				if not unit[n].InitNumber then
+				if not unit[n].InitNumber or Firstmission_flag then
 					unit[n].InitNumber = unit[n].number
 				end
 				nbTotalAeronefInit = nbTotalAeronefInit + unit[n].InitNumber
@@ -440,7 +440,7 @@ if mission_ini.slider_PercentPlane and type(mission_ini.slider_PercentPlane == "
 						unit[n].roster.ready = 0
 					end
 					--change la valeur number, qui sert de reference pour le recompletement
-					unit[n].number =  math.ceil( unit[n].InitNumber * coef)
+					unit[n].number = math.ceil( unit[n].InitNumber * coef)
 					nbTotalAeronefAfter = nbTotalAeronefAfter + unit[n].number
 
 				end

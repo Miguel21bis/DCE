@@ -65,7 +65,8 @@ local acceptedTargetTypes = {
     ['LOADING_CRANE_03'] = "Loading Crane",
     ['BOAT001'] = "Civil Ship",
     ['BOAT003'] = "Civil Ship",
-    ['BOAT010'] = "Civil Ship", 
+    ['BOAT010'] = "Civil Ship",
+	['CIVIL_AIRBASE_HANGAR'] = "Warehouse"
 
 }
 

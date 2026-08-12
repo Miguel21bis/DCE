@@ -1,30 +1,16 @@
 -- helps the CampaignMaker to balance the campaign
---
-------------------------------------------------------------------------------------------------------- 
--- Last Modification adjustment_a
-if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_HelpBalancePower.lua"] = "1.3.7"
-------------------------------------------------------------------------------------------------------- 
--- adjustment_a				(a: depreciated variable capability)
--- modification M56_a		AssignCallnameSquad
--- modification M38_e		helps to balance the game
-------------------------------------------------------------------------------------------------------- 
+
 
 require("Init/oob_air_init")
  
- 
--- if should_reload( 'oob_air_init' ) then
-    package.loaded[ 'Init/oob_air_init' ] = nil
-    require("Init/oob_air_init")
--- end
+
+package.loaded[ 'Init/oob_air_init' ] = nil
+require("Init/oob_air_init")
 
 require("Init/db_loadouts")
 
--- if should_reload( 'db_loadouts' ) then
-    package.loaded[ 'Init/db_loadouts' ] = nil
-    require("Init/db_loadouts")
--- end
-
+package.loaded[ 'Init/db_loadouts' ] = nil
+require("Init/db_loadouts")
 
 
 
@@ -36,8 +22,18 @@ require("Init/conf_mod")															-- Miguel21 modification M00 : need optio
 require("Init/radios_freq_compatible")												-- miguel21 modification M34 custom FrequenceRadio
 require("Active/camp_triggers")
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
+IncludeOnce("UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+
+IncludeOnce("UTIL_Data.lua")
+IncludeOnce("UTIL_DataMap.lua")
+
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 
 balance = {}

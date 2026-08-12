@@ -17,34 +17,197 @@ Briefing_oob_text_red = ""																	--text string to be added to next bri
 Briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
 Briefing_text = ""
 PlayerSide = nil
+MissionAccepted = nil
+
+
+-- ============================================================================
+-- DEBUG DE LA BOUCLE DE GENERATION
+-- Pourquoi : quand une generation echoue, il faut pouvoir dire en une seconde
+-- si le passage suivant a VRAIMENT rejoue MAIN_NextMission.lua, ou s'il a
+-- tourne a vide en reaffichant l'etat du passage precedent.
+-- Mettre GenTrace.actif = false pour retrouver exactement l'affichage d'origine.
+-- ============================================================================
+GenTrace = {
+	actif   = true,                        --false = plus aucune ligne [GEN] dans la console
+	fichier = "Debug/Generation_Loop.log", --nil = pas d'ecriture disque
+	passe   = 0,
+	empreinte = nil,                       --identite de la table Playability_criterium
+	chrono  = 0,
+}
+
+--vide le fichier de trace au demarrage du process
+if GenTrace.fichier then
+	local f = io.open(GenTrace.fichier, "w")
+	if f then f:close() end
+end
+
+function GenPrint(msg)
+	if not GenTrace.actif then return end
+	local ligne = "[GEN] "..tostring(msg)
+	print(ligne)
+	if GenTrace.fichier then
+		local f = io.open(GenTrace.fichier, "a")
+		if f then
+			f:write(ligne.."\n")
+			f:close()
+		end
+	end
+end
+
+--compte ce qui se trouve reellement dans la table ATO (tous camps confondus)
+function GenCountATO()
+	local packages, vols, avions = 0, 0, 0
+	if type(ATO) ~= "table" then
+		return packages, vols, avions
+	end
+	for _, listePackages in pairs(ATO) do
+		if type(listePackages) == "table" then
+			for _, paquet in pairs(listePackages) do
+				if type(paquet) == "table" then
+					packages = packages + 1
+					for _, volsDuRole in pairs(paquet) do
+						if type(volsDuRole) == "table" then
+							for _, vol in pairs(volsDuRole) do
+								if type(vol) == "table" then
+									vols = vols + 1
+									avions = avions + (tonumber(vol.number) or 0)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	return packages, vols, avions
+end
+
+--compte les entrees d'une table quelconque (index numeriques ou non)
+function GenCount(t)
+	if type(t) ~= "table" then return 0 end
+	local n = 0
+	for _ in pairs(t) do n = n + 1 end
+	return n
+end
+
+--resume compact de la raison dominante trackee pour l'escadron du joueur (solo uniquement)
+function GenCriteriaOK()
+	if not (playerInfo and playerInfo.squadBAT) then
+		return "(pas de squadBAT connu)"
+	end
+
+	local status = SquadGenerationStatus and SquadGenerationStatus[playerInfo.squadBAT]
+
+	if not status or not status.bestReject then
+		return "aucune raison trackee"
+	end
+
+	local reasonKey =
+		status.bestReject.dominantReason
+		or (status.bestReject.finalReject and status.bestReject.finalReject.reason)
+
+	return tostring(reasonKey or "inconnue")
+end
+
+--a appeler JUSTE AVANT de (re)jouer MAIN_NextMission.lua
+function GenPassStart()
+	GenTrace.passe = GenTrace.passe + 1
+	GenTrace.chrono = os.clock()
+	GenTrace.empreinte = tostring(SquadGenerationStatus)
+
+	GenPrint("---------------------------------------------------------------")
+	GenPrint("PASSE "..GenTrace.passe.."   (MissionInstance = "..tostring(MissionInstance)..")")
+	GenPrint("  avant : PlayerFlight = "..tostring(PlayerFlight)
+		.." | TaskRefused = "..tostring(TaskRefused)
+		.." | camp.time = "..tostring(camp and camp.time))
+end
+
+--a appeler JUSTE APRES avoir (re)joue MAIN_NextMission.lua
+function GenPassEnd()
+	local duree = os.clock() - GenTrace.chrono
+	local empreinte = tostring(SquadGenerationStatus)
+
+	--SquadGenerationStatus est recreee a chaque execution de ATO_Generator_C_Core.lua.
+	--Si l'adresse de la table n'a pas bouge, c'est que le generateur n'a pas tourne du tout.
+	if GenTrace.passe > 1 and empreinte == GenTrace.empreinte then
+		GenPrint("  !! ALERTE : le generateur n'a PAS ete rejoue a cette passe.")
+		GenPrint("  !! SquadGenerationStatus est la meme table qu'au passage precedent ("..empreinte..").")
+		GenPrint("  !! Cause habituelle : IncludeOnce() au lieu de Include() sur un fichier rejouable.")
+	end
+
+	local packages, vols, avions = GenCountATO()
+
+	GenPrint(string.format("  apres : ATO = %d package(s), %d vol(s), %d avion(s)   [%.2f s]",
+		packages, vols, avions, duree))
+	GenPrint("  apres : PlayerFlight = "..tostring(PlayerFlight)
+		.." | EndCampaign = "..tostring(EndCampaign)
+		.." | StopBug = "..tostring(StopBug))
+	GenPrint("  suivi : PlayerAssignFailure = "..GenCount(PlayerAssignFailure)
+		.." | DraftProgress = "..GenCount(DraftProgress)
+		.." | escortRejectReasons = "..GenCount(escortRejectReasons))
+	GenPrint("  raison dominante joueur : "..GenCriteriaOK())
+
+	--Controle croise : GeneratorPass est incremente dans ATO_Generator_A_Debug.lua.
+	--S'il reste bloque alors que le numero de passe augmente, ce sont les fichiers
+	--ATO_Generator_* qui ne sont pas rejoues (IncludeOnce quelque part en amont).
+	GenPrint("  moteur : GeneratorPass = "..tostring(GeneratorPass)
+		.." (doit valoir "..GenTrace.passe..")")
+end
+
+--a appeler JUSTE APRES avoir (re)joue MAIN_NextMission.lua
+function GenPassEnd()
+	local duree = os.clock() - GenTrace.chrono
+	local empreinte = tostring(Playability_criterium)
+
+	--Playability_criterium est recree a chaque execution de ATO_Generator_C_Core.lua.
+	--Si l'adresse de la table n'a pas bouge, c'est que le generateur n'a pas tourne du tout.
+	if GenTrace.passe > 1 and empreinte == GenTrace.empreinte then
+		GenPrint("  !! ALERTE : le generateur n'a PAS ete rejoue a cette passe.")
+		GenPrint("  !! Playability_criterium est la meme table qu'au passage precedent ("..empreinte..").")
+		GenPrint("  !! Cause habituelle : IncludeOnce() au lieu de Include() sur un fichier rejouable.")
+	end
+
+	local packages, vols, avions = GenCountATO()
+
+	GenPrint(string.format("  apres : ATO = %d package(s), %d vol(s), %d avion(s)   [%.2f s]",
+		packages, vols, avions, duree))
+	GenPrint("  apres : PlayerFlight = "..tostring(PlayerFlight)
+		.." | EndCampaign = "..tostring(EndCampaign)
+		.." | StopBug = "..tostring(StopBug))
+	GenPrint("  suivi : PlayerAssignFailure = "..GenCount(PlayerAssignFailure)
+		.." | DraftProgress = "..GenCount(DraftProgress)
+		.." | escortRejectReasons = "..GenCount(escortRejectReasons))
+	GenPrint("  criteres joueur atteints : "..GenCriteriaOK())
+
+	--Controle croise : GeneratorPass est incremente dans ATO_Generator_A_Debug.lua.
+	--S'il reste bloque alors que le numero de passe augmente, ce sont les fichiers
+	--ATO_Generator_* qui ne sont pas rejoues (IncludeOnce quelque part en amont).
+	GenPrint("  moteur : GeneratorPass = "..tostring(GeneratorPass)
+		.." (doit valoir "..GenTrace.passe..")")
+end
 
 local function acceptMission()
-	local m = ""
-	repeat
-		print("Actual time(DebriefMaster A): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
-		print("\n\n Night or Day ? : "..Daytime)											-- info day or not
-		print("\n\nAccept Mission ?:")
+    local m
+    repeat
+        print("\n\n Night or Day ? : " .. Daytime)
+        print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
+        print("\n\nAccept Mission ?:")
+        print("a - Accept mission")
+        print("s - Skip mission")
 
-		print("a".." - Accept mission")
-		print("s".." - Skip mission")
+        m = string.lower(io.read() or "")
 
-		m = tostring(io.stdin:read())
-		m = string.lower(m)
+        if m == "d" then
+            os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight.txt"')
+        elseif m ~= "a" and m ~= "s" then
+            print("\nInvalid entry.\n")
+        end
+    -- La boucle continue tant que l'utilisateur n'a pas saisi "a" ou "s"
+    until m == "a" or m == "s"
 
-		if not ( m ~= nil and ( m == "a" or m == "s" or m == "d")) then
-			print("\nInvalid entry.\n")
-		end
-	until m ~= nil and ( m == "a" or m == "s" or m == "d")
-
-	if  m == "s" then
-		TaskRefused = true
-		return false
-	elseif  m == "d" then
-		os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight' .. '.txt"')
-		return true
-	else
-		return true
-	end
+    TaskRefused = (m == "s")
+    MissionAccepted = (m == "a")
+    return MissionAccepted
 end
 
 -- Convertit les tasks longues en codes courts lisibles console
@@ -175,13 +338,16 @@ if not VersionPackageICM or VersionPackageICM == nil then										-- modificati
 end
 
 
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
+dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
+IncludeOnce("UTIL_Functions.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 --TODO ceci ne fonctionne pas
 -- recherche tjs pourquoi on ne passe pas du 15 au 16
 -- puis pourquoi on n'a pas les nouvelles cibles du 16
 
-UpdateConfModSuite(nil, nil, "DEBRIEF_Master "..debug.getinfo(1).currentline)
+--TODO UpdateConfMod utile?
+-- UpdateConfModSuite(nil, nil, "DEBRIEF_Master "..debug.getinfo(1).currentline)
 
 --load status file to be updated
 require("Active/oob_ground")																	--load ground oob
@@ -235,19 +401,25 @@ end
 --ne pas supprimer, utile pour le fichier statsevaluation
 dofile("Active/db_airbases.lua")
 dofile("Active/targetlist.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+IncludeOnce("UTIL_Data.lua")
+IncludeOnce("UTIL_DataMap.lua")
 
 
 ----*********** create and view Debriefing file for mission ********************************************
 ----*********** create and view Debriefing file for mission ********************************************
 --run log evaluation and status updates
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
+IncludeOnce("DEBRIEF_StatsEvaluation.lua")
 dofile("Active/oob_scen.lua")
---il faut laisser cette ligne, sinon le double appel crée un pb de alive_last
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
-dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
 
+--il faut laisser cette ligne, sinon le double appel crée un pb de alive_last
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
+-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
+Include ("DC_UpdateTargetlist.lua")
+IncludeOnce("DEBRIEF_Text.lua")
 
 local debriefFile = io.open("Debriefing/Debriefing " .. camp.mission .. ".txt", "w") or error("Failed to open debug file")
 debriefFile:write(Debriefing)																	--write Debriefing text into file (variable Debriefing comes from DEBRIEF_Text.lua)
@@ -370,7 +542,8 @@ if input == "y" or input == "yes" then
 	-- Briefing_oob_text_blue = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
 
 	
-	dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_AcceptMission.lua")
+	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_AcceptMission.lua")
+	IncludeOnce("MAIN_AcceptMission.lua")
 
 else
 
@@ -875,7 +1048,10 @@ if input == "y" or input == "yes" then
 				SinglePlayer = true
 				SingleWithDServer = true
 				elseif choix1 == "c" then
-					dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
+					-- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
+					--Include (et non IncludeOnce) : le joueur peut revenir sur cet ecran
+					--plusieurs fois de suite, le fichier doit etre rejoue a chaque fois.
+					Include("UTIL_ChangePlane.lua")
 				end
 
 		until tabIndex01[choix1]
@@ -891,8 +1067,29 @@ if input == "y" or input == "yes" then
 		repeat
 			print("Generating Next Mission.\n")
 
-			MissionInstance = MissionInstance + 1													--count the number of times the mission is generated															   
-			dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")											--generate next mission
+			MissionInstance = MissionInstance + 1													--count the number of times the mission is generated
+
+			--OPTION (une ligne, commentable) : chaque passe doit etre jugee sur elle-meme.
+			--Sans ce reset, une passe qui ne genere aucun vol joueur herite du PlayerFlight
+			--de la passe precedente et part quand meme dans acceptMission().
+			PlayerFlight = false
+
+			GenPassStart()
+
+			--CORRECTIF : IncludeOnce() ne rejoue PAS le fichier au 2e appel.
+			--MAIN_NextMission.lua doit etre REJOUE a chaque tour de boucle, comme le
+			--faisait le dofile() d'origine, sinon les passes suivantes tournent a vide
+			--(aucun avion genere, meme affichage d'erreur repete a l'identique).
+			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")			--generate next mission
+			if type(Include) == "function" then
+				Include("MAIN_NextMission.lua")
+			else
+				--filet de securite si UTIL_Include est une vieille version sans Include()
+				GenPrint("  !! Include() introuvable, repli sur dofile()")
+				dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")
+			end
+
+			GenPassEnd()
 
 			AcceptedMission = false
 
@@ -907,12 +1104,14 @@ if input == "y" or input == "yes" then
 				break
 			elseif Multi.NbGroup >= 1 and PlayerFlight then
 				if acceptMission() then
+					ShowBugsWindows()
 					BackupFilesMission()
 					print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
 					break
 				end
 			elseif SinglePlayer and PlayerFlight then														--mission has a player flight
 				if acceptMission() then
+					ShowBugsWindows()
 					BackupFilesMission() 
 					print("\nNext mission generated.\n")													--confirmation text
 					break
@@ -925,96 +1124,15 @@ if input == "y" or input == "yes" then
 				break
 			else																					--no player flight could be assigned, advance time and try again
 				
-				for _, crit in ipairs(Playability_criterium) do
-					if crit.key == "active_unit" and crit.value == nil then
-						print("Player unit is not active.\n\n")
-					elseif crit.key == "base" and crit.value == nil then
-						print("Player airbase is not operational.\n\n")
-					elseif crit.key == "ready_aircraft" and crit.value == nil then
-						print("Player unit has no ready aircraft.\n\n")
-					elseif crit.key == "tot" and crit.value == nil then
-						print("Player aircraft type cannot operate at this time of day.\n\n")
-					elseif crit.key == "target" and crit.value == nil then
-						print("No eligible mission available for player.\n\n")
-					elseif crit.key == "target_firepower" and crit.value == nil then
-						print("Not enough ready aircraft for this mission.\n\n")
-					elseif crit.key == "weather" and crit.value == nil then
-						print("Player aircraft type cannot operate in this weather.\n\n")
-					elseif crit.key == "target_range" and crit.value == nil then
-						print("No eligible mission available for player.\n\n")
-					elseif crit.key == "intercept" and crit.value == nil then
-						print("Ground alert intercept duty without launch.\n\n")
-					-- else
-					-- 	print("No eligible mission available.\n\n")
-					end
+				if SinglePlayer then
+					PrintPlayerRejectionSP()
+				else
+					PrintPlayerRejectionMP()
 				end
 
+			
 
-				if Multi.NbGroup and not PlayerFlight then
-
-					print("Mission generation failed:\n")
-					print("ID  Aircraft     Base                Squadron        Tasks")
-					print("----------------------------------------------------------------")
-
-
-					if PlayerAssignFailure then
-
-						for _, failData in pairs(PlayerAssignFailure) do
-
-							local shortTasks = failData.generatedTasksShort or "---"
-
-							local line =
-								string.format(
-									"%-3s %-12s %-19s %-15s %s",
-									tostring(failData.id or "?"),
-									tostring(failData.requestedPlane or "---"),
-									tostring(failData.baseShort or "---"),
-									tostring(failData.squadronShort or "---"),
-									shortTasks
-								)
-
-							print(line)
-
-							if failData.reason == "no_main_task_generated" then
-
-								print(" -> Requested main task never generated.")
-
-							elseif failData.reason == "task_filtered" then
-
-								print(" -> Main task generated but filtered during Block A.")
-
-							elseif failData.reason == "task_not_generated" then
-
-								print(" -> Aircraft generated but requested task unavailable.")
-
-							elseif failData.reason == "insufficient_aircraft" then
-
-								print(
-									" -> Generated "
-									..tostring(failData.foundAircraft or 0)
-									.." / "
-									..tostring(failData.requestedNb or "?")
-									.." aircraft."
-								)
-
-							elseif failData.reason == "no_aircraft_generated" then
-
-								print(" -> No compatible aircraft generated.")
-
-							end
-
-							if failData.debugReason then
-								print(" -> "..tostring(failData.debugReason))
-							end
-
-							print()
-						end
-
-						CheckAssignments()
-						
-						
-					end
-				end
+				GenPrint("  echec de la passe "..GenTrace.passe..", nouvelle tentative...")
 
 				os.execute 'timeout /t 4'
 
