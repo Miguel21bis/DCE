@@ -1,8 +1,8 @@
 if not versionDCE then versionDCE = {} end
 
-versionDCE["UTIL_Changelog.lua"] = "22.110.636"
+versionDCE["UTIL_Changelog.lua"] = "22.110.637"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.110.636"
+VersionDCE["UTIL_Changelog.txt"] = "22.110.637"
 
 --[[
 
@@ -19,6 +19,9 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
+##  Version 22.110.637
+    ###  Fixed
+        skipMission resets the entire campaign
 
 ##  Version 22.110.636
     ###  Add
