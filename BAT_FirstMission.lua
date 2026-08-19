@@ -37,12 +37,21 @@ oob_air = {}					--pour declarer la table globale et calmer les inquietudes d'ID
 local function acceptMission()
     local m
     repeat
--- APRÈS
+
         print("\n\n Night or Day ? : " .. Daytime)
         if DCEM_MachineMode then
             print("##DCEM_DAYNIGHT##"..tostring(Daytime))
         end
+
         print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
+        if DCEM_MachineMode then
+            -- print("##DCEM_MISSIONDATE##"..camp.date.day.."."..camp.date.month.."."..camp.date.year)
+			print("##DCEM_TIME##"..FormatTime(camp.time, "hh:mm").."|"..camp.date.day.."."..camp.date.month.."."..camp.date.year)
+        end
+		
+		if DCEM_MachineMode then
+            print("##DCEM_PROMPT##acceptmission")
+        end
         print("\n\nAccept Mission ?:")
         print("a - Accept mission")
         print("s - Skip mission")
@@ -254,11 +263,6 @@ end
 
 
 if VersionPackageICM then
-	-- print("0A0= = = = = = = = = = = = = = = = = = = = = = = "..camp.title.." ("..tostring(camp.version)..")= = = = = = = = = = = = = = = =")
-	-- print("= = = = = = = = = = = = = Script Version : "..tostring(showVersion).." = = Lua Version : "..tostring(_VERSION))
-	-- print("= = = = = = = = = = = = = Player Plane : "..tostring(playerInfo.planeBAT).." Unit: "..tostring(playerInfo.squadBAT).." Country: "..tostring(playerInfo.countryBAT))
-	-- print("= = = = = = = = = = = = = Debug Mod? : "..tostring(Debug.debug))
-	-- print()
 
 	print("========================================================================================================================")
 	print(" DCE CAMPAIGN GENERATOR")
@@ -266,7 +270,6 @@ if VersionPackageICM then
 	print("========================================================================================================================")
 	print()
 	print(" Script : "..tostring(showVersion))
-	-- print(" Lua    : "..tostring(_VERSION))
 	print()
 	print(" Player Aircraft : "..tostring(playerInfo.planeBAT))
 	print(" Squadron         : "..tostring(playerInfo.squadBAT))
@@ -288,6 +291,10 @@ print("Reset the campaign and generate a new first mission.\n")
 
 local input
 local choix1
+
+if DCEM_MachineMode then
+	print("##DCEM_TIME##"..FormatTime(camp.time, "hh:mm").."|"..camp.date.day.."."..camp.date.month.."."..camp.date.year)
+end
 
 -- print("B.\n")
 repeat
@@ -314,18 +321,6 @@ repeat
 	repeat
 		
 		if choix1 == nil then
-			-- print("Select :\n"..
-			-- 	"S (S)ingleplayer  \n"..
-			-- 	-- "D Singleplayer with (D)edicated Server \n"..
-			-- 	-- "DF Singleplayer with (D)edicated Server, (F)ull plane on Deck \n"..
-			-- 	"\n"..
-			-- 	"C (C)hange type of plane\n"..
-			-- 	"\n"..
-			-- 	"T Multiplayer by choice of (T)arget \n"..
-			-- 	"N multiplayer by choice of (N)ATO".."\n"..
-			-- 	"\n"..
-			-- 	"O t(o)ols (tools for CampaignMaker and Coder)"
-			-- )
 
 			print("--------------------------------------------------------------")
 			print(" Reset campaign and generate first mission")
@@ -349,6 +344,7 @@ repeat
 		-- choix1 = string.lower(choix1)
 		choix1 = string.lower(choix1 or "")
 
+		--[[ DEPRECATED (remplacé par les checkboxes Debug/AfficheFlight dans DCE_Manager, lues depuis conf_mod.lua)
 		-- Détection du mode debug : activation avec "+", désactivation avec "-"
 		if string.find(choix1, "%+") then
 			Debug.debug = true
@@ -361,6 +357,7 @@ repeat
 			print("Debug mode deactivated.")
 			choix1 = string.gsub(choix1, "%-", "")   -- Retirer tous les tirets
 		end
+		--]]
 		
 		--===================================================================================
 		-- "T Multiplayer by choice of (T)arget \n"..
@@ -368,59 +365,168 @@ repeat
 		--===================================================================================
 		if choix1 == "n" or choix1 == "t"  then
 			if choix1 == "t"  then
+				
 				--===================================================================================
 				-- Ecran N°2 Selection du Target 
 				--===================================================================================
 
-				
-				print("choose a Single target")
+				-- Fonction pour afficher le menu de sélection du camp
+				local function selectCamp()
+					print("\n--- Select Coalition ---")
+					print("1. targets in the RED camp")
+					print("2. targets in the BLUE camp")
+					print("3. Exit")
 
-				local tabIndex = {}
-				for side, targetSide in pairs(targetlist) do
-					local j = 1
-					local Ckey = 0
-					print() print(side..":")
-					for key, target in ipairs(targetSide) do
-						if target.inactive ~= true  and ( string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CSAR") then
-							if side == "red" then
-								Ckey = key + #targetlist["blue"]															--permet de n'afficher qu'un nombre continue pour les 2 camps
-							else
-								Ckey = key
-							end
-							io.write(  Ckey.." "..side.." "..tostring(target.titleName) .."  "..tostring(target.alive).." %  X"..tostring(target.priority).."\n")
-							if not tabIndex[Ckey]  then tabIndex[Ckey] = {} end
-							tabIndex[Ckey]["side"] = side
-							j = j+1
-						end
+					local choice
+					repeat
+						io.write("\nEnter your choice (1-3): ")
+						choice = tonumber(io.stdin:read())
+					until choice == 1 or choice == 2 or choice == 3
+
+					if choice == 1 then return "blue"
+					elseif choice == 2 then return "red"
+					else
+						print("Exiting selection.")
+						return nil
 					end
 				end
 
-				repeat
-					input = tonumber(io.stdin:read())
-					if (input == nil or input == "") then input = 999 end
-					if input >  #targetlist["blue"] then
-						Ckey = input - #targetlist["blue"]
-					else
-						Ckey = input
+				-- Fonction pour afficher le menu de sélection de la mission
+				local function selectMissionType()
+					print("\n--- Select Mission Type ---")
+					print("1. Standard targets (Strike's, Runway Attack)")
+					print("2. Rescue mission (SAR/CSAR)")
+					print("3. Back to coalition selection")
+
+					local choice
+					repeat
+						io.write("\nEnter your choice (1-3): ")
+						choice = tonumber(io.stdin:read())
+					until choice == 1 or choice == 2 or choice == 3
+
+					return choice
+				end
+
+				-- Fonction pour afficher les cibles standard (Strike, Runway Attack)
+				local function showStandardTargets(targetlist, targetSide)
+					local eniSide = DCS_ENI_Side[targetSide]
+
+					print("\n--- Select a target located in the camp "..eniSide.." ---")
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##targetlist")
 					end
-					if  tabIndex[input] then
-						local side = tabIndex[input]["side"]
-						if not Multi.Target then Multi.Target = {} end
-						if not Multi.Target[side] then Multi.Target[side]= {} end
-						Multi.Target[side] = targetlist[side][Ckey].titleName
-						print("\n"..targetlist[side][Ckey].titleName.."\n")
-					else
-						print("\nInvalid entry.\n")
+
+					-- Trier la table par priorité
+					table.sort(targetlist[targetSide], function(a, b)
+						return a.priority > b.priority
+					end)
+
+					local tabIndex = {}
+					local Ckey = 0
+
+					for key, target in ipairs(targetlist[targetSide]) do
+						if target.inactive ~= true and target.ATO
+						and (string.find(target.task, "Strike") or target.task == "Runway Attack" or target.task == "CAP" or target.task == "Fighter Sweep" or target.task == "Transport")
+						and target.type ~= "Ejected Pilot"
+						then
+							-- APRÈS
+							Ckey = key
+							io.write(Ckey.." "..eniSide.." "..tostring(target.titleName).."  "..tostring(target.alive).."%  X"..tostring(target.priority).."\n")
+							tabIndex[Ckey] = target
+
+							if DCEM_MachineMode then
+								print("##DCEM_TARGET##"..Ckey.."|"..eniSide.."|"..tostring(target.titleName).."|"..tostring(target.alive).."|"..tostring(target.priority))
+							end
+						end
 					end
-				until  tabIndex[input]
+
+					return tabIndex
+				end
+
+				-- Fonction pour afficher les cibles de type CSAR (pilotes éjectés)
+				local function showCSARTargets(targetlist, targetSide)
+					local eniSide = DCS_ENI_Side[targetSide]
+
+					print("\n--- Select the pilot to be rescued, who has fallen into the "..eniSide.." side  ---")
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##targetlist")
+					end
+					local tabIndex = {}
+					-- local Ckey = 0
+
+					-- Trier la table par priorité
+					table.sort(targetlist[targetSide], function(a, b)
+						return a.priority > b.priority
+					end)
+
+					for key, target in ipairs(targetlist[targetSide]) do
+						if not target.inactive and target.ATO and (target.task == "CSAR" or target.task == "SAR") then
+							-- Ckey = key
+							-- APRÈS
+							local mgrsInfo = target.MGRS_Chute_1km or target.MGRS_Chute or 0
+							io.write(key.." "..tostring(target.titleName).." "..tostring(mgrsInfo).."\n")
+							tabIndex[key] = target
+
+							if DCEM_MachineMode then
+								print("##DCEM_CSARTARGET##"..key.."|"..tostring(target.titleName).."|"..tostring(mgrsInfo))
+							end
+						end
+					end
+
+					return tabIndex
+				end
+
+				-- Fonction principale pour la sélection des cibles
+				local function selectTarget(targetlist)
+					local targetSide = selectCamp()
+					if not targetSide then return end -- Quitter si l'utilisateur choisit "Exit"
+
+					local missionChoice = selectMissionType()
+
+					local tabIndex = {}
+					if missionChoice == 1 then
+						tabIndex = showStandardTargets(targetlist, targetSide)
+					elseif missionChoice == 2 then
+						tabIndex = showCSARTargets(targetlist, targetSide)
+					else
+						return selectTarget(targetlist) -- Retourner au choix du camp
+					end
+
+					if next(tabIndex) == nil then
+						print("\nNo available targets for this selection.")
+						return
+					end
+
+					-- Sélection de la cible spécifique
+					
+					repeat
+						io.write("\nEnter target number: ")
+						input = tonumber(io.stdin:read())
+						if not input or not tabIndex[input] then
+							print("\nInvalid entry. Please enter a valid target number.")
+						end
+					until input and tabIndex[input]
+
+					local selectedTarget = tabIndex[input]
+					Multi.Target = Multi.Target or {}
+					Multi.Target[targetSide] = selectedTarget.titleName
+
+					print("\nSelected Target: "..selectedTarget.titleName)
+				end
+
+				-- Exécution de la sélection
+				selectTarget(targetlist)
 
 				io.write( "\n")
 			end	--if choix1 == "t"  then
-
+				
 			--===================================================================================
 			-- Ecran N°3 Selection nb of Flight
 			repeat
 				print("Select number of Flight :\n")
+				if DCEM_MachineMode then
+					print("##DCEM_PROMPT##flightcount")
+				end
 				input = tonumber(io.stdin:read())
 				if (input == nil or input == "") then input = 999 end
 				if  (input >= 1 and  input <= 10) then
@@ -490,6 +596,9 @@ repeat
 				local tabBug = {}
 
 				print("Select your flight:")
+				if DCEM_MachineMode then
+					print("##DCEM_PROMPT##flightcompose")
+				end
 				print("Format: [1-8 aircraft][ID][Task code]")
 				print("Example: 4de = 4 aircraft, ID d, Escort mission")
 				print()
@@ -727,10 +836,14 @@ repeat
 	until tabIndex01[choix1]
 
 	print("\n\n")
-	repeat
-		print("Generating First Mission.\n")
 
+	repeat
+	
 		MissionInstance = MissionInstance + 1															--count the number of times the mission is generated
+		if DCEM_MachineMode then
+			print("##DCEM_CYCLE##"..tostring(MissionInstance))
+		end
+		
 		-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")						--generate mission
 		Include("MAIN_NextMission.lua")
 		
@@ -739,6 +852,9 @@ repeat
 				ShowBugsWindows()
 				BackupFilesMission() 
 				print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
+				if DCEM_MachineMode then
+					print("##DCEM_OUTCOME##SUCCESS|Mission generated.")
+				end
 				 break
 			end
 		elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
@@ -746,14 +862,20 @@ repeat
 				BackupFilesMission() 
 				ShowBugsWindows()
 				print("\nCampaign reset and first campaign mission re-generated.\n")					--confirmation text
+				if DCEM_MachineMode then
+					print("##DCEM_OUTCOME##SUCCESS|Mission generated.")
+				end
 				 break
 			end
 		elseif StopBug then																				--mission has a player flight
 			print("\n\n StopBug .\n")																	--confirmation text
 			break
 
-		elseif MissionInstance >= 20 then																--no player flight could be assigned in 20 tries, stop it
+		elseif MissionInstance >= 5 then																--no player flight could be assigned in 20 tries, stop it
 			print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")
+			if DCEM_MachineMode then
+				print("##DCEM_OUTCOME##FAILED|No eligible player flight in 20 attempts.")
+			end
 			break
 		else																							--no player flight could be assigned, advance time and try again
 

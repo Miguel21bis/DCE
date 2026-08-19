@@ -31,12 +31,20 @@ MissionAccepted = nil
 local function acceptMission()
     local m
     repeat
--- APRÈS
+
         print("\n\n Night or Day ? : " .. Daytime)
         if DCEM_MachineMode then
             print("##DCEM_DAYNIGHT##"..tostring(Daytime))
         end
+
         print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
+        if DCEM_MachineMode then
+            -- print("##DCEM_MISSIONDATE##"..camp.date.day.."."..camp.date.month.."."..camp.date.year)
+			print("##DCEM_TIME##"..FormatTime(camp.time, "hh:mm").."|"..camp.date.day.."."..camp.date.month.."."..camp.date.year)
+        end
+		if DCEM_MachineMode then
+            print("##DCEM_PROMPT##acceptmission")
+        end
         print("\n\nAccept Mission ?:")
         print("a - Accept mission")
         print("s - Skip mission")
@@ -229,7 +237,6 @@ if VersionPackageICM then
 	print("========================================================================================================================")
 	print()
 	print(" Script : "..tostring(showVersion))
-	-- print(" Lua    : "..tostring(_VERSION))
 	print()
 	print(" Player Aircraft : "..tostring(playerInfo.planeBAT))
 	print(" Squadron         : "..tostring(playerInfo.squadBAT))
@@ -252,12 +259,16 @@ local input
 local choix1
 
 if not ChangePlane then
--- APRÈS
+
 	print("Actual time: " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
 	if DCEM_MachineMode then
 		print("##DCEM_TIME##"..FormatTime(camp.time, "hh:mm").."|"..camp.date.day.."."..camp.date.month.."."..camp.date.year)
 	end
+
 	print("Skip current mission and generate next campaign mission. Continue? y(es)/n(o):\n")
+	if DCEM_MachineMode then
+		print("##DCEM_PROMPT##yesno")
+	end
 
 	SinglePlayer = false
 	if Multi == nil then
@@ -322,6 +333,7 @@ if input == "y" or input == "yes" then
 			choix1 = io.stdin:read()
 			choix1 = string.lower(choix1)
 
+			--[[ DEPRECATED (remplacé par les checkboxes Debug/AfficheFlight dans DCE_Manager, lues depuis conf_mod.lua)
 			-- Détection du mode debug : activation avec "+", désactivation avec "-"
 			if string.find(choix1, "%+") then
 				Debug.debug = true
@@ -334,6 +346,7 @@ if input == "y" or input == "yes" then
 				print("Debug mode deactivated.")
 				choix1 = string.gsub(choix1, "%-", "")   -- Retirer tous les tirets
 			end
+			--]]
 
 
 			--===================================================================================
@@ -348,8 +361,6 @@ if input == "y" or input == "yes" then
 				-- Ecran N°2 Selection du Target 
 				--===================================================================================
 
-
-					-- UpdateFilesAfterTimeJump()
 
 					-- Fonction pour afficher le menu de sélection du camp
 					local function selectCamp()
@@ -391,7 +402,11 @@ if input == "y" or input == "yes" then
 					-- Fonction pour afficher les cibles standard (Strike, Runway Attack)
 					local function showStandardTargets(targetlist, targetSide)
 						local eniSide = DCS_ENI_Side[targetSide]
-						print("\n--- Sélectionnez une cible situé dans le camp "..eniSide.." ---")
+
+						print("\n--- Select a target located in the camp "..eniSide.." ---")
+						if DCEM_MachineMode then
+							print("##DCEM_PROMPT##targetlist")
+						end
 
 						-- Trier la table par priorité
 						table.sort(targetlist[targetSide], function(a, b)
@@ -423,7 +438,11 @@ if input == "y" or input == "yes" then
 					-- Fonction pour afficher les cibles de type CSAR (pilotes éjectés)
 					local function showCSARTargets(targetlist, targetSide)
 						local eniSide = DCS_ENI_Side[targetSide]
+
 						print("\n--- Select the pilot to be rescued, who has fallen into the "..eniSide.." side  ---")
+						if DCEM_MachineMode then
+							print("##DCEM_PROMPT##targetlist")
+						end
 						local tabIndex = {}
 						-- local Ckey = 0
 
@@ -498,6 +517,9 @@ if input == "y" or input == "yes" then
 				--===================================================================================
 				repeat
 					print("Select number of Flight :\n")
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##flightcount")
+					end
 					input = tonumber(io.stdin:read())
 					if (input == nil or input == "") then input = 999 end
 					if  (input >= 1 and  input <= 10) then
@@ -525,6 +547,9 @@ if input == "y" or input == "yes" then
 
 
 					print("Select your flight:")
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##flightcompose")
+					end
 					print("Format: [1-8 aircraft][ID][Task code]")
 					print("Example: 4de = 4 aircraft, ID d, Escort mission")
 					print()
@@ -797,8 +822,12 @@ if input == "y" or input == "yes" then
 		repeat
 			print("Generating Next Mission.\n")
 
+	
 			MissionInstance = MissionInstance + 1															--count the number of times the mission is generated
-
+			if DCEM_MachineMode then
+				print("##DCEM_CYCLE##"..tostring(MissionInstance))
+			end
+			
 			camp.VersionPackageICM = tostring(VersionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission																				--set amount of players
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")																--generate mission
 			Include("MAIN_NextMission.lua")
@@ -811,12 +840,18 @@ if input == "y" or input == "yes" then
 					EndInfo = EndCampaign
 				end
 				print("\n This campaign is a ".. tostring(EndInfo).."  \nEND OF THE CAMPAIGN, SEE THE BRIEFING IN THE MISSION..\n")					-- end of camapaign
+				if DCEM_MachineMode then
+					print("##DCEM_OUTCOME##ENDCAMPAIGN|"..tostring(EndInfo))
+				end
 				break
 			elseif Multi.NbGroup >= 1 and PlayerFlight then
 				if acceptMission() then
 					ShowBugsWindows()
 					BackupFilesMission()
 					print("\nMultiplayerCampaign Next mission generated.\n")								--confirmation text
+					if DCEM_MachineMode then
+						print("##DCEM_OUTCOME##SUCCESS|Mission generated.")
+					end
 					break
 				else
 					print("\nDebug A: AcceptMission() .\n")
@@ -826,6 +861,9 @@ if input == "y" or input == "yes" then
 					ShowBugsWindows()
 					BackupFilesMission()
 					print("\nNext mission generated.\n")													--confirmation text
+					if DCEM_MachineMode then
+						print("##DCEM_OUTCOME##SUCCESS|Mission generated.")
+					end
 					break
 				else
 					print("\nDebug B: AcceptMission() .\n")
@@ -835,6 +873,9 @@ if input == "y" or input == "yes" then
 				break
 			elseif MissionInstance == 20 then																--no player flight could be assigned in 20 tries, stop it
 				print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")
+				if DCEM_MachineMode then
+					print("##DCEM_OUTCOME##FAILED|No eligible player flight in 20 attempts.")
+				end
 				break
 			else																							--no player flight could be assigned, advance time and try again
 			

@@ -460,7 +460,7 @@ function LoadModData(relativeFolder, ACCEPT_NEW_TABLES)
                                 -- si DCE (global) a déjà une table du même nom -> merge dedans
                                 if type(_G[k]) == "table" then
                                     -- print("DCE : Fusion dans DCE -> " .. tostring(k))
-                                    mergeTablesDeep(_G[k], v)
+                                    MergeTablesDeep(_G[k], v)
                                 else
                                     -- table nouvelle, décider selon ACCEPT_NEW_TABLES
                                     if ACCEPT_NEW_TABLES then
@@ -2135,17 +2135,21 @@ function resolveGroup(pathsByField, defaults)
 end
 
 function generateSolid_G_Variable()
-	Weather = resolveGroup(WEATHER_PATHS, {
-		trend = 50, variance = 30, refTemp = 20,
-		instability = 60, windActivity = 2.5, winDirection = 158, weather_playerBias = 0
+		Weather = resolveGroup(WEATHER_PATHS, {
+			trend = 50, variance = 30, refTemp = 20,
+			instability = 60, windActivity = 2.5, winDirection = 158, weather_playerBias = 0
+		})
+
+		PictureBrief = resolveGroup(PICTURE_BRIEF_PATHS, {
+			pictureBrief = { blue = {}, red = {} 
+		},
 	})
+end
 
-	PictureBrief = resolveGroup(PICTURE_BRIEF_PATHS, {
-    	pictureBrief = { blue = {}, red = {} 
-	},
-})
-
-
+-- Exemple générique, à adapter à la vraie fonction si elle existe :
+function Attention(msg)
+    print("(MainNM) ATTENTION: " .. msg)
+    print("##DCEM_FATAL##" .. msg)   -- <- ligne ajoutée : signal fiable pour DCE_Manager
 end
 
 --construit les variables de maniere robuste, suite aux changements de structure de conf_mod.lua et mission_ini.lua

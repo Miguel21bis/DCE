@@ -653,16 +653,46 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 		local badEntry = false
 		local foundGoodMain = false
 
-		for k=1, #creaClientFlight do																	-- si le multiplayer est demande
+		-- Prévisualisation complète pour DCE_Manager : calcule et annonce TOUS les vols demandés
+		-- et leurs paquets compatibles avant de rien demander. La vraie boucle plus bas reste
+		-- INCHANGÉE - c'est elle qui fait réellement l'assignation et gère l'exclusion des
+		-- paquets déjà pris (tabSelect). Cette prévisualisation ne fait que reproduire, en
+		-- lecture seule, le même filtre de type que la ligne "elseif creaClientFlight[k].PlaneType
+		-- == playable[index].type" un peu plus bas.
+		if DCEM_MachineMode then
+			print("##DCEM_PROMPT##flightoption")
+			for pk = 1, #creaClientFlight do
+				print("##DCEM_FLIGHTWISH##"..creaClientFlight[pk].NbPlane.."|"..creaClientFlight[pk].PlaneType.."|"..creaClientFlight[pk].side.."|"..creaClientFlight[pk].task)
+				for pIndex = 1, #playable do
+					if creaClientFlight[pk].PlaneType == playable[pIndex].type then
+						print("##DCEM_FLIGHTOPT##1|"..pIndex.."|"..playable[pIndex].number
+							.."|"..AliasBaseName(playable[pIndex].base)
+							.."|"..AliasTypeName(playable[pIndex].type)
+							.."|"..(playable[pIndex].groupName or "")
+							.."|"..(playable[pIndex].target_name or ""))
+					end
+				end
+			end
+			print("##DCEM_FLIGHTPREVIEW_DONE##")
+		end
+
+		for k=1, #creaClientFlight do																	-- si le multiplayer est demande																-- si le multiplayer est demande
 			local resteAPrendre = creaClientFlight[k].NbPlane		
 			repeat
 				local tabIndex = {}																		--table pour afficher uniquement les choix possibles
+				local forcedNb = nil		-- chiffre forcé par DCE_Manager pour ce tour (nil = comportement normal)
 
 				repeat
 					
 					print(" -------------------------------------------------------> Note: Your plane Flight wishes: ")
-					print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##flightoption")
+					end
 					
+					print(" -------------------------------------------------------> "..creaClientFlight[k].NbPlane.." "..creaClientFlight[k].PlaneType.." ("..creaClientFlight[k].side..") "..creaClientFlight[k].task)
+					if DCEM_MachineMode then
+						print("##DCEM_FLIGHTWISH##"..creaClientFlight[k].NbPlane.."|"..creaClientFlight[k].PlaneType.."|"..creaClientFlight[k].side.."|"..creaClientFlight[k].task)
+					end
 
 					-- ========================================
 					-- Construction des lignes avant affichage
@@ -799,12 +829,35 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 
 					groupNChoice = io.stdin:read()
 
-					if type(groupNChoice) == "string" and groupNChoice ~= "" and string.match(groupNChoice, "^%d+$") then
+					forcedNb = nil		-- on repart de zéro à chaque tentative, pour ne pas garder une valeur forcée d'un essai précédent invalide
+
+					-- groupNChoice = io.stdin:read()
+
+					-- Format "idxFforce" (ex: "3F4") envoyé par DCE_Manager quand l'utilisateur force
+					-- un nombre différent du nombre réel du paquet. Sinon, comportement DOS classique inchangé.
+					-- ATTENTION : "type(x)=='string' and string.match(...)" ne marche PAS ici, car
+					-- l'opérateur "and" tronque le multi-retour de string.match à une seule valeur -
+					-- il faut passer par un vrai "if" pour récupérer idxPart ET forcePart.
+					local idxPart, forcePart
+					-- print("AtoPA A groupNChoice: "..tostring(groupNChoice))
+					if type(groupNChoice) == "string" then
+						idxPart, forcePart = string.match(groupNChoice, "^(%d+)F(%d+)$")
+						-- print("AtoPA B idxPart: "..tostring(idxPart).." forcePart: "..tostring(forcePart)) 
+					end
+
+					if idxPart then
+						groupNChoice = tonumber(idxPart)
+						forcedNb = tonumber(forcePart)
+						-- print("AtoPA C groupNChoice: "..tostring(groupNChoice).." forcedNb: "..tostring(forcedNb))
+					elseif type(groupNChoice) == "string" and groupNChoice ~= "" and string.match(groupNChoice, "^%d+$") then
 						groupNChoice = tonumber(groupNChoice)										-- si inférieur à 57 ASCII, c'est inférieur au chiffre 9, donc c'est un chiffre
+						-- print("AtoPA D groupNChoice: "..tostring(groupNChoice))
 					elseif type(groupNChoice) == "string" then
+						-- print("AtoPA E groupNChoice: "..tostring(groupNChoice))
 						if string.lower(groupNChoice) == "s" then
 							TaskRefused = true
 							groupNChoice = math.random(1, #playable)
+							-- print("AtoPA F groupNChoice: "..tostring(groupNChoice))
 						end
 					end
 
@@ -816,7 +869,7 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 						badEntry = false
 					end
 
-				until tabIndex[groupNChoice]
+				until tabIndex[groupNChoice] or TaskRefused
 
 				if playable[groupNChoice] then print("Selected: "..playable[groupNChoice].groupName) end
 
@@ -825,7 +878,10 @@ if #playable > 0 and AllCoopPossible then																--there are playable fl
 				-- if not TaskRefused then
 				if not TaskRefused and selectedPlayable then
 
-					resteAPrendre = resteAPrendre - selectedPlayable.number
+					-- DCE_Manager peut forcer un nombre différent du nombre réel du groupe (forcedNb) -
+					-- typiquement pour valider un flight même si le paquet choisi n'a pas assez d'avions.
+					-- C'est cette valeur forcée qui compte pour le quota, PAS le nombre réel du groupe.
+					resteAPrendre = resteAPrendre - (forcedNb or selectedPlayable.number)
 
 					-- ajoute ce systeme pour avoir le briefing de tous
 					if not camp.client then camp.client = {} end

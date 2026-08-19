@@ -413,31 +413,6 @@ function rejectStep(draft, step, reason, data, bloc, line)
 	end
 
 	
-	-- if isPlayerRelatedDraft(draft) and draft.clientPlayer and not draft.playerFailureRegistered then
-	-- if draft.clientPlayer and not draft.playerFailureRegistered then
-	-- if isPlayerRelatedDraft(draft) and not draft.playerFailureRegistered then
-	-- 	draft.playerFailureRegistered = true
-
-	-- 	registerPlayerFailure({
-
-	-- 		draftId = draft.draftId,
-	-- 		unitType = draft.unitType,
-
-	-- 		requestedPlane = draft.type,
-	-- 		requestedTask = draft.task,
-	-- 		requestedNb = draft.number,
-
-	-- 		stage = bloc,
-	-- 		reason = reason,
-	-- 		line = line,
-
-	-- 		details = data,
-
-	-- 		debugText = reason,
-	-- 	})
-	-- end
-
-	
 end
 
 function getDominantRejectReason(draft)

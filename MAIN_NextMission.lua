@@ -70,8 +70,12 @@ local oldMapResource = DeepCopy(mapResource)
 zipFile:unzClose()
 
 if mission.version < 19 then --19ok 18bad
-	print("(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update.")
-	print("(MainNM) ATTENTION ") os.execute 'pause'
+	local msg = "(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update."
+
+	Attention(msg)
+	
+	os.execute 'pause'
+
 	os.exit()
 end
 
