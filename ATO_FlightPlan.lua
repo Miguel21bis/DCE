@@ -568,7 +568,6 @@ end
 ---- function to get sidenumbers -----
 local sidenumbers = {}
 
--- function GetSidenumber(squadron, lower, upper, nUnit, player, type)				--not local, also used in DC_StaticAircraft
 function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAircraft
 
 	local squadron = flight.name
@@ -578,19 +577,13 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 	local client = flight.client
 	local type = flight.type
 
+	print("GetSidenumber() passe A type: "..tostring(flight.type).." name: "..tostring(flight.name) .." lower: "..tostring(lower).." upper: "..tostring(upper))
+
 	local s 																		--new sidenumber
 	local counter = 0
 
-	-- if type == "F-4E-45MC" then
-	-- 	print("player "..tostring(player).." client "..tostring(client).." flight.task "..tostring(flight.task))
-	-- 	print("mission_ini.persistentAircraftTailNb "..tostring(mission_ini.persistentACFT_TailNb))
-	-- 	print("mission_ini.persistentAircraftKey "..tostring(mission_ini.persistentACFT_FileNameCache))
-	-- 	-- os.execute 'pause'
-	-- end
 	if type == "F-4E-45MC" and mission_ini.persistentACFT_TailNb and mission_ini.persistentACFT_TailNb ~= "" then
-		-- print("persistent passe A")
 		if player then
-			-- print("persistent passe A2")
 			if nUnit == 1 then
 				-- print("persistent passe A3 ok")
 				-- os.execute 'pause'
@@ -598,12 +591,8 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 			end
 		--utilise ici le fichier Init/persistenceMP.lua s'il existe, pour facilité l'attribution des num tail/avion
 		elseif client and PersistenceMP_byTask and PersistenceMP_byTask[flight.task] then
-			-- print("persistent passe B")
 			for clientName, clientData in pairs(PersistenceMP_byTask[flight.task]) do
-				-- print("persistent passe B2")
 				if not clientData.assigned and clientData.tailNum then
-					-- print("persistent passe B3 OK")
-					-- os.execute 'pause'
 					clientData.assigned = true
 					return tostring(clientData.tailNum), mission_ini.persistentACFT_FileNameCache, true
 				end
@@ -611,11 +600,13 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 		end
 	end
 
-	if not lower or upper then
+	if not lower or not upper then
 		s = math.random(1, 99)										--us a random number
 		s = string.format("%03d", s)
+		print("GetSidenumber() passe B "..tostring(s))
 		return tostring(s)
 	end
+
 	if sidenumbers[squadron] == nil then										--sidenumber squadron entry does not exist
 		sidenumbers[squadron] = {}												--create sidenumber squadron entry
 	end
@@ -694,6 +685,8 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 			s = "0" .. s_str															--add a zero in front
 		end
 	end
+
+	print("GetSidenumber() passe Z "..tostring(s))
 
 	return tostring(s)															--return sidenumber as string
 end
