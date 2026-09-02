@@ -509,6 +509,8 @@ function LoadFileAndUpdate(from)
 	Include("DC_NavalEnvironment.lua")
 	Include("DC_UpdateSAR.lua")
 
+	Include("DC_UpdateWargame.lua")
+
 	-- print('campDate B '..camp.date.year)
 
 	CommonRanges = DCE_FindCommonRadioRanges()	--get common radio range for all planes in campaign

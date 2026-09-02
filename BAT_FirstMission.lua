@@ -91,28 +91,28 @@ local function taskToShort(task)
 end
 
 
--- Construit la liste compacte des tasks dispo pour un squadron
-local function buildTaskString(playableFlight)
+-- -- Construit la liste compacte des tasks dispo pour un squadron
+-- local function buildTaskString(playableFlight)
 
-	local tasks = {}
+-- 	local tasks = {}
 
-	if playableFlight.task then
-		tasks[#tasks + 1] = taskToShort(playableFlight.task)
-	end
+-- 	if playableFlight.task then
+-- 		tasks[#tasks + 1] = taskToShort(playableFlight.task)
+-- 	end
 
-	-- évite doublons
-	local already = {}
-	local result = {}
+-- 	-- évite doublons
+-- 	local already = {}
+-- 	local result = {}
 
-	for i = 1, #tasks do
-		if not already[tasks[i]] then
-			already[tasks[i]] = true
-			result[#result + 1] = tasks[i]
-		end
-	end
+-- 	for i = 1, #tasks do
+-- 		if not already[tasks[i]] then
+-- 			already[tasks[i]] = true
+-- 			result[#result + 1] = tasks[i]
+-- 		end
+-- 	end
 
-	return table.concat(result, " ")
-end
+-- 	return table.concat(result, " ")
+-- end
 
 -- Tronque une chaine à une longueur fixe pour affichage console
 local function fitString(txt, maxLen)
@@ -857,7 +857,7 @@ repeat
 				end
 				 break
 			end
-		elseif SinglePlayer and PlayerFlight  then														--mission has a player flight
+		elseif SinglePlayer and PlayerFlight then														--mission has a player flight
 			if acceptMission() then
 				BackupFilesMission() 
 				ShowBugsWindows()

@@ -577,7 +577,7 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 	local client = flight.client
 	local type = flight.type
 
-	print("GetSidenumber() passe A type: "..tostring(flight.type).." name: "..tostring(flight.name) .." lower: "..tostring(lower).." upper: "..tostring(upper))
+	-- print("GetSidenumber() passe A type: "..tostring(flight.type).." name: "..tostring(flight.name) .." lower: "..tostring(lower).." upper: "..tostring(upper))
 
 	local s 																		--new sidenumber
 	local counter = 0
@@ -603,7 +603,7 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 	if not lower or not upper then
 		s = math.random(1, 99)										--us a random number
 		s = string.format("%03d", s)
-		print("GetSidenumber() passe B "..tostring(s))
+		-- print("GetSidenumber() passe B "..tostring(s))
 		return tostring(s)
 	end
 
@@ -686,7 +686,7 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 		end
 	end
 
-	print("GetSidenumber() passe Z "..tostring(s))
+	-- print("GetSidenumber() passe Z "..tostring(s))
 
 	return tostring(s)															--return sidenumber as string
 end

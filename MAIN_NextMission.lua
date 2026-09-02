@@ -641,6 +641,8 @@ if MissionInstance >= 2 then
 	Include("DC_NavalEnvironment.lua")
 	Include("DC_UpdateSAR.lua")
 
+	Include("DC_UpdateWargame.lua")
+
 	Include("ATO_ThreatEvaluation.lua")
 	Include("DC_UpdateTargetlist.lua")
 	Include("DC_CheckTriggers.lua")

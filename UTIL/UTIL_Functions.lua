@@ -332,80 +332,6 @@ function _afficheTXT(_table, titre, prof)
 end -- function affiche
 
 
-
--- Charge les mods d'un dossier, exécute chaque fichier dans un env isolé
--- relativeFolder = "../../../Missions/Campaigns/"..camp.title.."/Mods" par exemple
--- ACCEPT_NEW_TABLES = true --toutes les tables créées par le mod seront ajoutées à _G
--- function LoadModData(relativeFolder, ACCEPT_NEW_TABLES)
---     ACCEPT_NEW_TABLES = not not ACCEPT_NEW_TABLES    -- bool
---     local fullFolder = "../../../Missions/Campaigns/"..camp.title.."/"..relativeFolder
---     -- print("DCE : Scanning Mods folder : " .. tostring(fullFolder))
-
---     local cmd = 'dir "' .. fullFolder .. '" /b'
---     local p = io.popen(cmd)
---     if not p then
---         -- print("DCE ERROR : impossible de lire le dossier Mods : " .. fullFolder)
---         return
---     end
-
---     for file in p:lines() do
---         if file:match("%.lua$") then
---             local fullpath = fullFolder .. "/" .. file
---             -- print("DCE : Chargement MOD -> " .. fullpath)
-
---             -- load the chunk (file) without executing it globally
---             local chunk, loadErr = loadfile(fullpath)
---             if not chunk then
---                 -- print("DCE ERROR : loadfile failed for " .. fullpath .. " : " .. tostring(loadErr))
---             else
---                 -- create an isolated env that falls back to _G for reads (so mod can call DCE functions)
---                 local env = {}
---                 setmetatable(env, { __index = _G })
-
---                 -- set this env as the chunk's environment (Lua 5.1)
---                 setfenv(chunk, env)
-
---                 -- execute the chunk safely
---                 local ok, execErr = pcall(chunk)
---                 if not ok then
---                     -- print("DCE ERROR : execution failed for " .. fullpath .. " : " .. tostring(execErr))
---                 else
---                     -- enumerate what the mod defined in env
---                     for k, v in pairs(env) do
---                         -- skip metamethods and inherited keys (if index produced inherited, pairs won't show them)
---                         if type(k) == "string" then
---                             -- only consider tables defined by the mod (ignore functions, numbers...)
---                             if type(v) == "table" then
---                                 -- print("DCE : Table détectée dans MOD '" .. file .. "' : " .. tostring(k))
-
---                                 -- si DCE (global) a déjà une table du même nom -> merge dedans
---                                 if type(_G[k]) == "table" then
---                                     -- print("DCE : Fusion dans DCE -> " .. tostring(k))
---                                     MergeTablesDeep(_G[k], v)
---                                 else
---                                     -- table nouvelle, décider selon ACCEPT_NEW_TABLES
---                                     if ACCEPT_NEW_TABLES then
---                                         -- print("DCE : Ajout d'une nouvelle table globale -> " .. tostring(k))
---                                         _G[k] = v
---                                     else
---                                         -- print("DCE : Table nouvelle ignorée (pour l'instant) -> " .. tostring(k))
---                                     end
---                                 end
---                             else
---                                 -- si le mod définit des scalaires ou fonctions globaux qu'on souhaite conserver ou logger
---                                 -- par défaut on ignore pour éviter de polluer _G
---                                 -- Si tu veux autoriser certaines clés non-table, tu peux les whitelist ici.
---                             end
---                         end
---                     end
---                 end
---             end
---         end
---     end
-
---     p:close()
--- end
-
 -- Charge les mods d'un dossier, exécute chaque fichier dans un env isolé
 -- relativeFolder = "../../../Missions/Campaigns/"..camp.title.."/Mods" par exemple
 -- ACCEPT_NEW_TABLES = true --toutes les tables créées par le mod seront ajoutées à _G
@@ -575,10 +501,9 @@ function Check_TaskPossibleByPlane()
 				--si aucune tasks strike n'a été trouvée
 				if not foundStrikeTask and addMultipleStrike then
 					debugTempFLIGHT = "(Error UutilF C03) this task, requested in Init\\oob_air_init.lua, is not listed in the UTIL_Data.lua file : "..tostring(squad.type).." "..tostring("Strike ( CAS or Ground Attack or Pinpoint Strike )")
-					print(debugTempFLIGHT )
+					-- print(debugTempFLIGHT )
 					AddLog(debugTempFLIGHT)
 					error = error + 1
-					-- os.execute 'pause'
 				end
 				if not squad.inactive and not foundPlane then
 					--TODO revoir ce pb, exemple avec campaign Hornet Over Carrier SC
@@ -1639,8 +1564,6 @@ function AddIconLayer(layersObjects, targetListRequired)
           table.insert(mission.drawings.layers[4].objects, object)
         end
     end
-
-        -- os.execute 'pause'
 
     return layersObjects
 
