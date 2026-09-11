@@ -568,6 +568,45 @@ end
 ---- function to get sidenumbers -----
 local sidenumbers = {}
 
+--découpe un modex en une liste ordonnée de segments : "alpha" (lettres), "digit" (chiffres), "other" (reste)
+--ex: "EF180" -> { {type="alpha", value="EF"}, {type="digit", value="180"} }
+--ex: "82FS"  -> { {type="digit", value="82"}, {type="alpha", value="FS"} }
+---@param str string|number
+---@return table[]
+local function SplitSegments(str)
+	str = tostring(str)
+	local segs = {}
+	local i, len = 1, #str
+	while i <= len do
+		local c = str:sub(i, i)
+		local j = i
+		if c:match("%d") then
+			while j <= len and str:sub(j, j):match("%d") do j = j + 1 end
+			segs[#segs + 1] = { type = "digit", value = str:sub(i, j - 1) }
+		elseif c:match("%a") then
+			while j <= len and str:sub(j, j):match("%a") do j = j + 1 end
+			segs[#segs + 1] = { type = "alpha", value = str:sub(i, j - 1) }
+		else
+			while j <= len and not str:sub(j, j):match("%w") do j = j + 1 end
+			segs[#segs + 1] = { type = "other", value = str:sub(i, j - 1) }
+		end
+		i = j
+	end
+	return segs
+end
+
+--vérifie que 2 listes de segments ont la même "forme" (même nombre de segments, mêmes types dans le même ordre)
+---@param a table[]
+---@param b table[]
+---@return boolean
+local function SegmentsMatch(a, b)
+	if #a ~= #b then return false end
+	for i = 1, #a do
+		if a[i].type ~= b[i].type then return false end
+	end
+	return true
+end
+
 function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAircraft
 
 	local squadron = flight.name
@@ -577,16 +616,12 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 	local client = flight.client
 	local type = flight.type
 
-	-- print("GetSidenumber() passe A type: "..tostring(flight.type).." name: "..tostring(flight.name) .." lower: "..tostring(lower).." upper: "..tostring(upper))
-
-	local s 																		--new sidenumber
+	local s																			--new sidenumber (chaine finale, ex: "EF182")
 	local counter = 0
 
 	if type == "F-4E-45MC" and mission_ini.persistentACFT_TailNb and mission_ini.persistentACFT_TailNb ~= "" then
 		if player then
 			if nUnit == 1 then
-				-- print("persistent passe A3 ok")
-				-- os.execute 'pause'
 				return mission_ini.persistentACFT_TailNb, mission_ini.persistentACFT_FileNameCache, true
 			end
 		--utilise ici le fichier Init/persistenceMP.lua s'il existe, pour facilité l'attribution des num tail/avion
@@ -600,19 +635,49 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 		end
 	end
 
-	if not lower or not upper then
+	if not lower or not upper then												--pas de plage définie, cas normal (aucun sidenumber configuré pour ce squadron)
 		s = math.random(1, 99)										--us a random number
 		s = string.format("%03d", s)
-		-- print("GetSidenumber() passe B "..tostring(s))
+		return tostring(s)
+	end
+
+	local lowerSegs = SplitSegments(lower)
+	local upperSegs = SplitSegments(upper)
+
+	if not SegmentsMatch(lowerSegs, upperSegs) then			--lower et upper sont fournis mais de formats incompatibles : véritable erreur de configuration
+		AddLog("GetSidenumber() incompatible sidenumber format for squadron "..tostring(squadron)..", lower: "..tostring(lower)..", upper: "..tostring(upper)..", falling back to random number")
+		s = math.random(1, 99)
+		s = string.format("%03d", s)
 		return tostring(s)
 	end
 
 	if sidenumbers[squadron] == nil then										--sidenumber squadron entry does not exist
 		sidenumbers[squadron] = {}												--create sidenumber squadron entry
 	end
-	local upperNum = tonumber(upper)
-	local lowerNum = tonumber(lower)
 
+	--prépare, pour chaque segment, ses bornes/options ; repère le 1er segment numérique qui varie ("principal")
+	local segCount = #lowerSegs
+	local mainIndex										---@type integer|nil
+	local mainLowerNum, mainUpperNum = 0, 0				--valeurs par defaut ; reecrites plus bas si un segment numerique variable existe, evite tout `nil` implicite
+	local segInfo = {}
+	for i = 1, segCount do
+		local lo, hi = lowerSegs[i].value, upperSegs[i].value
+		if lowerSegs[i].type == "digit" then
+			local loNum, hiNum = tonumber(lo) or 0, tonumber(hi) or 0		--fallback 0 impossible en pratique (segment déjà validé comme "digit"), juste pour couper l'optionalité aux yeux du LSP
+			---@cast loNum integer
+			---@cast hiNum integer
+			if hiNum < loNum then loNum, hiNum = hiNum, loNum end
+			local padWidth = math.max(string.len(lo), string.len(hi))				--supporte plus de 3 chiffres
+			segInfo[i] = { type = "digit", loNum = loNum, hiNum = hiNum, padWidth = padWidth }
+			if not mainIndex and loNum ~= hiNum then
+				mainIndex, mainLowerNum, mainUpperNum = i, loNum, hiNum
+			end
+		elseif lowerSegs[i].type == "alpha" and lo ~= hi then
+			segInfo[i] = { type = "alphaChoice", options = { lo, hi } }			--ex: EF ou EG, tiré au hasard
+		else																	--alpha identique entre lower/upper, ou segment "other" : reste fixe
+			segInfo[i] = { type = "fixed", value = lo }
+		end
+	end
 
 	--cherche si le joueur fait partie de cet escadron
 	local reservedDigit = 0
@@ -624,69 +689,74 @@ function GetSidenumber(flight, nUnit)				--not local, also used in DC_StaticAirc
 			end
 		end
 	end
-	-- modification M42.b : liveryModex
+
+	--assemble une chaine à partir d'un tirage pour le segment numérique principal (les autres segments sont tirés/fixés en interne)
+	local function BuildString(mainNum)
+		local parts = {}
+		for i = 1, segCount do
+			local info = segInfo[i]
+			if info.type == "digit" then
+				local n = (i == mainIndex) and mainNum or info.loNum
+				parts[i] = string.format("%0"..info.padWidth.."d", n)
+			elseif info.type == "alphaChoice" then
+				parts[i] = info.options[math.random(1, 2)]
+			else
+				parts[i] = info.value
+			end
+		end
+		return table.concat(parts)
+	end
+
 	local leaderCheck															--on s assure que le num 200 (par exemple) est donné au leader et pas un ailier
 	if player and nUnit == 1 then
-		s = lowerNum
+		s = BuildString(mainIndex and mainLowerNum or nil)
 	else
-		if lowerNum and upperNum then
+		if mainIndex then
 			repeat
 				leaderCheck = true
 				counter = counter + 1
-				s = math.random(lowerNum +reservedDigit, upperNum)		--find random sidenumber
+				local sNum = math.random(mainLowerNum + reservedDigit, mainUpperNum)		--find random sidenumber
+				s = BuildString(sNum)
 
-				if nUnit == 1 and tonumber(string.sub (s, -1)) ~= 0 and not sidenumbers[squadron][lower] then	--on s assure que le num 200 (par exemple) est donné au leader et pas un ailier
+				if nUnit == 1 and sNum % 10 ~= 0 and not sidenumbers[squadron][s] then	--on s assure que le num 200 (par exemple) est donné au leader et pas un ailier
 					leaderCheck = false
 				end
 
-			until (sidenumbers[squadron][s] == nil and leaderCheck)	or counter == 100	--repeat until a sidenumber is found that is not yet in squadron use or stop after 100 tries
+			until (sidenumbers[squadron][s] == nil and leaderCheck) or counter == 100	--repeat until a sidenumber is found that is not yet in squadron use or stop after 100 tries
+		else
+			--pas de segment numérique variable (seules les lettres varient, ou modex totalement fixe)
+			repeat
+				counter = counter + 1
+				s = BuildString(nil)
+			until sidenumbers[squadron][s] == nil or counter == 100
 		end
 
-		--le script n'a pas trouvé de serial non libre
+		--le script n'a pas trouvé de serial non libre : recherche linéaire du premier combo encore libre
 		if counter >= 100 then
-
-			local totSerial = {}
-			for n= lowerNum, tonumber(upper) do								--creation de la table de tous les serial
-				totSerial[n] = false
-			end
-
-			for n, squad in pairs(sidenumbers[squadron]) do						--suppresion de la table totale des seriales déjà utilisé
-				for totN, value in pairs(totSerial) do								--liste la table totale
-					if n == totN then												--marque les serial dejà utilisé
-						totSerial[totN] = true
-					end
-				end
-			end
-
-			for totN, value in pairs(totSerial) do									--prend le premier serial libre
-				if totSerial[totN] == false then
-					s = totN
+			local loN = mainIndex and mainLowerNum or 0
+			local hiN = mainIndex and mainUpperNum or 0
+			for n = loN, hiN do
+				local candidate = BuildString(n)
+				if sidenumbers[squadron][candidate] == nil then
+					s = candidate
 					break
 				end
 			end
 		end
-
 	end
 
 	if s and s ~= nil then
 		sidenumbers[squadron][s] = true													--mark sidenumber in use for squadron
 	end
-	-- particularité du Harrier : donner 810 pour afficher 18
-	local s_str = tostring(s)
-	if type == "AV8BNA" then
-		local Digit_1 = string.sub(s_str, -1, -1)
-		local Digit_2 = string.sub(s_str, -2, -2)
-		s = tonumber(Digit_1..Digit_2.."0")
-		s = string.format("%03d", s)
-	else
-		local lNew = string.len(s_str)													--lenght of new sidenumber
-		local lOld = string.len(lower)												--lenght of given lower end of sidenumbers
-		for n = lNew, lOld - 1 do													--for each character that new sidenumber is smaller than given lower ranger
-			s = "0" .. s_str															--add a zero in front
-		end
-	end
 
-	-- print("GetSidenumber() passe Z "..tostring(s))
+	-- particularité du Harrier : donner 810 pour afficher 18 (ne s'applique qu'à la partie numérique)
+	if type == "AV8BNA" then
+		local numOnly = s:match("%d+") or s
+		local Digit_1 = string.sub(numOnly, -1, -1)
+		local Digit_2 = string.sub(numOnly, -2, -2)
+		local n2 = tonumber(Digit_1..Digit_2.."0")
+		s = string.format("%03d", n2)
+	end
 
 	return tostring(s)															--return sidenumber as string
 end
