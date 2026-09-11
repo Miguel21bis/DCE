@@ -77,7 +77,7 @@ end
 --tente de charger un fichier .stm depuis Templates/wargame_<side>/, sans logguer d'erreur
 --(les échecs "attendus" - ex: tentative sur le mauvais côté - sont gérés par l'appelant)
 local function tryLoadTemplateFile(side, fileName)
-	local path = "Templates/wargame_"..side.."/"..tostring(fileName)
+	local path = "Init/Wargame/Templates_"..side.."/"..tostring(fileName)
 	local ok, err = pcall(dofile, path)
 
 	if not ok or not staticTemplate then

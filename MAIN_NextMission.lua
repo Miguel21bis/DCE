@@ -76,7 +76,11 @@ if mission.version < 19 then --19ok 18bad
 	
 	os.execute 'pause'
 
-	os.exit()
+	if Debug.debug then
+	else
+		os.exit()
+	end
+	
 end
 
 --parse la table original trigrules pour reperer les a_do_script_file 
