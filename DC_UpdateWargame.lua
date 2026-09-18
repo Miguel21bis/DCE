@@ -3,7 +3,7 @@
 --(pour que oobGroupIndex retrouve les groupes fraichement créés/déplacés dès CE cycle).
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateWargame.lua"] = "1.1.0"
+versionDCE["DC_UpdateWargame.lua"] = "1.1.1"
 -------------------------------------------------------------------------------------------------------
 -- ScriptsMod ne décide jamais rien pour une formation wargame (position, force, vie/mort...) :
 -- ce fichier ne fait QUE réconcilier oob_ground avec ce que targetlist contient déjà.
@@ -223,6 +223,9 @@ local function rebuildUnitsFromBucket(group, elements, unitIndex)
 			newUnit.name = element.name
 			newUnit.x = element.x
 			newUnit.y = element.y
+			if element.heading then							--sinon on garde le heading du template (repli)
+				newUnit.heading = element.heading
+			end
 
 			if UnitByName[newUnit.name] then
 				newUnit.unitId = UnitByName[newUnit.name]			--meme nom => meme unite d'un cycle a l'autre, on garde son id
@@ -335,6 +338,14 @@ for sideName, targets in pairs(targetlist) do
 						if group.route and group.route.points and group.route.points[1] then
 							group.route.points[1].x = group.x
 							group.route.points[1].y = group.y
+						end
+
+						--heading du groupe = heading du 1er element du paquet (meme convention que x/y ci-dessus).
+						--Uniquement si le groupe porte deja un heading de groupe (cas des groupes "static", qui
+						--n'ont qu'une unite) : les groupes "vehicle" n'en ont pas dans le template, on ne
+						--rajoute pas artificiellement un champ que DCS n'attend pas sur ces groupes-la.
+						if group.heading and firstElement.heading then
+							group.heading = firstElement.heading
 						end
 
 						rebuildUnitsFromBucket(group, bucketElements, templateData.unitIndex)
