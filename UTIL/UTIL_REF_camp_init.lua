@@ -29,6 +29,10 @@ REF_camp = {
 			"Frontline1.png",
 		},--pictureBrief
 	},
+	wargame_config = {
+		country_blue = "Blue", -- @ui text group="Sides" label="Blue side name" help=Display name of the blue side (e.g. "US"). Used by the wargame UI for labels and colors. [default: "Blue"]
+		country_red  = "Red",  -- @ui text group="Sides" label="Red side name" help=Display name of the red side (e.g. "Iran"). Used by the wargame UI for labels and colors. [default: "Red"]
+	}
 
 	-- ANY MODIFICATIONS IN THIS FILE NEED TO RESTART ALL THE CAMPAIGN USING FIRSTMISSION.BAT FILE
 }

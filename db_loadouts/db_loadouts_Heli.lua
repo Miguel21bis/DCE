@@ -3,8 +3,9 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Heli.lua"] = "1.1.6"
+versionDCE["db_loadouts/db_loadouts_Heli.lua"] = "1.1.7"
 
+-- 1.1.7 - AH-64 Modern Strike (Radar Hellfire)
 -- 1.1.6 - OH58D and UH-1H strike range to 150000
 -- 1.1.5 - No Mods
 -- 1.1.4 - UH-1H Loadout strike NAM Rockets HE 
@@ -296,6 +297,54 @@ db_loadouts = {
 			},
 		},
 		Strike = {
+			["Modern Strike - AGM-114K*8 - AGM-114L*8"] = {
+				minscore = 0.3,
+				support = {
+					Escort = false,
+					SEAD = false,
+				},
+				attributes =  { "soft", "Parked Aircraft", "SAM" },
+				code_loadout =  { "TF", "Crisis", "WOB" },
+				expend = "Auto",
+				night = true,
+				adverseWeather = true,
+				range = 100000,
+				firepower = 1,
+				vCruise = 70,
+				vAttack = 75,
+				hCruise = 50,
+				hAttack = 50,
+				standoff = 7000,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+				[1] = {
+					["CLSID"] = "{AN_APG_78}",
+					["num"] = 6,
+				},
+				[2] = {
+					["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}",
+					["num"] = 4,
+				},
+				[3] = {
+					["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{M299_4xAGM_114L}",
+					["num"] = 3,
+				},
+				[5] = {
+					["CLSID"] = "{M299_4xAGM_114L}",
+					["num"] = 2,
+				},
+					},
+					fuel = 1438,
+					flare = 60,
+					chaff = 30,
+					gun = 100,
+				},
+			},
 			Strike = {
 				minscore = 0.3,
 				support = {

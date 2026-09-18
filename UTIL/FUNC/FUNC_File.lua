@@ -509,6 +509,8 @@ function LoadFileAndUpdate(from)
 	Include("DC_NavalEnvironment.lua")
 	Include("DC_UpdateSAR.lua")
 
+	Include("DC_UpdateWargame.lua")
+
 	-- print('campDate B '..camp.date.year)
 
 	CommonRanges = DCE_FindCommonRadioRanges()	--get common radio range for all planes in campaign
@@ -1044,8 +1046,21 @@ function ShowBugsWindows()
 		--cette maniere de chercer la presence d un fichier evite un plantage
 	local fileName = "Debug/BugList.lua"
 	local testPath = io.open(fileName, "r")
-	if testPath ~= nil then	
+	if testPath ~= nil then
 		io.close(testPath)
-		os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')
+
+		if DCEM_MachineMode then
+			-- Piloté par DCE_Manager (fenêtre cachée) : pas de notepad, on envoie le contenu
+			-- de BugList via des marqueurs lus par ScriptsModRunner_Form (onglet "Debug log")
+			print("##DCEM_BUGLIST_START##")
+			if BugList and type(BugList) == "table" then
+				for i = 1, #BugList do
+					print("##DCEM_BUGLISTITEM##" .. tostring(BugList[i]))
+				end
+			end
+			print("##DCEM_BUGLIST_END##")
+		else
+			os.execute('start "BugList" "notepad.exe" "Debug/BugList.lua"')
+		end
 	end
 end

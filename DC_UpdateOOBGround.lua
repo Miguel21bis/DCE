@@ -499,7 +499,8 @@ for k1, v1 in pairs(mission.coalition) do															--side table(red/blue)
 					table.remove(v2.vehicle.group,nGroup)
 				end
 			end
-		elseif v2.static then																			--if country has vehicles
+		end
+		if v2.static then																			--if country has vehicles
 			for nGroup = #v2.static.group, 1, -1 do
 				local group = v2.static.group[nGroup]
 				
