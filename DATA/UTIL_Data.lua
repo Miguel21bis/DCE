@@ -1006,6 +1006,7 @@ Data_divers = {
 	},
 	["B-52H"] = 	{
 		instrumentUnits = "imperial",
+		folderModName = "b-52h",
 		EPLRS_Capacity = false,
 		datalinks = {
 			type = "Link16",

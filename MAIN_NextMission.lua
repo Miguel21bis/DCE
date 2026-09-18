@@ -70,9 +70,17 @@ local oldMapResource = DeepCopy(mapResource)
 zipFile:unzClose()
 
 if mission.version < 19 then --19ok 18bad
-	print("(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update.")
-	print("(MainNM) ATTENTION ") os.execute 'pause'
-	os.exit()
+	local msg = "(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update."
+
+	Attention(msg)
+	
+	os.execute 'pause'
+
+	if Debug.debug then
+	else
+		os.exit()
+	end
+	
 end
 
 --parse la table original trigrules pour reperer les a_do_script_file 
@@ -636,6 +644,8 @@ if MissionInstance >= 2 then
 	Include("DC_Weather.lua")
 	Include("DC_NavalEnvironment.lua")
 	Include("DC_UpdateSAR.lua")
+
+	Include("DC_UpdateWargame.lua")
 
 	Include("ATO_ThreatEvaluation.lua")
 	Include("DC_UpdateTargetlist.lua")

@@ -82,7 +82,7 @@ end
 local currentScript = debug.getinfo(1).source:sub(2)
 local baseDir = currentScript:match("(.*/)") or "./"
 
-local function mergeTablesDeep(target, source)
+function mergeTablesDeep(target, source)
     for k, v in pairs(source) do
         if type(v) == "table" then
             target[k] = target[k] or {}

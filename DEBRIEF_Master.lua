@@ -1,24 +1,32 @@
 --To evaluate the DCS debrief.log, update the campaign status files/OOBs, generate a Debriefing and initiate generation of next campaign mission
 --Initiated by MissionEnd.lua running from within DCS
+
+io.stdout:setvbuf("no")
+
+-- Vrai uniquement quand ce script est piloté par DCE_Manager (variable posée par
+-- ProcessConsoleBridge.Start côté C#). Sert à activer la ligne technique
+-- ##DCEM_DEBRIEFTEXT_PATH## en fin de debrief, invisible/inutile en DOS direct.
+DCEM_MachineMode = (os.getenv("DCEM_MACHINE_MODE") == "1")
+
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
 versionDCE["DEBRIEF_Master.lua"] = "1.17.137"
 -------------------------------------------------------------------------------------------------------
 
+FromFile = "DEBRIEF_Master.lua"																	-- file name for debug
 
 BugList = BugList or {}
 Playable_m = {}
 AcceptedMission = false
 MissionInstance = 0
 TimeAlreadyAdded = false
+MissionAccepted = nil
 
 Briefing_status = ""																		--text string to be added to next briefing (status reports are amended for each mission generation attempt until mission is succesfully generated)
 Briefing_oob_text_red = ""																	--text string to be added to next briefing (red repair and reinforcements)
 Briefing_oob_text_blue = ""																	--text string to be added to next briefing (blue repair and reinforcements)
 Briefing_text = ""
 PlayerSide = nil
-MissionAccepted = nil
-
 
 -- ============================================================================
 -- DEBUG DE LA BOUCLE DE GENERATION
@@ -90,68 +98,34 @@ function GenCount(t)
 	return n
 end
 
---resume compact de la raison dominante trackee pour l'escadron du joueur (solo uniquement)
+--liste compacte des criteres de jouabilite reellement atteints
 function GenCriteriaOK()
-	if not (playerInfo and playerInfo.squadBAT) then
-		return "(pas de squadBAT connu)"
+	if type(Playability_criterium) ~= "table" then
+		return "(table absente)"
 	end
-
-	local status = SquadGenerationStatus and SquadGenerationStatus[playerInfo.squadBAT]
-
-	if not status or not status.bestReject then
-		return "aucune raison trackee"
+	local ok = {}
+	for _, crit in ipairs(Playability_criterium) do
+		if crit.value then
+			ok[#ok + 1] = crit.key
+		end
 	end
-
-	local reasonKey =
-		status.bestReject.dominantReason
-		or (status.bestReject.finalReject and status.bestReject.finalReject.reason)
-
-	return tostring(reasonKey or "inconnue")
+	if #ok == 0 then
+		return "aucun"
+	end
+	return table.concat(ok, ", ")
 end
 
 --a appeler JUSTE AVANT de (re)jouer MAIN_NextMission.lua
 function GenPassStart()
 	GenTrace.passe = GenTrace.passe + 1
 	GenTrace.chrono = os.clock()
-	GenTrace.empreinte = tostring(SquadGenerationStatus)
+	GenTrace.empreinte = tostring(Playability_criterium)
 
 	GenPrint("---------------------------------------------------------------")
 	GenPrint("PASSE "..GenTrace.passe.."   (MissionInstance = "..tostring(MissionInstance)..")")
 	GenPrint("  avant : PlayerFlight = "..tostring(PlayerFlight)
 		.." | TaskRefused = "..tostring(TaskRefused)
 		.." | camp.time = "..tostring(camp and camp.time))
-end
-
---a appeler JUSTE APRES avoir (re)joue MAIN_NextMission.lua
-function GenPassEnd()
-	local duree = os.clock() - GenTrace.chrono
-	local empreinte = tostring(SquadGenerationStatus)
-
-	--SquadGenerationStatus est recreee a chaque execution de ATO_Generator_C_Core.lua.
-	--Si l'adresse de la table n'a pas bouge, c'est que le generateur n'a pas tourne du tout.
-	if GenTrace.passe > 1 and empreinte == GenTrace.empreinte then
-		GenPrint("  !! ALERTE : le generateur n'a PAS ete rejoue a cette passe.")
-		GenPrint("  !! SquadGenerationStatus est la meme table qu'au passage precedent ("..empreinte..").")
-		GenPrint("  !! Cause habituelle : IncludeOnce() au lieu de Include() sur un fichier rejouable.")
-	end
-
-	local packages, vols, avions = GenCountATO()
-
-	GenPrint(string.format("  apres : ATO = %d package(s), %d vol(s), %d avion(s)   [%.2f s]",
-		packages, vols, avions, duree))
-	GenPrint("  apres : PlayerFlight = "..tostring(PlayerFlight)
-		.." | EndCampaign = "..tostring(EndCampaign)
-		.." | StopBug = "..tostring(StopBug))
-	GenPrint("  suivi : PlayerAssignFailure = "..GenCount(PlayerAssignFailure)
-		.." | DraftProgress = "..GenCount(DraftProgress)
-		.." | escortRejectReasons = "..GenCount(escortRejectReasons))
-	GenPrint("  raison dominante joueur : "..GenCriteriaOK())
-
-	--Controle croise : GeneratorPass est incremente dans ATO_Generator_A_Debug.lua.
-	--S'il reste bloque alors que le numero de passe augmente, ce sont les fichiers
-	--ATO_Generator_* qui ne sont pas rejoues (IncludeOnce quelque part en amont).
-	GenPrint("  moteur : GeneratorPass = "..tostring(GeneratorPass)
-		.." (doit valoir "..GenTrace.passe..")")
 end
 
 --a appeler JUSTE APRES avoir (re)joue MAIN_NextMission.lua
@@ -187,27 +161,41 @@ function GenPassEnd()
 end
 
 local function acceptMission()
-    local m
-    repeat
-        print("\n\n Night or Day ? : " .. Daytime)
-        print("\n  " .. camp.date.day .. "/" .. camp.date.month .. "/" .. camp.date.year)
+	local m
+	repeat
+		print("Actual time(DebriefMaster A): " .. FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year .. ".\n")
+
+		print("\n\n Night or Day ? : "..Daytime)													-- info day or not
+		if DCEM_MachineMode then
+			print("##DCEM_DAYNIGHT##"..tostring(Daytime))
+		end
+
+		if DCEM_MachineMode then
+			print("##DCEM_TIME##"..FormatTime(camp.time, "hh:mm").."|"..camp.date.day.."."..camp.date.month.."."..camp.date.year)
+		end
+
+		if DCEM_MachineMode then
+            print("##DCEM_PROMPT##acceptmission")
+        end
         print("\n\nAccept Mission ?:")
         print("a - Accept mission")
         print("s - Skip mission")
 
-        m = string.lower(io.read() or "")
+		m = string.lower(tostring(io.stdin:read() or ""))
 
-        if m == "d" then
-            os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight.txt"')
-        elseif m ~= "a" and m ~= "s" then
-            print("\nInvalid entry.\n")
-        end
-    -- La boucle continue tant que l'utilisateur n'a pas saisi "a" ou "s"
-    until m == "a" or m == "s"
+		if m == "d" then
+			--CORRECTIF : ouvrir le fichier debug ne doit pas accepter la mission a la place
+			--du joueur. On reboucle, comme dans BAT_SkipMission/BAT_FirstMission, au lieu
+			--de "return true" immediatement.
+			os.execute('start "Debug" "notepad++.exe" "Debug/debugFlight' .. '.txt"')
+		elseif m ~= "a" and m ~= "s" then
+			print("\nInvalid entry.\n")
+		end
+	until m == "a" or m == "s"
 
-    TaskRefused = (m == "s")
-    MissionAccepted = (m == "a")
-    return MissionAccepted
+	TaskRefused = (m == "s")
+	MissionAccepted = (m == "a")
+	return MissionAccepted
 end
 
 -- Convertit les tasks longues en codes courts lisibles console
@@ -289,8 +277,15 @@ if testPath == nil then
 	- or these files have been deleted by a new mission generation.\
 	"
 	print(txt)
-	print("DCE debug") os.execute 'pause'
-	os.exit()
+	print("DCE debug")
+	if not DCEM_MachineMode then
+		os.execute 'pause'
+	end
+	if DCEM_MachineMode then
+		os.exit(1)
+	else
+		os.exit()
+	end
 end
 
 local logExport = loadfile("MissionEventsLog.lua")()											--mission events log
@@ -401,9 +396,9 @@ end
 --ne pas supprimer, utile pour le fichier statsevaluation
 dofile("Active/db_airbases.lua")
 dofile("Active/targetlist.lua")
-
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Data.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_DataMap.lua")
+
 IncludeOnce("UTIL_Data.lua")
 IncludeOnce("UTIL_DataMap.lua")
 
@@ -414,17 +409,23 @@ IncludeOnce("UTIL_DataMap.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_StatsEvaluation.lua")
 IncludeOnce("DEBRIEF_StatsEvaluation.lua")
 dofile("Active/oob_scen.lua")
-
 --il faut laisser cette ligne, sinon le double appel crée un pb de alive_last
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
-Include ("DC_UpdateTargetlist.lua")
+IncludeOnce("DC_UpdateTargetlist.lua")
 IncludeOnce("DEBRIEF_Text.lua")
 
-local debriefFile = io.open("Debriefing/Debriefing " .. camp.mission .. ".txt", "w") or error("Failed to open debug file")
+local debriefFilePath = "Debriefing/Debriefing " .. camp.mission .. ".txt"
+
+local debriefFile = io.open(debriefFilePath, "w") or error("Failed to open debug file")
 debriefFile:write(Debriefing)																	--write Debriefing text into file (variable Debriefing comes from DEBRIEF_Text.lua)
 debriefFile:close()
-os.execute('start "Debriefing" "notepad.exe" "Debriefing/Debriefing ' .. camp.mission .. '.txt"')	--open the Debriefing file with notepad
+
+if DCEM_MachineMode then
+	print("##DCEM_DEBRIEFTEXT_PATH##"..debriefFilePath)
+else
+	os.execute('start "Debriefing" "notepad.exe" "' .. debriefFilePath .. '"')	--open the Debriefing file with notepad
+end
 
 
 ResetUnitClient()
@@ -467,8 +468,6 @@ if Debug.debug then
 			end
 		end
 	end
-	-- print("DebriefMaster "..tostring(foundN).."  foundN in db_airbases")
-	-- print("DebriefMaster "..tostring(foundX).."  foundX in db_airbases")
 end
 
 
@@ -480,7 +479,6 @@ if VersionPackageICM then
 	print("============================================================================================================================")
 	print()
 	print(" Script : "..tostring(showVersion))
-	-- print(" Lua    : "..tostring(_VERSION))
 	print()
 	print(" Player Aircraft : "..tostring(playerInfo.planeBAT))
 	print(" Squadron         : "..tostring(playerInfo.squadBAT))
@@ -489,6 +487,11 @@ if VersionPackageICM then
 	print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
 	print("============================================================================================================================")
 	print()
+
+	if DCEM_MachineMode then
+		print("##DCEM_HEADER##"..tostring(camp.title).."|"..tostring(camp.version).."|"..tostring(playerInfo.planeBAT).."|"..tostring(playerInfo.squadBAT).."|"..tostring(playerInfo.countryBAT).."|"..(Debug.debug and "DEBUG ON" or ""))
+	end
+
 else
 	print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
 end
@@ -519,7 +522,11 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
 	end
 end
 
+if DCEM_MachineMode then
+	print("##DCEM_PROMPT##debriefaccept")
+end
 print("\nAccept mission results? y(es)/n(o):\n")						--ask for user confirmation
+
 
 local input
 
@@ -537,11 +544,6 @@ print("\n\n")
 
 if input == "y" or input == "yes" then
 
-
-	-- Briefing_oob_text_red = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
-	-- Briefing_oob_text_blue = FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
-
-	
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_AcceptMission.lua")
 	IncludeOnce("MAIN_AcceptMission.lua")
 
@@ -562,7 +564,10 @@ end
 	-- Ecran N 0 Choix next campaign mission	
 --ask for input to save results and continue with campaign or disregard the last mission
 
-print("\nGenerate next campaign mission? y(es)/n(o):\n")						--ask for user confirmation
+if DCEM_MachineMode then
+	print("##DCEM_PROMPT##yesno::Generate next mission?")
+end
+print("\nGenerate next campaign mission? y(es)/n(o):\n")				--ask for user confirmation
 
 -- input
 local choix1
@@ -617,18 +622,19 @@ if input == "y" or input == "yes" then
 			print("--------------------------------------------------------------")
 			print()
 			print(" [S] Singleplayer")
-			print()
-			print(" [C] Change aircraft type")
-			print()
+			-- print()
+			-- print(" [C] Change aircraft type")
+			-- print()
 			print(" [T] Multiplayer by Target")
 			print(" [N] Multiplayer by NATO package")
-			print()
-			print(" [O] Tools / CampaignMaker")
+			-- print()
+			-- print(" [O] Tools / CampaignMaker")
 			print()
 
 			choix1 = io.stdin:read()
 			choix1 = string.lower(choix1)
 
+			--[[ DEPRECATED (remplacé par les checkboxes Debug/AfficheFlight dans DCE_Manager, lues depuis conf_mod.lua)
 			-- Détection du mode debug : activation avec "+", désactivation avec "-"
 			if string.find(choix1, "%+") then
 				Debug.debug = true
@@ -641,6 +647,7 @@ if input == "y" or input == "yes" then
 				print("Debug mode deactivated.")
 				choix1 = string.gsub(choix1, "%-", "")   -- Retirer tous les tirets
 			end
+			--]]
 
 			--===================================================================================
 			-- "T Multiplayer by choice of (T)arget \n"..
@@ -696,7 +703,13 @@ if input == "y" or input == "yes" then
 				-- Fonction pour afficher les cibles standard (Strike, Runway Attack)
 				local function showStandardTargets(targetlist, targetSide)
 					local eniSide = DCS_ENI_Side[targetSide]
-					print("\n--- Sélectionnez une cible situé dans le camp "..eniSide.." ---")
+
+					--CORRECTIF : texte joueur en anglais, aligne sur BAT_SkipMission.lua/BAT_FirstMission.lua
+					--(convention : commentaires en francais, texte joueur en anglais).
+					print("\n--- Select a target located in the camp "..eniSide.." ---")
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##targetlist")
+					end
 
 					-- Trier la table par priorité
 					table.sort(targetlist[targetSide], function(a, b)
@@ -714,6 +727,10 @@ if input == "y" or input == "yes" then
 							Ckey = key
 							io.write(Ckey.." "..eniSide.." "..tostring(target.titleName).."  "..tostring(target.alive).."%  X"..tostring(target.priority).."\n")
 							tabIndex[Ckey] = target
+
+							if DCEM_MachineMode then
+								print("##DCEM_TARGET##"..Ckey.."|"..eniSide.."|"..tostring(target.titleName).."|"..tostring(target.alive).."|"..tostring(target.priority))
+							end
 						end
 					end
 
@@ -724,6 +741,9 @@ if input == "y" or input == "yes" then
 				local function showCSARTargets(targetlist, targetSide)
 					local eniSide = DCS_ENI_Side[targetSide]
 					print("\n--- Select the pilot to be rescued, who has fallen into the "..eniSide.." side  ---")
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##targetlist")
+					end
 					local tabIndex = {}
 					-- local Ckey = 0
 
@@ -738,6 +758,10 @@ if input == "y" or input == "yes" then
 							local mgrsInfo = target.MGRS_Chute_1km or target.MGRS_Chute or 0
 							io.write(key.." "..tostring(target.titleName).." "..tostring(mgrsInfo).."\n")
 							tabIndex[key] = target
+
+							if DCEM_MachineMode then
+								print("##DCEM_CSARTARGET##"..key.."|"..tostring(target.titleName).."|"..tostring(mgrsInfo))
+							end
 						end
 					end
 
@@ -793,6 +817,9 @@ if input == "y" or input == "yes" then
 				--===================================================================================
 				repeat
 					print("Select number of Flight :\n")
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##flightcount")
+					end
 					input = tonumber(io.stdin:read())
 					if (input == nil or input == "") then input = 999 end
 					if  (input >= 1 and  input <= 10) then
@@ -823,6 +850,9 @@ if input == "y" or input == "yes" then
 					-- print("example for (4 "..ExPlaneA..": Escort): 4ae or 4AE")
 
 					print("Select your flight:")
+					if DCEM_MachineMode then
+						print("##DCEM_PROMPT##flightcompose")
+					end
 					print("Format: [1-8 aircraft][ID][Task code]")
 					print("Example: 4de = 4 aircraft, ID d, Escort mission")
 					print()
@@ -849,11 +879,6 @@ if input == "y" or input == "yes" then
 							if Playable_m[unit.type] and unit.inactive ~= true then
 
 								tabTaskAvailable[nSide] = tabTaskAvailable[nSide] or {}
-								-- tabTaskAvailable[nSide][unit.name] = {
-								-- 	type = unit.type,
-								-- 	base = unit.base,
-								-- 	tasks = {},
-								-- }
 
 								table.insert(tabTaskAvailable[nSide], {
 									name = unit.name,
@@ -895,30 +920,9 @@ if input == "y" or input == "yes" then
 							playable_type[indexStringType]["base"] = unit.base
 							playable_type[indexStringType]["unitName"] = unit.name
 
-							-- io.write(" (1 to 8): ("..indexStringType.."): "..unit.type.." || "..AliasBaseName(unit.base).." || ")
-
-							-- for taskN, taskStr in PairsByKeys(unit.tasks) do
-
-							-- 	if TabTask[taskStr] then
-							-- 		io.write( " ("..TabTask[taskStr]..")"..taskStr.."")
-							-- 		-- local FstLetTask = string.lower(string.sub (taskStr, 1, 1))
-							-- 		tabIndex[tostring(1)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(2)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(3)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(4)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(5)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(6)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(7)..indexStringType..TabTask[taskStr]] = true
-							-- 		tabIndex[tostring(8)..indexStringType..TabTask[taskStr]] = true
-
-							-- 	elseif not TabTask[taskStr] and not string.lower(taskStr) == "spotter" then
-							-- 		table.insert(tabBug,taskStr )
-							-- 	end
-							-- end
-							-- io.write("\n")
-
 							local shortTasks = {}
 							local displayTasks = {}
+							local machineTasks = {}
 
 							for _, taskStr in PairsByKeys(unit.tasks) do
 
@@ -931,6 +935,11 @@ if input == "y" or input == "yes" then
 										.."("
 										..string.lower(TabTask[taskStr])
 										..")"
+
+									machineTasks[#machineTasks + 1] =
+										taskToShort(taskStr)
+										..":"
+										..string.lower(TabTask[taskStr])
 								end
 							end
 
@@ -947,7 +956,13 @@ if input == "y" or input == "yes" then
 									shortTaskText
 								)
 
-							print(line)
+							if DCEM_MachineMode then
+								-- Ligne technique pour DCE_Manager (capture automatique) : ne pas supprimer.
+								-- Format : ##DCEM_AC##side|id|type|base|squadron|CODE1:x,CODE2:y,...
+								print("##DCEM_AC##"..nSide.."|"..indexStringType.."|"..unit.type.."|"..unit.base.."|"..unit.name.."|"..table.concat(machineTasks, ","))
+							else
+								print(line)
+							end
 
 							for taskN, taskStr in PairsByKeys(unit.tasks) do
 
@@ -1067,8 +1082,11 @@ if input == "y" or input == "yes" then
 		repeat
 			print("Generating Next Mission.\n")
 
-			MissionInstance = MissionInstance + 1													--count the number of times the mission is generated
-
+			MissionInstance = MissionInstance + 1															--count the number of times the mission is generated
+			if DCEM_MachineMode then
+				print("##DCEM_CYCLE##"..tostring(MissionInstance))
+			end
+			
 			--OPTION (une ligne, commentable) : chaque passe doit etre jugee sur elle-meme.
 			--Sans ce reset, une passe qui ne genere aucun vol joueur herite du PlayerFlight
 			--de la passe precedente et part quand meme dans acceptMission().
@@ -1121,16 +1139,22 @@ if input == "y" or input == "yes" then
 				break
 			elseif MissionInstance == 50 then														--no player flight could be assigned in 50 tries, stop it
 				print("Mission Generation Error. No eligible player flight in 50 attempts. Start a new campaign.\n\n")
+				if DCEM_MachineMode then
+					print("##DCEM_OUTCOME##FAILED|Mission Generation Error. No eligible player flight in 50 attempts. Start a new campaign.")
+				end
 				break
-			else																					--no player flight could be assigned, advance time and try again
-				
+			else																				--no player flight could be assigned, advance time and try again
+
+				--CORRECTIF : ce bloc reimplementait a la main (et de maniere obsolete, via
+				--Playability_criterium) l'affichage deja fait par PrintPlayerRejectionSP()/
+				--PrintPlayerRejectionMP() dans ATO_Generator_A_Debug.lua, utilise par
+				--BAT_FirstMission.lua et BAT_SkipMission.lua. PrintPlayerRejectionMP() appelle
+				--deja CheckAssignments() en interne, inutile de le refaire ici.
 				if SinglePlayer then
 					PrintPlayerRejectionSP()
 				else
 					PrintPlayerRejectionMP()
 				end
-
-			
 
 				GenPrint("  echec de la passe "..GenTrace.passe..", nouvelle tentative...")
 
@@ -1146,7 +1170,6 @@ if input == "y" or input == "yes" then
 				print("============================================================================================================================")
 				print()
 				print(" Script : "..tostring(showVersion))
-				-- print(" Lua    : "..tostring(_VERSION))
 				print()
 				print(" Player Aircraft : "..tostring(playerInfo.planeBAT))
 				print(" Squadron         : "..tostring(playerInfo.squadBAT))
@@ -1155,6 +1178,10 @@ if input == "y" or input == "yes" then
 				print(" Debug Mode       : "..(Debug.debug and "ENABLED" or "DISABLED"))
 				print("============================================================================================================================")
 				print()
+
+				if DCEM_MachineMode then
+					print("##DCEM_HEADER##"..tostring(camp.title).."|"..tostring(camp.version).."|"..tostring(playerInfo.planeBAT).."|"..tostring(playerInfo.squadBAT).."|"..tostring(playerInfo.countryBAT).."|"..(Debug.debug and "DEBUG ON" or ""))
+				end
 
 			else
 				print("= = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =")
@@ -1167,7 +1194,9 @@ if input == "y" or input == "yes" then
 
 	until 1 == 2
 
-	os.execute 'pause'
+	if not DCEM_MachineMode then
+		os.execute 'pause'
+	end
 
 
 else
@@ -1190,4 +1219,8 @@ if not Debug.debug then
 	os.remove("Mission_LL_Positions.lua")			--DISABLE FOR DEBUG
 end
 
-os.exit()
+if DCEM_MachineMode then
+	os.exit(0)
+else
+	os.exit()
+end

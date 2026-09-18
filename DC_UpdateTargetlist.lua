@@ -714,7 +714,49 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 			
 			-- local c_st = os.clock()
 
-			if target.class == nil or target.class == "vehicle" or  target.class == "static"  then														--For scenery object targets
+			if target.wargameFormation then
+				--formation gérée par le wargame (DCE_Manager): DC_UpdateWargame.lua (exécuté avant
+				--ce fichier) a déjà réconcilié oob_ground. ScriptsMod ne fait ici QUE le minimum:
+				--threat calc + alive (updateAlive est appelé plus loin, hors de ce bloc, pour tous
+				--les targets ayant des elements). On ne touche ni à target.x/y, ni à element.class.
+
+				if target.alive == nil then target.alive = 100 end
+				-- if target.alive_last == nil then target.alive_last = nil end
+				if target.alive_last == nil then target.alive_last = 0 end
+				target.targetDead_last = nil
+
+				local group = oobGroupIndex[target.name]
+				if group then
+					target.foundOobGround = true
+					target.groupId = group.groupId
+				elseif not target.foundOobGround then
+					checkBug3(" Error_wargame_01: wargame target |"..tostring(target.name).."| (formationId "..tostring(target.wargameFormationId)..") introuvable dans oob_ground, DC_UpdateWargame.lua a peut-être échoué pour cette formation")
+				end
+
+				if GroundthreatsAll and target.elements then
+					local threats = GroundthreatsAll[DCS_ENI_Side[sideName]]
+					if threats then
+						for _, element in pairs(target.elements) do
+							if not element.dead and element.x and element.y then
+								for _, threat in pairs(threats) do
+									local dx = element.x - threat.x
+									local dy = element.y - threat.y
+									local dist = dx*dx + dy*dy
+
+									if dist <= threat.range * threat.range then
+										if threat.range > maxRange then
+											maxRange = threat.range
+										end
+										element.range = threat.range
+									end
+								end
+							end
+						end
+					end
+				end
+				target.range = maxRange
+
+			elseif target.class == nil or target.class == "vehicle" or  target.class == "static"  then														--For scenery object targets
 				
 				target.alive = 100															--Introduce percentage of alive target elements
 				target.x = 0																--Introduce x coordinate for target
