@@ -297,13 +297,13 @@ db_loadouts = {
 			},
 		},
 		Strike = {
-			["Modern Strike"] = {
+			["Modern Strike - AGM-114K*8 - AGM-114L*8"] = {
 				minscore = 0.3,
 				support = {
 					Escort = false,
 					SEAD = false,
 				},
-				attributes =  { },
+				attributes =  { "soft", "Parked Aircraft", "SAM" },
 				code_loadout =  { "TF", "Crisis", "WOB" },
 				expend = "Auto",
 				night = true,
@@ -318,24 +318,26 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
-						[1] = {
-							CLSID = "{M299_4xAGM_114L}",
-						},
-						[2] = {
-							CLSID = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}",
-						},
-						[3] = {
-							CLSID = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}",
-						},
-						[4] = {
-							CLSID = "{M299_4xAGM_114L}",
-						},
-						[5] = {
-							CLSID = "{IAFS_ComboPak_100}",
-						},
-						[6] = {
-							CLSID = "{AN_APG_78}",
-						},
+				[1] = {
+					["CLSID"] = "{AN_APG_78}",
+					["num"] = 6,
+				},
+				[2] = {
+					["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}",
+					["num"] = 4,
+				},
+				[3] = {
+					["CLSID"] = "{88D18A5E-99C8-4B04-B40B-1C02F2018B6E}",
+					["num"] = 1,
+				},
+				[4] = {
+					["CLSID"] = "{M299_4xAGM_114L}",
+					["num"] = 3,
+				},
+				[5] = {
+					["CLSID"] = "{M299_4xAGM_114L}",
+					["num"] = 2,
+				},
 					},
 					fuel = 1438,
 					flare = 60,
