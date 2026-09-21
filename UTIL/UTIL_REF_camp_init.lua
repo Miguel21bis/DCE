@@ -30,8 +30,9 @@ REF_camp = {
 		},--pictureBrief
 	},
 	wargame_config = {
-		country_blue = "Blue", -- @ui text group="Sides" label="Blue side name" help=Display name of the blue side (e.g. "US"). Used by the wargame UI for labels and colors. [default: "Blue"]
-		country_red  = "Red",  -- @ui text group="Sides" label="Red side name" help=Display name of the red side (e.g. "Iran"). Used by the wargame UI for labels and colors. [default: "Red"]
+		country_blue = "Blue", -- @ui text group="Wargame" label="Blue side name" help=Display name of the blue side (e.g. "US"). Used by the wargame UI for labels and colors. [default: "Blue"]
+		country_red  = "Red",  -- @ui text group="Wargame" label="Red side name" help=Display name of the red side (e.g. "Iran"). Used by the wargame UI for labels and colors. [default: "Red"]
+		zone_edge_margin_meters = 1000,  -- @ui numeric min=0 max=10000 group="Wargame" label="Zone margin (m)" help=Margin in meters from the edge of the map to the wargame zone. [default: 1000]
 	}
 
 	-- ANY MODIFICATIONS IN THIS FILE NEED TO RESTART ALL THE CAMPAIGN USING FIRSTMISSION.BAT FILE
