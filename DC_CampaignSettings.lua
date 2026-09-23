@@ -46,13 +46,16 @@ si le joueur repasse (a n'importe quel moment de la campagne) une variable é "f
 	-> il prend en compte les pertes antérieur
 ]]--
 
-------------------------------------------------------------------------------------------------------- 
-------------------------------------------------------------------------------------------------------- 
-if not versionDCE then versionDCE = {} end
-versionDCE["DC_CampaignSettings.lua"] = "1.4.20"
-------------------------------------------------------------------------------------------------------- 
-if Debug.debug then
-	print("START DC_CampaignSettings.lua "..versionDCE["DC_CampaignSettings.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+
+
+-- 0 veut dire "pas de changement" (option zero-false de DCE_Manager)
+-- mais en Lua, 0 est VRAI dans un if : sans ce bloc, 0 est pris comme un vrai réglage
+-- (réserves mises à 0, escadrons ENI réduits à 55 %, 0 % d'avions...)
+local slidersZeroFalse = { "slider_CampaignDuration", "slider_EnemyLevel", "slider_PercentPlane" }
+for _, key in ipairs(slidersZeroFalse) do
+	if mission_ini[key] == 0 then
+		mission_ini[key] = false
+	end
 end
 
 --[[
