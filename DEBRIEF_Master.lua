@@ -1092,6 +1092,11 @@ if input == "y" or input == "yes" then
 			--de la passe precedente et part quand meme dans acceptMission().
 			PlayerFlight = false
 
+			--mode degrade : a partir de la 5e tentative infructueuse, on assouplit portee/
+			--firepower pour le draft du joueur plutot que de ne rien lui proposer (cf
+			--ATO_Generator_A_Debug.lua / ATO_Generator_C_Core.lua).
+			RelaxGeneration = (MissionInstance >= 5)
+
 			GenPassStart()
 
 			--CORRECTIF : IncludeOnce() ne rejoue PAS le fichier au 2e appel.

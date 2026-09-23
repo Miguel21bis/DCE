@@ -843,7 +843,12 @@ repeat
 		if DCEM_MachineMode then
 			print("##DCEM_CYCLE##"..tostring(MissionInstance))
 		end
-		
+
+		--mode degrade : a partir de la 5e tentative infructueuse, on assouplit portee/
+		--firepower pour le draft du joueur plutot que de ne rien lui proposer (cf
+		--ATO_Generator_A_Debug.lua / ATO_Generator_C_Core.lua).
+		RelaxGeneration = (MissionInstance >= 5)
+
 		-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")						--generate mission
 		Include("MAIN_NextMission.lua")
 		
@@ -871,7 +876,7 @@ repeat
 			print("\n\n StopBug .\n")																	--confirmation text
 			break
 
-		elseif MissionInstance >= 5 then																--no player flight could be assigned in 20 tries, stop it
+		elseif MissionInstance >= 20 then																--no player flight could be assigned in 20 tries, stop it
 			print("Mission Generation Error. No eligible player flight in 20 attempts. Try again.\n\n")
 			if DCEM_MachineMode then
 				print("##DCEM_OUTCOME##FAILED|No eligible player flight in 20 attempts.")

@@ -827,7 +827,12 @@ if input == "y" or input == "yes" then
 			if DCEM_MachineMode then
 				print("##DCEM_CYCLE##"..tostring(MissionInstance))
 			end
-			
+
+			--mode degrade : a partir de la 5e tentative infructueuse, on assouplit portee/
+			--firepower pour le draft du joueur plutot que de ne rien lui proposer (cf
+			--ATO_Generator_A_Debug.lua / ATO_Generator_C_Core.lua).
+			RelaxGeneration = (MissionInstance >= 5)
+
 			camp.VersionPackageICM = tostring(VersionPackageICM)											-- modification M35 version ScriptsMod -- ajoute la version du script dans camp_status pour utilisation en fin de mission																				--set amount of players
 			-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")																--generate mission
 			Include("MAIN_NextMission.lua")
