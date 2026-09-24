@@ -1,8 +1,8 @@
 if not versionDCE then versionDCE = {} end
 
-versionDCE["UTIL_Changelog.lua"] = "22.112.641"
+versionDCE["UTIL_Changelog.lua"] = "22.115.645"
 if not VersionDCE then VersionDCE = {} end
-VersionDCE["UTIL_Changelog.txt"] = "22.112.641"
+VersionDCE["UTIL_Changelog.txt"] = "22.115.645"
 
 
 
@@ -21,7 +21,11 @@ known issues:
 - [pedro]	lands on another ship instead of CV or LHA
 - [target]	a squadron is assigned to a target while another squadron (identical type&task) is based closer to it.
 
-##  Version 22.112.641
+-- ##  Version 22.115.645
+    ###  Fixed
+        AH-64 datalink bug
+		no roster.reserve
+
     ###  Changed
         modified AddPropAircraft  Apache
 
@@ -29,6 +33,8 @@ known issues:
         compatible with DCE_Manager mission generator
 		compatible with DCE_Manager Wargame (still in progress)
 		extended the MODEX/SideNumber field to accept: XRRMH838
+		DCE_Manager supervise le debriefing et la génération de la mission suivante (uniquement si cette mission a été créer par DCE_Manager)
+		augmente les possibilités de création de mission au dela de 5 tentatives, en supprimant certaines limitations (distance, powerfire, etc...)
 
 ##  Version 22.110.637
     ###  Fixed
