@@ -30,24 +30,37 @@ if Firstmission_flag then																				--if the script is called by BAT_Fi
 	campFile:close()
 end
 
-
+-- _affiche(oob_air, "oob_air")
 -- require("Init/oob_air_init")																		--run initial oob air
-for side,unit in pairs(oob_air) do																	----update oob_air to add roster and score table
-	for n = 1, #unit do
-		unit[n].roster = {
-			ready = unit[n].number,																	--number of airframes ready for operations
-			lost = 0,																				--number of airframes lost
-			damaged = 0																				--number of airframes damaged
-		}
-		unit[n].score = {
-			kills_air = 0,																			--air kills
-			kills_ground = 0,																		--ground kills
-			kills_ship = 0																			--ship kills
-		}
-		if unit[n].reserve then
-			unit[n].roster.reserve = unit[n].reserve
-		end
-	end
+for side, unit in pairs(oob_air) do                                                                 ----update oob_air to add roster and score table
+
+    -- Retire les entrées sans "type" (ex: pools de réserve génériques) : elles font
+    -- planter le tri plus loin dans UTIL_ResetCampaign.lua ("attempt to index a nil
+    -- value (field 'type')"), donc autant les exclure ici, une bonne fois pour toutes.
+    local filtered = {}
+    for n = 1, #unit do
+        if unit[n].type then
+            table.insert(filtered, unit[n])
+        end
+    end
+    oob_air[side] = filtered
+    unit = filtered
+
+    for n = 1, #unit do
+        unit[n].roster = {
+            ready = unit[n].number,                                                                 --number of airframes ready for operations
+            lost = 0,                                                                               --number of airframes lost
+            damaged = 0                                                                             --number of airframes damaged
+        }
+        unit[n].score = {
+            kills_air = 0,                                                                          --air kills
+            kills_ground = 0,                                                                       --ground kills
+            kills_ship = 0                                                                          --ship kills
+        }
+        if unit[n].reserve then
+            unit[n].roster.reserve = unit[n].reserve
+        end
+    end
 end
 
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)

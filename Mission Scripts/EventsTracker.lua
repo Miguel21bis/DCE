@@ -1992,13 +1992,29 @@ function eventHandlerDCE:onEvent(event)
 
             -- os.execute('start "EventPath" cmd  /k "c: & cd '..path..' & call \Init\\path.bat && pause"')
 
-            --Launch external LUA environment to evaluate debrief.log, update campaign status files and generate the next campaign mission
-            os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' ..
-            PathDD ..
-            ' & cd ' ..
-            PathDCE ..
-            ' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.' ..
-            campL.VersionPackageICM .. '\\DEBRIEF_Master.lua"')
+			--Launch external LUA environment to evaluate debrief.log, update campaign status files and generate the next campaign mission
+			if campL.DCEManagerExe and campL.DCEManagerExe ~= "" then
+				--Mission generee par DCE_Manager : il reprend la main sur le debriefing.
+				--Les chemins voyagent en slashes normaux dans campL (TableSerialization
+				--n'echappe pas les antislashs), on les reconvertit juste avant l'appel.
+				local exe = string.gsub(campL.DCEManagerExe, "/", "\\")
+
+				--Le slash final doit sauter AVANT la conversion : un antislash juste avant
+				--le guillemet fermant serait pris pour un echappement et casserait l'argument.
+				local savedGames = string.gsub(campL.path, "[/\\]+$", "")
+				savedGames = string.gsub(savedGames, "/", "\\")
+
+				os.execute('start "" "' .. exe .. '" --debrief "' .. campL.title ..
+					'" --saved-games "' .. savedGames .. '"')
+			else
+				--Ancien fonctionnement : console DOS + luae.exe.
+				os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' ..
+					PathDD ..
+					' & cd ' ..
+					PathDCE ..
+					' & call \"%DCSDIR%\\bin\\luae.exe\" ..\\..\\..\\ScriptsMod.' ..
+					campL.VersionPackageICM .. '\\DEBRIEF_Master.lua"')
+			end
         elseif event.id == world.event.S_EVENT_HIT then
             if event.target and event.initiator then
                 if targetObjCategory == Object.Category.SCENERY and event.target.getDesc then

@@ -49,6 +49,24 @@ DraftStepIndex = {
 
 escortRejectReasons = {}
 
+--Mode degrade : positionne (dans DEBRIEF_Master.lua / BAT_FirstMission.lua / BAT_SkipMission.lua)
+--AVANT l'Include() de MAIN_NextMission.lua qui recharge ce fichier -- donc ne PAS l'ecraser ici
+--(sinon la valeur mise par la boucle de tentatives serait perdue a chaque passe).
+--Quand actif (a partir de la 5e tentative infructueuse), certaines limitations (portee,
+--puissance de feu) sont ignorees pour le draft du joueur plutot que de ne rien proposer.
+if RelaxGeneration == nil then
+	RelaxGeneration = false
+end
+
+--Recueil des limitations ignorees grace a RelaxGeneration, par nom d'unite (squad).
+--Remise a zero a chaque passe (ce fichier est rejoue a chaque tentative de generation).
+RelaxedLimits = {}
+
+--Garde-fou anti-doublon pour AnnounceRelaxedLimits() : plusieurs points du pipeline
+--(processEligibleLoadout ET createATO_table) peuvent declencher l'annonce pour le meme
+--squad. Remis a zero a chaque passe, comme RelaxedLimits.
+RelaxAnnounced = {}
+
 --Traduction lisible des codes de rejet produits par rejectStep()/PlayerAssignFailure.
 --priority sert a choisir la raison "dominante" quand plusieurs rejets ont ete tentes
 --pour le meme escadron (cf getDominantRejectReason). Plus le chiffre est haut, plus
@@ -213,6 +231,14 @@ function isPlayerRelatedDraft(draft)
 		return true
 	end
 
+	--Filet de securite solo : dans createATO_table (ATO_Generator_C_Core.lua), l'objet "draft"
+	--manipule (draftSortiesEntry) ne porte ni .unit ni .player/.client, seulement .name (nom du
+	--squad). En solo, le squad du joueur est connu via playerInfo.squadBAT (deja utilise par
+	--ExplainPlayerRejectionSP) : on s'en sert ici pour reconnaitre le draft du joueur a ce stade.
+	if SinglePlayer and playerInfo and playerInfo.squadBAT and draft.name and draft.name == playerInfo.squadBAT then
+		return true
+	end
+
 	return false
 end
 
@@ -267,7 +293,118 @@ function registerPlayerFailure(data)
 			.." | stage "..tostring(data.stage)
 			.." | reason "..tostring(data.reason)
 			.." | ligne "..tostring(data.line))
+
+		--Detail chiffre (cible, distance, firepower, etc.) quand disponible.
+		--Pourquoi: data.details vient de getRejectDetail() (donnees precises capturees
+		--par rejectStep()) ou, a defaut, du simple compteur rejectStats -> generique,
+		--marche pour n'importe quelle raison de rejet sans code specifique par cas.
+		if type(data.details) == "table" and next(data.details) then
+
+			local detailParts = {}
+
+			for k, v in pairs(data.details) do
+				detailParts[#detailParts + 1] = tostring(k).."="..tostring(v)
+			end
+
+			table.sort(detailParts) --ordre stable, plus facile a comparer entre passes
+
+			print("       -> "..table.concat(detailParts, " | "))
+		end
 	end
+end
+
+--Enregistre qu'une limitation a ete ignoree (RelaxGeneration) pour ce squad.
+--Pourquoi: garder le detail chiffre exact (cible, distance/firepower demande vs possible)
+--pour pouvoir l'annoncer plus tard via AnnounceRelaxedLimits().
+function recordRelaxedLimit(unitName, checkName, data)
+
+	if not unitName then
+		return
+	end
+
+	if not RelaxedLimits[unitName] then
+		RelaxedLimits[unitName] = {}
+	end
+
+	table.insert(RelaxedLimits[unitName], {
+		check = checkName,
+		data = data,
+	})
+end
+
+--Annonce (console + briefing joueur) qu'une sortie a ete generee en ignorant une ou
+--plusieurs limitations pour ce squad. A appeler une seule fois par sortie generee.
+--Pourquoi: le joueur doit savoir precisement ce qui a ete assoupli pour lui, pas juste
+--"une mission a quand meme ete generee".
+--Annonce (console + briefing joueur) qu'une sortie a ete generee en ignorant une ou
+--plusieurs limitations pour ce squad. A appeler une seule fois par sortie generee.
+--Pourquoi: le joueur doit savoir precisement ce qui a ete assoupli pour lui, pas juste
+--"une mission a quand meme ete generee".
+--targetName/loadoutName : la cible et le loadout de LA sortie effectivement generee/acceptee.
+--Necessaire pour filtrer RelaxedLimits[unitName], qui accumule aussi les tentatives sur
+--d'autres cibles essayees pendant la meme passe et jamais retenues (cf retour utilisateur :
+--une mission generee ne doit annoncer QUE ce qui a permis SA generation, pas tous les essais).
+function AnnounceRelaxedLimits(unitName, targetName, loadoutName)
+
+	if RelaxAnnounced[unitName] then
+		return --deja annonce pour ce squad a cette passe (processEligibleLoadout ET createATO_table peuvent tous deux appeler cette fonction)
+	end
+
+	local entries = RelaxedLimits[unitName]
+
+	if not entries or #entries == 0 then
+		return
+	end
+
+	local lignes = {}
+
+	for _, entree in ipairs(entries) do
+
+		--ne garder que les limitations relachees pour la cible/loadout de la sortie
+		--effectivement generee, pas les autres cibles essayees puis abandonnees.
+		if entree.data and entree.data.target == targetName and entree.data.loadout == loadoutName then
+
+			if entree.check == "range" then
+
+				lignes[#lignes + 1] = string.format(
+					" - Range: %d km used out of %d km possible (target %s, loadout %s)",
+					math.floor((entree.data.toTarget or 0) / 1000),
+					math.floor((entree.data.range or 0) / 1000),
+					tostring(entree.data.target),
+					tostring(entree.data.loadout)
+				)
+
+			elseif entree.check == "firepower" then
+
+				lignes[#lignes + 1] = string.format(
+					" - Firepower: %d available for %d required (target %s, loadout %s)",
+					math.floor(entree.data.maxPossible or 0),
+					math.floor(entree.data.required or 0),
+					tostring(entree.data.target),
+					tostring(entree.data.loadout)
+				)
+			end
+		end
+	end
+
+	if #lignes == 0 then
+		return
+	end
+
+	local titre =
+		"Mission generated with "..#lignes.." limitation(s) ignored for "..tostring(unitName)..":"
+
+	--console, meme esprit que les logs [FAIL]/[GEN]
+	print("[RELAX] "..titre)
+	for _, ligne in ipairs(lignes) do
+		print("[RELAX] "..ligne)
+	end
+
+	--briefing joueur : Briefing_text finit dans mission.descriptionText (cf DC_Briefing.lua),
+	--donc lu en jeu. Doit etre ajoute AVANT que DC_Briefing.lua ne tourne dans cette meme passe.
+	Briefing_text = (Briefing_text or "").."\n"..titre.."\n"..table.concat(lignes, "\n").."\n \n"
+
+	RelaxAnnounced[unitName] = true
 end
 
 --Enregistre l'étape la plus avancée atteinte par un squad
@@ -413,31 +550,6 @@ function rejectStep(draft, step, reason, data, bloc, line)
 	end
 
 	
-	-- if isPlayerRelatedDraft(draft) and draft.clientPlayer and not draft.playerFailureRegistered then
-	-- if draft.clientPlayer and not draft.playerFailureRegistered then
-	-- if isPlayerRelatedDraft(draft) and not draft.playerFailureRegistered then
-	-- 	draft.playerFailureRegistered = true
-
-	-- 	registerPlayerFailure({
-
-	-- 		draftId = draft.draftId,
-	-- 		unitType = draft.unitType,
-
-	-- 		requestedPlane = draft.type,
-	-- 		requestedTask = draft.task,
-	-- 		requestedNb = draft.number,
-
-	-- 		stage = bloc,
-	-- 		reason = reason,
-	-- 		line = line,
-
-	-- 		details = data,
-
-	-- 		debugText = reason,
-	-- 	})
-	-- end
-
-	
 end
 
 function getDominantRejectReason(draft)
@@ -464,6 +576,32 @@ function getDominantRejectReason(draft)
 	end
 
 	return bestReason
+end
+
+--Retrouve l'entree detaillee de draftContext.rejectReasons correspondant a "reason".
+--Pourquoi: getDominantRejectReason() ne renvoie qu'un code texte (ex: "range_too_short") ;
+--cette fonction va rechercher les donnees chiffrees (cible, distance, firepower, etc.)
+--et le numero de ligne captures au moment du rejectStep() correspondant, pour pouvoir
+--les faire remonter dans registerPlayerFailure()/le log [FAIL].
+--S'il y a plusieurs occurrences de la meme raison, on garde la derniere (la plus recente).
+function getRejectDetail(draftContext, reason)
+
+	if not draftContext or not draftContext.rejectReasons or not reason then
+		return nil
+	end
+
+	local found
+
+	for i = 1, #draftContext.rejectReasons do
+
+		local entry = draftContext.rejectReasons[i]
+
+		if entry.reason == reason then
+			found = entry
+		end
+	end
+
+	return found
 end
 
 -- Calcule un score représentatif d'échec

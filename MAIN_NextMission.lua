@@ -1,14 +1,7 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 ------------------------------------------------------------------------------------------------------- 
--- last modification: M90_a cleanCode_i
-if not versionDCE then versionDCE = {} end
-versionDCE["MAIN_NextMission.lua"] = "2.40.222"
-------------------------------------------------------------------------------------------------------- 
 
-if Debug.debug then
-	print("START MAIN_NextMission.lua "..versionDCE["MAIN_NextMission.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-end
 
 local t0 = os.clock()
 local t_miz  = 0
@@ -70,9 +63,17 @@ local oldMapResource = DeepCopy(mapResource)
 zipFile:unzClose()
 
 if mission.version < 19 then --19ok 18bad
-	print("(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update.")
-	print("(MainNM) ATTENTION ") os.execute 'pause'
-	os.exit()
+	local msg = "(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update."
+
+	Attention(msg)
+	
+	os.execute 'pause'
+
+	if Debug.debug then
+	else
+		os.exit()
+	end
+	
 end
 
 --parse la table original trigrules pour reperer les a_do_script_file 
@@ -454,8 +455,10 @@ local function makePayloadRestricted()
 end
 
 
+addFileTrigger("DCE_Util_Common.lua")										-- Chantier A DCE InGame : utilitaires génériques (avant tout le reste)
 addFileTrigger("camp_status.lua")
-addFileTrigger("AddCommandRadioF10.lua")
+addFileTrigger("DCE_RadioF10.lua")										-- Renomme depuis AddCommandRadioF10.lua
+addFileTrigger("DCE_Background.lua")										-- Chantier B2 DCE InGame : sous-systèmes tâche de fond (avoidArea, EWR, CarrierDeckMonitor...)
 addFileTrigger("EventsTracker.lua")
 addFileTrigger("Fuel_Check.lua")													-- Norman99 Modification	M57
 addFileTrigger("ATC_ShutUp_GENERIC.lua")											-- Psyko Modification		M59
@@ -636,6 +639,8 @@ if MissionInstance >= 2 then
 	Include("DC_Weather.lua")
 	Include("DC_NavalEnvironment.lua")
 	Include("DC_UpdateSAR.lua")
+
+	Include("DC_UpdateWargame.lua")
 
 	Include("ATO_ThreatEvaluation.lua")
 	Include("DC_UpdateTargetlist.lua")
@@ -1154,6 +1159,7 @@ local campL = {
 	debugTraceability = Debug.debugTraceability,                           --??? utile
 	path = camp.path,
 	title = camp.title,
+	DCEManagerExe = os.getenv("DCEM_EXE_PATH") or "",	--vide si la mission n'a pas été générée par DCE_Manager
 	mission = camp.mission,
 	ScriptsMod = camp.ScriptsMod,
 	version = camp.version,
@@ -1356,7 +1362,9 @@ if PlayerFlight then
 	miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
 	miz:zipAddFile("l10n/DEFAULT/AirGroundAttackScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AirGroundAttackScript.lua")
 	miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
-	miz:zipAddFile("l10n/DEFAULT/AddCommandRadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AddCommandRadioF10.lua")				-- Modification M29
+	miz:zipAddFile("l10n/DEFAULT/DCE_Util_Common.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Util_Common.lua")						-- Chantier A DCE InGame
+	miz:zipAddFile("l10n/DEFAULT/DCE_RadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_RadioF10.lua")						-- Renomme depuis AddCommandRadioF10.lua (Modification M29)
+	miz:zipAddFile("l10n/DEFAULT/DCE_Background.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Background.lua")						-- Chantier B2 DCE InGame
 	miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
 	miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
 	miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")										-- Pedro TEST

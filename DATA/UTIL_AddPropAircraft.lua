@@ -2,7 +2,7 @@
 ------------------------------------------------------------------------------------------------------- 
 -- last modification:  updateData_s
 if not versionDCE then versionDCE = {} end
-versionDCE["UTIL_AddPropAircraft.lua"] = "1.5.30"
+versionDCE["UTIL_AddPropAircraft.lua"] = "1.5.31"
 -------------------------------------------------------------------------------------------------------
 
 if Debug.debug then print("START UTIL_AddPropAircraft.lua  =-=-=-=-=-=-=-=-=-=-=-=-=-=-=") end
@@ -239,21 +239,21 @@ Data_AddPropAircraft = {
 	},
 
 	["AH-64D_BLK_II"] = {							--AH-64D Apache
-		["FlareProgramDelay"] = 0,
+		["FlareProgramDelay"] = 3,
 		["TN_IDM_LB"] = "1",						-- ["TN_IDM_LB"] = "3", etc...
 		["FlareSalvoInterval"] = 0,
-		["OverrideIFF"] = 0,
+		["OverrideIFF"] = 3,
 		["PltNVG"] = true,
 		["CpgNVG"] = true,
 		-- ["FCR_RFI_removed"] = false,
 		["HumanOrchestra"] = false,
 		["OwnshipCallSign"] = "G-1",				--["OwnshipCallSign"] = "G-3", etc
 		["TrackAirTargets"] = true,
-		["FlareBurstCount"] = 0,
+		["FlareBurstCount"] = 1,
 		["AIDisabled"] = false,
 		["FlareBurstInterval"] = 0,
 		["FlareSalvoCount"] = 0,
-		["NetCrewControlPriority"] = 0,				
+		["NetCrewControlPriority"] = 0,
 	},
 	["AH-64D_BLK_II_IA"] = {
 		["CpgNVG"] = true,

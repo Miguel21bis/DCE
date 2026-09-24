@@ -1241,6 +1241,13 @@ local function buildDraftSorties(
 		draftContext.generatedSortie = true
 		draftContext.anyMissionGenerated = true
 
+		--annonce (console + briefing) si cette sortie a ete obtenue grace a RelaxGeneration ;
+		--relaxAnnounced evite de repeter l'annonce a chaque tour de la boucle repeat ci-dessous.
+		if not draftContext.relaxAnnounced then
+			draftContext.relaxAnnounced = true
+			AnnounceRelaxedLimits(unit.name, target.titleName, currentLoadout.name)
+		end
+
 		validateStep(draftContext, "sortie")
 
 		if task == "AWACS" or task == "Refueling" or task == "AFAC" then
@@ -1348,6 +1355,23 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 			firepowerValid = true
 			draftContext.passPackmax = true
 
+		end
+
+		--mode degrade : a partir de la 5e tentative infructueuse, on ignore ce manque de
+		--firepower pour le draft du joueur plutot que de ne rien lui proposer (cf RelaxGeneration,
+		--ATO_Generator_A_Debug.lua). L'ecart exact est garde pour etre annonce plus tard.
+		if not firepowerValid and RelaxGeneration and isPlayerRelatedDraft(draftContext) then
+
+			recordRelaxedLimit(unit.name, "firepower", {
+				required = target.firepower.min,
+				availableAircraft = AcftAvail[unit.name].available,
+				loadoutFirepower = currentLoadout.firepower,
+				maxPossible = AcftAvail[unit.name].available * currentLoadout.firepower,
+				target = target.titleName,
+				loadout = currentLoadout.name,
+			})
+
+			firepowerValid = true
 		end
 
 		if isDebugModeA3 then
@@ -1547,7 +1571,24 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 
 						tempDebug = "\n"..("AtoG passe A_26                    AtoG toTarget "..tostring(toTarget).." <=?? currentLoadout.range: "..tostring(currentLoadout.range) )
 
-						if toTarget <= currentLoadout.range then		--basic feasibility check of range before performance intensive route calculations are done
+						local rangeOK = toTarget <= currentLoadout.range
+
+						--mode degrade : a partir de la 5e tentative infructueuse, on ignore le
+						--depassement de portee pour le draft du joueur plutot que de ne rien
+						--lui proposer (cf RelaxGeneration, ATO_Generator_A_Debug.lua).
+						if not rangeOK and RelaxGeneration and isPlayerRelatedDraft(draftContext) then
+
+							recordRelaxedLimit(unit.name, "range", {
+								toTarget = math.floor(toTarget),
+								range = math.floor(currentLoadout.range),
+								target = target.titleName,
+								loadout = currentLoadout.name,
+							})
+
+							rangeOK = true
+						end
+
+						if rangeOK then		--basic feasibility check of range before performance intensive route calculations are done
 
 							validateStep(draftContext, "range")
 
@@ -1838,11 +1879,6 @@ for sideName, units in pairs(oob_air) do
 			local enabledTasks = {}
 			local hasMainTask = false
 
-			-- if type(unit.tasks == "string") then
-			-- 	print("AtoG attention, the squad "..unit.name.." tasks: "..tostring(unit.tasks).." has a string instead of a table for its tasks. Fix it in Init\\oob_air and Active\\oob_air ")
-			-- 	_affiche(unit.tasks, "unit.tasks: ")
-			-- 	--  os.execute 'pause'
-			-- end
 			for taskName, taskBool in pairs(unit.tasks or EMPTY) do
 				if taskBool then
 					enabledTasks[#enabledTasks + 1] = taskName
@@ -2268,6 +2304,12 @@ for sideName, units in pairs(oob_air) do
 				local reason =
 					getDominantRejectReason(draftContext)
 
+				--donnees precises (cible, distance, firepower, etc.) + ligne capturees
+				--par le rejectStep() correspondant a "reason" ; a defaut (raison sans
+				--data associee, ex: HumainRequired), on retombe sur le compteur brut.
+				local rejectDetail =
+					getRejectDetail(draftContext, reason)
+
 				registerPlayerFailure({
 
 					-- draftId = draftContext.debugId,
@@ -2281,7 +2323,9 @@ for sideName, units in pairs(oob_air) do
 
 					reason = reason,
 
-					details = DeepCopy(draftContext.rejectStats),
+					line = rejectDetail and rejectDetail.line,
+
+					details = (rejectDetail and rejectDetail.data) or DeepCopy(draftContext.rejectStats),
 
 					debugText = reason,
 				})
@@ -3756,10 +3800,44 @@ local function createATO_table(draftPriority)
 
 							--enough aircraft are available to satisfy minimum firepower requirement for target
 							-- if (available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min) or passPackmax_C then				
-							if (available_Main * draft.loadout.firepower >= draft.target.firepower.min ) or passPackmax_C then
+							local firepowerPackOK = (available_Main * draft.loadout.firepower >= draft.target.firepower.min ) or passPackmax_C
+
+							--mode degrade : a partir de la 5e tentative infructueuse, on ignore ce manque de
+							--firepower pour le draft du joueur plutot que de ne rien lui proposer (cf
+							--RelaxGeneration, ATO_Generator_A_Debug.lua). available_Main > 0 : il reste au
+							--moins un avion, on ne fabrique pas d'avion a partir de rien.
+							if not firepowerPackOK and RelaxGeneration and isPlayerRelatedDraft(draft) and available_Main > 0 then
+
+								recordRelaxedLimit(draft.name, "firepower", {
+									required = draft.target.firepower.min,
+									maxPossible = math.floor(available_Main * draft.loadout.firepower),
+									target = draft.target_name,
+									loadout = draft.loadout.name,
+								})
+
+								firepowerPackOK = true
+							end
+
+							if firepowerPackOK then
 
 								--if the target has a minimum package number requirement, sufficient aircraft are available from this unit to satisfy it	
-								if draft.target.firepower.packmin == nil or available_Main * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min then				
+								local firepowerPackMultiOK =
+									draft.target.firepower.packmin == nil
+									or available_Main * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min
+
+								if not firepowerPackMultiOK and RelaxGeneration and isPlayerRelatedDraft(draft) and available_Main > 0 then
+
+									recordRelaxedLimit(draft.name, "firepower", {
+										required = (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min,
+										maxPossible = math.floor(available_Main * draft.loadout.firepower),
+										target = draft.target_name,
+										loadout = draft.loadout.name,
+									})
+
+									firepowerPackMultiOK = true
+								end
+
+								if firepowerPackMultiOK then				
 
 									local limitMP = true   --TODO a revoir, semble inutile
 
@@ -4555,6 +4633,11 @@ local function createATO_table(draftPriority)
 											addFlight(request_Main_Nb, "main", draftForFlight)
 											--********************************************************************************************
 
+											--vol principal reellement ajoute a l'ATO : si ce package a beneficie du mode
+											--degrade (RelaxGeneration), c'est le point fiable pour l'annoncer (cf le meme
+											--hook au niveau du 1er circuit, processEligibleLoadout / buildDraftSorties).
+											AnnounceRelaxedLimits(draft.name, draft.target_name, draft.loadout.name)
+
 											-- for taskSupport, supportPart in pairs(draft.support) do										--iterate through all package support
 											-- Ça stabilise :
 											-- l’ordre d’allocation support,
@@ -4678,16 +4761,7 @@ local function createATO_table(draftPriority)
 
 				if isDebugModeC and next(escortRejectReasons) then
 					for squadName, reasons in pairs(escortRejectReasons) do
-
-						--reasons est desormais une liste de tables {sujet=..., reasonCode=..., cause=...}
-						--(depuis addEscortRejectReason), plus une liste de chaines -> on ne peut plus
-						--faire table.concat(reasons, ...) directement, il faut d'abord extraire .sujet.
-						local sujets = {}
-						for _, entry in ipairs(reasons) do
-							sujets[#sujets + 1] = (type(entry) == "table" and entry.sujet) or tostring(entry)
-						end
-
-						debugLog(draft.id.." ESCORT_REJECT "..squadName.." => "..table.concat(sujets, " | "))
+						debugLog(draft.id.." ESCORT_REJECT "..squadName.." => "..table.concat(reasons, " | "))
 					end
 				end
 
