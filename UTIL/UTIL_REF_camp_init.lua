@@ -16,8 +16,8 @@ REF_camp = {
 		year  = 2000, -- @ui numeric min=1940 max=2100 group="Start date" label="Year" help=Calendar year the campaign starts on. [default: 1996]
 		month = 01, -- @ui numeric min=1 max=12 group="Start date" label="Month" help=Calendar month the campaign starts on. [default: 1]
 	},
-	time      = 17700, -- @ui numeric min=0 max=86400 group="Start date" label="Time of day (s)" help=Daytime in seconds since midnight at campaign start (17700 = 04:55). [default: 0]
-	variation = 2,     -- @ui numeric min=-30 max=30 group="Geography" label="Magnetic variation" help=Variation in degrees from true north to magnetic north for this theatre. [default: 0]
+		time      = 17700, -- @ui numeric format=hhmm min=0 max=86400 group="Start date" label="Time of day" help=Time of day at campaign start (hours:minutes). [default: 0]
+		variation = 2,     -- @ui numeric min=-30 max=30 group="Geography" label="Magnetic variation" help=Variation in degrees from true north to magnetic north for this theatre. [default: 0]
 
 	ewrFreqAdaptable = true, -- @ui checkbox group="Geography" label="Adaptive EWR frequencies" help=If enabled, EWR frequencies are generated adaptively from campaign start; fixed for the whole campaign. [default: true]
 
@@ -32,8 +32,13 @@ REF_camp = {
 	wargame_config = {
 		country_blue = "Blue", -- @ui text group="Wargame" label="Blue side name" help=Display name of the blue side (e.g. "US"). Used by the wargame UI for labels and colors. [default: "Blue"]
 		country_red  = "Red",  -- @ui text group="Wargame" label="Red side name" help=Display name of the red side (e.g. "Iran"). Used by the wargame UI for labels and colors. [default: "Red"]
-		zone_edge_margin_meters = 1000,  -- @ui numeric min=0 max=10000 group="Wargame" label="Zone margin (m)" help=Margin in meters from the edge of the map to the wargame zone. [default: 1000]
-	}
+				zone_edge_margin_meters = 1000,  -- @ui numeric min=0 max=10000 group="Wargame" label="Zone margin (m)" help=Margin in meters from the edge of the map to the wargame zone. [default: 1000]
+	},
+
+	-- Timing presets offered to the player in the Config window (Time tab). Empty = no preset combo.
+	-- One line per preset: { label = "...", <conf_mod field> = value, ... }. Read by DCE_Manager only, no restart needed.
+		timing_presets = { -- @ui presets format=hhmm audience=campaignMaker group="Timing presets" label="Timing presets" cols="startup_time_player:Startup,mission_duration:Mission,idle_time_min:Min between missions,idle_time_max:Max between missions" help=Presets offered to the player as buttons in the Config window (Time tab). No campaign restart needed.
+	},
 
 	-- ANY MODIFICATIONS IN THIS FILE NEED TO RESTART ALL THE CAMPAIGN USING FIRSTMISSION.BAT FILE
 }

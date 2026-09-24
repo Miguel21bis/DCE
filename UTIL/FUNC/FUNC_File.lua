@@ -612,6 +612,26 @@ function serializeScalar(v)
 	return tostring(v)
 end
 
+-- Une entrée de liste qui est elle-même une table (ex: une ligne de timing_presets)
+-- -> { label = "...", cle = valeur, ... } sur une seule ligne.
+-- label en tête, puis les autres clés triées (pairs() ne garantit aucun ordre).
+-- Seules les clés texte et les valeurs simples sont gérées, pas de table dans la table.
+function serializeInlineTable(t)
+	local keys = {}
+	for k in pairs(t) do
+		if type(k) == "string" and k ~= "label" then keys[#keys + 1] = k end
+	end
+	table.sort(keys)
+
+	local parts = {}
+	if t.label ~= nil then parts[#parts + 1] = "label = " .. serializeScalar(t.label) end
+	for _, k in ipairs(keys) do
+		parts[#parts + 1] = k .. " = " .. serializeScalar(t[k])
+	end
+
+	return "{ " .. table.concat(parts, ", ") .. " }"
+end
+
 
 
 -- Porte les variables retrouvées vers conf_mod.lua (une seule responsabilité :
@@ -820,8 +840,14 @@ function ModifiCampInit()
 			local values = localFlat[path]
 			if type(values) == "table" and values[1] ~= nil then
 				local indent = (line:match("^(%s*)") or "") .. "\t"
-				for _, picName in ipairs(values) do
-					outLines[#outLines + 1] = indent .. serializeScalar(picName) .. ","
+				for i, item in ipairs(values) do
+					if type(item) == "table" then
+						-- entrée qui est elle-même une table (ex: timing_presets)
+						outLines[#outLines + 1] = indent .. "[" .. i .. "] = " .. serializeInlineTable(item) .. ","
+					else
+						-- entrée simple (ex: nom d'image de pictureBrief)
+						outLines[#outLines + 1] = indent .. serializeScalar(item) .. ","
+					end
 				end
 				skippingList = true
 			end
