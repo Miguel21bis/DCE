@@ -409,8 +409,8 @@ local function buildMissionIndex()
 										end
 
 										if task and task.id == "EngageTargetsInZone" then
-											data.sation1 = group.route.points[i]
-											data.sation2 = group.route.points[i + 1]
+											data.station1 = group.route.points[i]
+											data.station2 = group.route.points[i + 1]
 										end
 										if task and task.id == "Orbit" and task.params then
 											data.orbitCAP.altitude = task.params.altitude
@@ -496,8 +496,13 @@ local function buildMissionIndex()
         end
     end
 
+	local planeCount = 0
+	for _ in pairs(MissGroupByName) do
+		planeCount = planeCount + 1
+	end
+
 	env.info("DCE buildMissionIndex: planes=" ..
-		tostring(#MissGroupByName) ..
+		tostring(planeCount) ..
 		" carriers=" .. tostring(#DCE_carriers) ..
 		" in " .. string.format("%.3f", timer.getTime() - t0) .. "s")
 
@@ -816,7 +821,10 @@ function RemovePlane(playerGroup)
 				local gpGid = Group.getID(gp)
 				local UnitId = Unit.getID(_unit)
 				local unitCallsign = _unit:getCallsign()
-				local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - playertPointVec3.x, 2) + math.pow(unitPosVec3.z - playertPointVec3.z, 2)))
+				-- local distance = math.floor(math.sqrt(math.pow(unitPosVec3.x - playertPointVec3.x, 2) + math.pow(unitPosVec3.z - playertPointVec3.z, 2)))
+				local dx = unitPosVec3.x - playertPointVec3.x
+				local dz = unitPosVec3.z - playertPointVec3.z
+				local distance = math.floor(math.sqrt(dx * dx + dz * dz))
 				if distance <= 900 then
 					env.info(gpName.." "..unitCallsign.." "..distance.."m ")
 					-- trigger.action.outText(gpName.." "..unitCallsign.." "..distance.."m ", 15)	--FOR DEBUG
@@ -946,6 +954,16 @@ local function updateFuelCache(unit)
 end
 
 local function updateBaseDistance(unit, baseX, baseY)
+	-- garde-fous : on ne calcule rien si un argument essentiel manque
+	if not unit or not baseX or not baseY then
+		env.info("DCE_Bug updateBaseDistance: argument manquant (unit/baseX/baseY nil)")
+		return nil
+	end
+
+	if not unit.isExist or not unit:isExist() then
+		return nil
+	end
+
 	local id = unit:getID()
 	local now = timer.getTime()
 
@@ -1059,13 +1077,14 @@ local function bingo(gpId, gpObj)
 						end
 						-- distanceToBase_Km = GetDistance({ x = baseX, y = baseY }, { x = unitVec3.x, y = unitVec3.z }) / 1000
 
-						local c = BaseDistCache[unitId]
-                        if c then
-                            local dt = timer.getTime() - c.lastTime
-                            distanceToBase_Km = c.lastDistKm - c.closingSpeed * dt
-                        else
-                            distanceToBase_Km = updateBaseDistance(unit, baseX, baseY)
-                        end
+						-- local c = BaseDistCache[unitId]
+                        -- if c then
+                        --     local dt = timer.getTime() - c.lastTime
+                        --     distanceToBase_Km = c.lastDistKm - c.closingSpeed * dt
+                        -- else
+                        --     distanceToBase_Km = updateBaseDistance(unit, baseX, baseY)
+                        -- end
+						distanceToBase_Km = updateBaseDistance(unit, baseX, baseY) or 0
 					else
 						env.info("DCE_Bug DCE_Bingo this group not found in MissionGroupIndex[] " .. tostring(groupName))
 					end
@@ -1476,23 +1495,26 @@ function SAR_fct.activateRadioBeacon(arguments)
 	end
 end
 
+--TODO code mort, non appelée
 function SAR_fct.StopRadioBeaconTransmission(ejPilotName)
+	if not ejPilotName or type(ejPilotName) ~= "string" then
+		env.info("DCE_Bug StopRadioBeaconTransmission: ejPilotName manquant ou invalide")
+		return
+	end
 
-	trigger.action.stopRadioTransmission('radioBeacon_'..ejPilotName)
+	trigger.action.stopRadioTransmission('radioBeacon_' .. ejPilotName)
 
-	env.info( "DCE_RADIO StopRadioBeaconTransmission  "..tostring('radioBeacon_'..ejPilotName))
+	env.info("DCE_RADIO StopRadioBeaconTransmission  " .. tostring('radioBeacon_' .. ejPilotName))
 
 	--set a OFF la radio du l'ejectedPilot
-	for MGRS_Chute, zone in pairs(ZoneSAR) do
-		for pilotN, ejPilot in ipairs(zone) do
-			local ejPilotObj = Unit.getByName(ejPilot.name)
-			if ejPilot.sideName == ejPilotName then
-				ejPilot.radio_on = nil
-				env.info( "DCE_activateRadioBeacon set radioBeacon OFF for ejPilot.name "..tostring(ejPilot.name))	
+	for MGRS_Chute, zone in pairs(ZoneSAR or {}) do
+		for pilotN, ejPil in ipairs(zone) do
+			if ejPil and ejPil.name == ejPilotName then
+				ejPil.radio_on = nil
+				env.info("DCE_activateRadioBeacon set radioBeacon OFF for ejPil.name " .. tostring(ejPil.name))
 			end
 		end
 	end
-
 end
 
 	--************* SAR ejectedPilot PART ****************************************
@@ -1538,7 +1560,10 @@ function SAR_fct.menuF10_SAR(arg)
 
 					if unitEjectPilot then
 						local ejPilotVec3 = unitEjectPilot:getPoint()
-						local distance = math.sqrt(math.pow( pos_SAR_vec3.x - ejPilotVec3.x, 2) + math.pow(pos_SAR_vec3.z - ejPilotVec3.z, 2))
+						-- local distance = math.sqrt(math.pow( pos_SAR_vec3.x - ejPilotVec3.x, 2) + math.pow(pos_SAR_vec3.z - ejPilotVec3.z, 2))
+						local dx = pos_SAR_vec3.x - ejPilotVec3.x
+						local dz = pos_SAR_vec3.z - ejPilotVec3.z
+                        local distance = math.sqrt(dx * dx + dz * dz)
 
 						env.info("DCE_menuF10_SAR _F4 pilotN "..tostring(pilotN).." ejPil.name "..tostring(ejPil.name).." distance to player "..tostring(distance))
 
@@ -1894,7 +1919,10 @@ function ReFueling(playerGroup)
 			-- if _unit:getTypeName() == "S-3B Tanker" and _unit:isActive() then			
 			-- if _unit:getTypeName() == "S-3B Tanker"  and t.point.z > 100 and _unit:isActive() then			
 
-				local tempDistance = math.sqrt(math.pow(t.point.x - player.point.x, 2) + math.pow(t.point.y - player.point.y, 2))		--distance between tanker and player
+				-- local tempDistance = math.sqrt(math.pow(t.point.x - player.point.x, 2) + math.pow(t.point.y - player.point.y, 2))		--distance between tanker and player
+				local dx = t.point.x - player.point.x
+				local dy = t.point.y - player.point.y
+				local tempDistance = math.sqrt(dx * dx + dy * dy) --distance between tanker and player
 				if tempDistance < selected_distance then
 					tanker.point = t.point
 					tanker.TypeName = tankerTypeName
@@ -1940,9 +1968,9 @@ function ReFueling(playerGroup)
 
 	local intercept_LL =  coord.LOtoLL(interceptPosVec3)
 
-	LLposNstring, LLposEstring = LLtool.LLstrings(interceptPosVec3)
-	trigger.action.outText(tanker.callsign.." "..tanker.gpName.." Rdv: "..'N ' .. LLposNstring .. '   E ' .. LLposEstring.." Alt: "..infoAlti.." Speed "..infoSpeed, 20)
-
+	LLposNstring, LLposEstring = LLtool.LLstrings(interceptPosVec3) local txt = tanker.callsign .. " " .. tanker.gpName .. " Rdv: " ..
+    'N ' .. LLposNstring .. '   E ' .. LLposEstring .. " Alt: " .. infoAlti .. " Speed " .. infoSpeed
+	
 		local Mission = {														--define mission for interceptor group
 			id = 'Mission',
 			params = {
@@ -2030,7 +2058,11 @@ function ReFueling(playerGroup)
 			}
 		}
 
-		Controller.setTask(tanker.ctr, Mission)																			--activate task with mission for interceptor group							
+	local function Execute()
+		trigger.action.outText(txt, 20)
+		Controller.setTask(tanker.ctr, Mission)
+	end
+	timer.scheduleFunction(Execute, nil, timer.getTime() + 3) --activate task with mission for interceptor group							
 end
 
 function RequestCAP(playerGroup)
@@ -2090,7 +2122,10 @@ function RequestCAP(playerGroup)
 			if _unit:isActive() then
 			-- if _unit:getTypeName() == "S-3B Tanker"  and t.point.z > 100 and _unit:isActive() then			
 
-				local tempDistance = math.sqrt(math.pow(t.point.x - player.point.x, 2) + math.pow(t.point.y - player.point.y, 2))		--distance between tanker and player
+				-- local tempDistance = math.sqrt(math.pow(t.point.x - player.point.x, 2) + math.pow(t.point.y - player.point.y, 2))		--distance between tanker and player
+				local dx = t.point.x - player.point.x
+				local dy = t.point.y - player.point.y
+                local tempDistance = math.sqrt(dx * dx + dy * dy) --distance between tanker and player
 
 				if tempDistance < selected_distance then
 
@@ -2127,7 +2162,7 @@ function RequestCAP(playerGroup)
 		interception_alt = 7600
 	end
 
-	trigger.action.outText(CAP.callsign.." "..CAP.gpName, 20)
+	-- trigger.action.outText(CAP.callsign.." "..CAP.gpName, 20)
 
 
 		local Mission = {														--define mission for interceptor group
@@ -2217,32 +2252,51 @@ function RequestCAP(playerGroup)
 
 		Controller.setTask(CAP.ctr, Mission)																			--activate task with mission for interceptor group
 
-		trigger.action.outText("ADD_CR "..CAP.callsign.." "..CAP.gpName, 60)
+	local function Execute()
+		trigger.action.outText(CAP.callsign .. " " .. CAP.gpName, 20)
+		Controller.setTask(CAP.ctr, Mission)
+		trigger.action.outText("ADD_CR " .. CAP.callsign .. " " .. CAP.gpName, 60)
+	end
+	timer.scheduleFunction(Execute, nil, timer.getTime() + 3)
 end
 
 
 function getOut(arg)
-	env.info( "DCE_getOut A function getOut(gid) ")
+	env.info("DCE_getOut A function getOut(gid) ")
+
+	if not arg or not arg[1] or not arg[2] then
+		env.info("DCE_Bug getOut: argument manquant (arg/arg_groupObj/arg_playerName)")
+		return
+	end
 
 	local arg_groupObj = arg[1]
 	local arg_playerName = arg[2]
+
+	if not arg_groupObj.isExist or not arg_groupObj:isExist() then
+		env.info("DCE_getOut: groupObj n'existe plus, abandon")
+		return
+	end
 
 	local wingman = arg_groupObj:getUnits()
 	local playerName
 	local playerObj
 	local playerId
 
-	for w = 1, #wingman do
-		playerName = wingman[w]:getPlayerName()
+	if wingman then
+		for w = 1, #wingman do
+			if wingman[w] and wingman[w].isExist and wingman[w]:isExist() and wingman[w].getPlayerName then
+				playerName = wingman[w]:getPlayerName()
 
-		if playerName == arg_playerName then
-			playerObj = wingman[w]
-			playerId = Unit.getID(playerObj)
+				if playerName == arg_playerName then
+					playerObj = wingman[w]
+					playerId = Unit.getID(playerObj)
 
-			env.info( "DCE_getOut B Attempted emergency evacuation of the aircraft ")
-			trigger.action.outTextForUnit(playerId, "Attempted emergency evacuation of the aircraft ", 15)
+					env.info("DCE_getOut B Attempted emergency evacuation of the aircraft ")
+					trigger.action.outTextForUnit(playerId, "Attempted emergency evacuation of the aircraft ", 15)
 
-			GetOutGDFM({playerName, playerObj, playerId})
+					GetOutGDFM({ playerName, playerObj, playerId })
+				end
+			end
 		end
 	end
 end
@@ -2396,8 +2450,14 @@ addFuncs = function(gId, gObj, playerName)
 		-- for pName, value in pairs(EWR_optionPlayer) do
 		-- 	radioCommands[#radioCommands + 1] = missionCommands.addCommandForGroup(gId, tostring(pName) .." Get out", subR_C1, getOut, {gObj ,pName} )
         -- end
-		for playersName, unitObj in ipairs(wingmans) do
-			missionCommands.addCommandForGroup(gId, tostring(playersName) .. " Get out", subR_C1, getOut, { gObj, playersName })
+		for unitN, unitObj in ipairs(wingmans) do
+			if unitObj and unitObj.isExist and unitObj:isExist() and unitObj.getPlayerName then
+				local pName = unitObj:getPlayerName()
+				if pName then
+					missionCommands.addCommandForGroup(gId, tostring(pName) .. " Get out", subR_C1, getOut,
+						{ gObj, pName })
+				end
+			end
 		end
 
 		if campL.SC_CarrierIntoWind == "man" then
@@ -2482,7 +2542,85 @@ local function timerPlayerMenu(arg)
 end
 
 
+--TODO nouvelle fonction a tester
+local function _NEW_loopAFAC_CAS()
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+		Perf_F_N = Perf_F_N + 1
+	end
 
+	if next(AFAC_available) == nil then
+		if campL.debug then
+			local dt = os.clock() - t0
+			Perf_F = Perf_F + dt
+		end
+		return timer.getTime() + 17
+	end
+
+	for _, sideNum in ipairs({ coalition.side.BLUE, coalition.side.RED }) do
+		-- résout une seule fois par camp les AFAC de ce camp encore vivants
+		-- (avant : Group.getByName / getUnits / isExist refaits pour CHAQUE striker)
+		local sideAfacs = {}
+		for afacFlightName, afacData in pairs(AFAC_available) do
+			if afacData and sideNum == afacData.sideNum then
+				local afacGroupObj = Group.getByName(afacFlightName)
+				if afacGroupObj then
+					local unitsAFAC = afacGroupObj:getUnits()
+					local unitAFAC = unitsAFAC and unitsAFAC[1]
+					if unitAFAC and unitAFAC:isExist() then
+						sideAfacs[#sideAfacs + 1] = {
+							name = afacFlightName,
+							afacData = afacData, -- référence live (pas une copie), pour garder l'auto-throttling
+							unit = unitAFAC,
+						}
+					end
+				end
+			end
+		end
+
+		if #sideAfacs > 0 then
+			local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
+
+			for _, gp in pairs(groups) do
+				local gpName = Group.getName(gp)
+				if gpName and string.find(gpName, "Strike", 1, true) then
+					local strikers = gp:getUnits()
+					for wingmanN, unitStriker in ipairs(strikers) do
+						if unitStriker and unitStriker:isExist() then
+							local unitStrikerVec3 = unitStriker:getPoint()
+
+							for _, afac in ipairs(sideAfacs) do
+								local smokeData = afac.afacData.smokeData
+								if smokeData and timer.getTime() > (smokeData.time + 300) then
+									local afacVec3 = afac.unit:getPoint()
+									local dx = afacVec3.x - unitStrikerVec3.x
+									local dz = afacVec3.z - unitStrikerVec3.z
+									local distance = math.sqrt(dx * dx + dz * dz)
+
+									if distance <= 10000 then
+										trigger.action.smoke(smokeData.targetPosVec3, SmokeColor_TargetDesignation)
+										AFAC_available[afac.name]["smokeData"] = {
+											time = timer.getTime(),
+											targetPosVec3 = smokeData.targetPosVec3,
+											sideNum = sideNum,
+										}
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_F = Perf_F + dt
+	end
+	return timer.getTime() + 17
+end
 
 local function loopAFAC_CAS()
 
@@ -2572,15 +2710,12 @@ end
 
 --uniquement pour le Bingo?
 local function loopPilot()
-
 	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
 
-	for n=1, 5 do
-		for _, gp in pairs(groups) do
-			local gpGid = Group.getID(gp)
-			if gpGid and gp then
-				bingo(gpGid, gp)
-			end
+	for _, gp in pairs(groups) do
+		local gpGid = Group.getID(gp)
+		if gpGid and gp then
+			bingo(gpGid, gp)
 		end
 	end
 
