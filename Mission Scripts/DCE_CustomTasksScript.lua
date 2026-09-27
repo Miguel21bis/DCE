@@ -4594,6 +4594,9 @@ end	--Custom_SAR
 -- cache global du relief pour eviter les appels repetes a land.getHeight
 TerrainHeightCache = {}
 
+TerrainStats_N = TerrainStats_N or 0
+TerrainStats_Cache_N = TerrainStats_Cache_N or 0
+
 -- retourne l'altitude terrain avec mise en cache (precision par pas de 50m)
 -- pourquoi: evite des milliers d'appels couteux a land.getHeight
 function GetTerrainHeightCached(arg_x, arg_y)

@@ -3,12 +3,6 @@
 --Version 21.12.2014
 --This script gives radars a chance to detect anti-radar missiles launched against them and to shut down for self-preservation
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  M83_c
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/ARM_Defence_Script.lua"] = "4.6.13"
-------------------------------------------------------------------------------------------------------- 	
-
-env.info("DCE_ARM START LOADING ARM_Defence_Script.lua "..tostring(versionDCE["Mission Scripts/ARM_Defence_Script.lua"]))
 
 
 -- Cache global des jammers (mis à jour périodiquement)
@@ -508,12 +502,6 @@ end
 function ARM_Shot_EventHandler:onEvent(event)
 
     if event.id == world.event.S_EVENT_SHOT then
-		local t0
-		if campL.debug then
-			t0 = os.clock()
-			Perf_M_N = Perf_M_N + 1
-		end
-
         local wep = event.weapon    --Get the weapon of the launch event
         local tgt = wep:getTarget() --Get the target of the weapon
         local addTime = 0
@@ -662,11 +650,6 @@ function ARM_Shot_EventHandler:onEvent(event)
                 checkMissileProximity()
             end
         end
-
-		if campL.debug then
-			local dt = os.clock() - t0
-			Perf_M = Perf_M + dt
-		end
     end
 
 end

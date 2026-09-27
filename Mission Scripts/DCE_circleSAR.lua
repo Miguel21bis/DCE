@@ -1,11 +1,5 @@
 --circle in the middle of the fields, free of obstacles (one hopes) to land a helicopter for SAR evacuation
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  modification
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/circleSAR.lua"] = "1.1.2"
-------------------------------------------------------------------------------------------------------- 
--- Miguel21 modification M61_a			SAR 
-------------------------------------------------------------------------------------------------------- 
 
 circleSAR = {
    {   

@@ -2,32 +2,6 @@
 --Script attached to mission and executed via trigger
 --Requires DCS os and io functions sanitizer to be deactivated
 ------------------------------------------------------------------------------------------------------- 
--- MBot version 20200111
--------------------------------------------------------------------------------------------------------
--- last modification  debug_q cleanCode_h
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/EventsTracker.lua"] = "2.14.77"
-------------------------------------------------------------------------------------------------------- 
-
--- test_b 					(b: saved game on another DD)
--- Reglage_d 				(d modified TableSerialization)(c CVN to CV)(a: global pathD)
--- debug_q					(q CleanName)(op prohibited character of player names)(n getCategory)(m Pedro cycle)(n scene life0)(m escorte)(jkl wrong caratere in player names)(i: base.side = base.coalition)(b: n'affiche pas les messages d'error sauf � la fin de mission)
--- cleanCode_h				(g springCleaning)
--- modification M88_a		CheckRefuelProgress
--- modification M62_a		compatible Datacard Generator or CombatFlite
--- modification M61_j		SAR (j noSAR in wrongSide)
--- modification M50_c		Records landings for later use in logistics (C-130, Transport...) (bc: caractere interdit)
--- modification M40_i		Pedro Helicopter (i use new follow task)
--- modification M37_e		SuperCarrier
--- modification M35_d		(d: info log) version ScriptsMod
--- modification M18_g		despawn (g info bad coalition)(e: option confMod)(d: active unit) (cf despawn/destroy Plane on BaseAirStart) destroy Plane Landing CV + FARP 
-------------------------------------------------------------------------------------------------------- 
-
-env.info("DCE_EventT START LOADING EventsTracker.lua "..tostring(versionDCE["Mission Scripts/EventsTracker.lua"]))
-
-env.info("DCE_EventT env.mission.theatre?: "..tostring(env.mission.theatre ))
-
-_affiche(world.event, "DCE_EventT world.event: ")
 
 Info_event_C = {}
 
@@ -36,7 +10,6 @@ for eventName, eventId in pairs(world.event) do
 		Info_event_C[eventId] = eventName
 	end
 end
-_affiche(Info_event_C, "DCE_EventTInfo_event_C ")
 
 Info_event_B = {}
 
@@ -72,23 +45,6 @@ local BDA_THRESHOLD = 15    -- nombre d'événements BDA tolérés dans cette fe
 for eventName, eventId in pairs(world.event) do
 	table.insert(Info_event_B, eventId, eventName)
 end
-
--- if campL.debug then
--- 	local logStr = "Info_event_B = " .. TableSerialization(Info_event_B, 0)
--- 	local logFile = io.open(PathDCE.."Debug\\Info_event_B.lua", "w")
--- 	if logFile then
--- 		logFile:write(logStr)
--- 		logFile:close()
--- 	else
--- 		env.info("DCE_EventT Info_event_B: Failed to open log file for writing.")
--- 	end
--- end
-
-env.info("DCET_testingConstante: Unit.Category.AIRPLANE "..tostring(Unit.Category.AIRPLANE))
-env.info("DCET_testingConstante: Unit.Category.HELICOPTER "..tostring(Unit.Category.HELICOPTER))
-env.info("DCET_testingConstante: Unit.Category.GROUND_UNIT "..tostring(Unit.Category.GROUND_UNIT))
-env.info("DCET_testingConstante: Unit.Category.SHIP "..tostring(Unit.Category.SHIP))
-env.info("DCET_testingConstante: Unit.Category.STRUCTURE "..tostring(Unit.Category.STRUCTURE))
 
 local scenLog = {}
 local eventIdTotal = {}
@@ -380,18 +336,9 @@ end
 
 local function destructionScenaryInZone(point, radius, launcherName)
 
-
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-		Perf_J_N = Perf_J_N + 1
-	end
-
     if radius > 1000 then
 		if campL.debug then
 			env.info("DCE_EventT destructionScenaryInZone: radius too big, RETURN ")
-			local dt = os.clock() - t0
-			Perf_J = Perf_J + dt
 		end
 		
 		return
@@ -407,10 +354,6 @@ local function destructionScenaryInZone(point, radius, launcherName)
 			-- Optimisation: évite de traiter les objets de forêt (très nombreux) pour économiser du CPU
 			-- On ne fait la détection qu'une fois, et on saute le traitement si c'est une forêt
 			if objType and objType:find("FOREST", 1, true) then
-				if campL.debug then
-					local dt = os.clock() - t0
-					Perf_J = Perf_J + dt
-				end
 				return -- On sort immédiatement, on ne log pas les forêts
 			end
 
@@ -440,11 +383,6 @@ local function destructionScenaryInZone(point, radius, launcherName)
 		}
 	}
     world.searchObjects(Object.Category.SCENERY, searchArea, if_found)
-
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_J = Perf_J + dt
-	end
 end
 
 
@@ -474,12 +412,6 @@ local function getTrackingInterval(alt)
 end
 
 local function updateTrackedBombs()
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-		Perf_H_N = Perf_H_N + 1
-	end
-	
 	local now = timer.getTime()
 
 	for id, data in pairs(trackedBombs) do
@@ -527,28 +459,13 @@ local function updateTrackedBombs()
 		end
 	end
 
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_H = Perf_H + dt
-	end
-	
 	return now + 0.2
 end
 
 
 local function trackBomb(bomb, desc, initiator)
 
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-		Perf_E_N = Perf_E_N + 1
-	end
-	
     if not bomb or not bomb.isExist or not bomb:isExist() then
-		if campL.debug then
-			local dt = os.clock() - t0
-			Perf_E = Perf_E + dt
-		end
 		return
 	end
 
@@ -562,116 +479,8 @@ local function trackBomb(bomb, desc, initiator)
 		lastPosVec3 = nil,
 		impactHandled = false,
     }
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_E = Perf_E + dt
-	end
 	
 end
-
---[[ local function trackBomb(bomb, desc, initiator)
-
-	local t0 = os.clock()
-	Perf_E_N = Perf_E_N + 1
-
-    -- Génère un ID unique même si bomb:getID() n'existe plus
-    local id = (bomb and bomb.getID and bomb:getID()) or GenerateIdAleatoire()
-    local lastPosVec3 = nil
-    local weaponName = desc and (desc.displayName or (bomb and bomb.getTypeName and bomb:getTypeName()) or "unknown") or "unknown"
-    local explosiveMass = desc and desc.warhead and desc.warhead.explosiveMass or 0
-    -- local warheadMass = desc and desc.warhead and desc.warhead.mass or 0
-    local launcherName = initiator and initiator.getName and initiator:getName() or "unknown"
-
-    -- debugBomb("Tracking bombe : " .. weaponName .. " | ID: " .. tostring(id))
-
-    local function checkBomb()
-        if not bomb or not (bomb.isExist and bomb:isExist()) then
-            if lastPosVec3 and lastPosVec3.x and lastPosVec3.y and lastPosVec3.z then
-                -- debugBomb(string.format(" Bombe %s tombée à %.1f / %.1f / %.1f", weaponName, lastPos.x, lastPos.y, lastPos.z))
-                scenLog["BOMB_"..id] = {
-                    event = "BOMB_IMPACT",
-                    weaponName = weaponName,
-                    explosiveMass = explosiveMass,
-                    -- warheadMass = warheadMass,
-                    x = lastPosVec3.x,
-                    y = lastPosVec3.z,
-                    z = lastPosVec3.y,
-                    initiator = launcherName,
-                    time = timer.getTime(),
-                    valid = true,
-                }
-
-				--ajoute ici une fonction pour detecter les batiments dans la zone de souffle
-				local correctedRadius = 50
-				if explosiveMass then
-					local k_val = 4.0  -- k = 4 par défaut, typique pour bâtiments légers
-					correctedRadius = k_val * (explosiveMass)^(1/3)
-				end
-
-				-- Ajoute la détection de destruction de bâtiments dans la zone de souffle avec un timer pour diluer les requêtes
-				local delay = 120
-				local function scheduleDestructionScenery(repeatCount)
-					destructionScenaryInZone(lastPosVec3, correctedRadius, launcherName)
-					if repeatCount > 1 then
-						timer.scheduleFunction(function()
-							scheduleDestructionScenery(repeatCount - 1)
-						end, {}, timer.getTime() + 0.9)
-					end
-				end
-				-- Lance la première détection après 60s, puis 9 autres espacées de 0.1s (total 10 exécutions)
-				timer.scheduleFunction(function()
-					scheduleDestructionScenery(10)
-				end, {}, timer.getTime() + delay)
-
-            else
-                -- debugBomb(" Bombe a disparu sans position finale.")
-                scenLog["BOMB_"..id] = {
-                    event = "BOMB_IMPACT",
-                    weaponName = weaponName,
-                    explosiveMass = explosiveMass,
-                    -- warheadMass = warheadMass,
-                    x = 0, y = 0, z = 0,
-                    initiator = launcherName,
-                    time = timer.getTime(),
-                    valid = false,
-                }
-            end
-            trackedBombs[id] = nil
-            return
-        end
-
-        -- local success, posVec3 = pcall(function() return bomb:getPoint() end)
-        -- if success and posVec3 and posVec3.x and posVec3.y and posVec3.z then
-        --     lastPosVec3 = posVec3
-        -- else
-        --     -- debugBomb("Erreur sur getPoint(), bombe probablement supprimée trop tôt.")
-        -- end
-
-		local posVec3 = bomb:getPoint()
-
-        local alt = lastPosVec3 and lastPosVec3.y or 0
-        local nextCheck = getTrackingInterval(alt)
-    --     timer.scheduleFunction(checkBomb, {}, timer.getTime() + nextCheck)
-    end
-
-
-	
-    trackedBombs[id] = true
-    checkBomb()
-
-	-- trackedBombs[id] = {
-	-- 	bomb = bomb,
-	-- 	desc = desc,
-	-- 	initiator = initiator,
-	-- 	lastPosVec3 = nil,
-    -- }
-
-	local dt = os.clock() - t0
-	Perf_E = Perf_E + dt
-	
-
-end ]]
-
 
 -- Fonction périodique pour notifier le joueur pendant le ravitaillement
 local function CheckRefuelProgress()
@@ -882,242 +691,201 @@ function eventHandlerDCE:onEvent(event)
 		end
 	end
 
-	-- on ne traite et surtout on n'enregistre pas les events interressant pour la DCE, sinon surchage CPU
-	if eventsSurvey[event.id] then
-
-		local t0
-		if campL.debug then
-            env.info("DCE_EventsTracker event.id " .. tostring(event.id) .. " " .. tostring(Info_event[event.id]))
-
-			t0 = os.clock()
-			Perf_O_N = Perf_O_N + 1
-
-			if not Perf_EventsT[event.id] then
-                Perf_EventsT[event.id] = {
-                    N = 1,
-                    timing = 0,
-					t_N = 0,
-				}
-            else
-				Perf_EventsT[event.id].N = Perf_EventsT[event.id].N + 1
-			end
-
-		end
-
 		
-        -- Anti-flood BDA (global, sans getID ni getName)
-        if event.id == world.event.S_EVENT_BDA then
+	-- Anti-flood BDA (global, sans getID ni getName)
+	if event.id == world.event.S_EVENT_BDA then
 
-			if survey_EVENT_BDA then
+		if survey_EVENT_BDA then
 
-				-- Vérification du flood BDA
-				if not bdaTimestamps then
-					bdaTimestamps = {}
-				end
+			-- Vérification du flood BDA
+			if not bdaTimestamps then
+				bdaTimestamps = {}
+			end
 
-				env.info("[BDA-FLOOD A] S_EVENT_BDA detected ")
+			env.info("[BDA-FLOOD A] S_EVENT_BDA detected ")
 
-				local now = timer.getTime()
-				table.insert(bdaTimestamps, now)
+			local now = timer.getTime()
+			table.insert(bdaTimestamps, now)
 
-				-- Nettoyage des timestamps trop anciens
-				local recent = {}
-				for _, t in ipairs(bdaTimestamps) do
-					if now - t < BDA_WINDOW then
-						table.insert(recent, t)
-					end
-				end
-				bdaTimestamps = recent
-
-				-- Détection du flood
-				if #recent >= BDA_THRESHOLD then
-					trigger.action.outText("BDA FLOOD détecté : " .. #recent .. " événements en " .. BDA_WINDOW .. "s", 20)
-					env.info("[BDA-FLOOD B] Seuil atteint : " .. #recent)
-					
-					local tgt = event.target
-					
-					if tgt then
-
-						local tgtName = tgt.getName and tgt:getName() or "unknown"
-						
-						trigger.action.outText("BDA flood détecté tgtName : " .. tgtName ..  " sera upprimé", 20)
-						env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  "  sera upprimé")
-
-						local isPlayer = tgt.getPlayerName and tgt:getPlayerName()
-						if not isPlayer and tgtName then
-							isPlayer = Players[tgtName]
-						end
-
-						if tgt and tgt.isExist and not isPlayer then
-							if tgt:isExist() then tgt:destroy() end
-							env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  " supprimés OK")
-						elseif isPlayer then
-							env.info("[BDA-FLOOD C]BDA flood détecté mais la cible est un joueur : " .. tostring(isPlayer) ..  " ne sera pas supprimé")
-						end
-					end
-
-					local init = event.initiator
-					if init then
-
-						local initName = init.getName and init:getName() or "unknown"
-
-						trigger.action.outText("BDA flood détecté initName: "  .. initName .. " supprimé", 20)
-						env.info("[BDA-FLOOD C]BDA flood détecté initName: " .. initName .. " supprimé")
-
-						local isPlayer = init.getPlayerName and init:getPlayerName()
-						if not isPlayer and initName then
-							isPlayer = Players[initName]
-						end
-
-						if init and init.isExist and not isPlayer then
-							if init:isExist() then init:destroy() end
-							env.info("[BDA-FLOOD C]BDA flood détecté initName : " .. initName ..  " supprimés OK")
-						elseif isPlayer then
-							env.info("[BDA-FLOOD C]BDA flood détecté mais l initiateur est un joueur : " .. isPlayer ..  " ne sera pas supprimé")
-						end
-
-						
-					end
-
-					bdaTimestamps = {}
+			-- Nettoyage des timestamps trop anciens
+			local recent = {}
+			for _, t in ipairs(bdaTimestamps) do
+				if now - t < BDA_WINDOW then
+					table.insert(recent, t)
 				end
 			end
-        end
+			bdaTimestamps = recent
+
+			-- Détection du flood
+			if #recent >= BDA_THRESHOLD then
+				trigger.action.outText("BDA FLOOD détecté : " .. #recent .. " événements en " .. BDA_WINDOW .. "s", 20)
+				env.info("[BDA-FLOOD B] Seuil atteint : " .. #recent)
+				
+				local tgt = event.target
+				
+				if tgt then
+
+					local tgtName = tgt.getName and tgt:getName() or "unknown"
+					
+					trigger.action.outText("BDA flood détecté tgtName : " .. tgtName ..  " sera upprimé", 20)
+					env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  "  sera upprimé")
+
+					local isPlayer = tgt.getPlayerName and tgt:getPlayerName()
+					if not isPlayer and tgtName then
+						isPlayer = Players[tgtName]
+					end
+
+					if tgt and tgt.isExist and not isPlayer then
+						if tgt:isExist() then tgt:destroy() end
+						env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  " supprimés OK")
+					elseif isPlayer then
+						env.info("[BDA-FLOOD C]BDA flood détecté mais la cible est un joueur : " .. tostring(isPlayer) ..  " ne sera pas supprimé")
+					end
+				end
+
+				local init = event.initiator
+				if init then
+
+					local initName = init.getName and init:getName() or "unknown"
+
+					trigger.action.outText("BDA flood détecté initName: "  .. initName .. " supprimé", 20)
+					env.info("[BDA-FLOOD C]BDA flood détecté initName: " .. initName .. " supprimé")
+
+					local isPlayer = init.getPlayerName and init:getPlayerName()
+					if not isPlayer and initName then
+						isPlayer = Players[initName]
+					end
+
+					if init and init.isExist and not isPlayer then
+						if init:isExist() then init:destroy() end
+						env.info("[BDA-FLOOD C]BDA flood détecté initName : " .. initName ..  " supprimés OK")
+					elseif isPlayer then
+						env.info("[BDA-FLOOD C]BDA flood détecté mais l initiateur est un joueur : " .. isPlayer ..  " ne sera pas supprimé")
+					end
+
+					
+				end
+
+				bdaTimestamps = {}
+			end
+		end
+	end
 
    
 		
-		--custom events log
-		local log_entry = {															--create a custom log entry for this event
-			t = timer.getTime(),														--store time of event
-			infoEvent = Info_event[event.id] or "S_EVENT_UNKNOWN",		--store event name
-		}
-		if event.id == world.event.S_EVENT_SHOT then								--1
-			log_entry.type = "shot"
-		elseif event.id == world.event.S_EVENT_HIT then								--2
-			log_entry.type = "hit"
-		elseif event.id == world.event.S_EVENT_KILL then							--28
-			log_entry.type = "kill"
-		elseif event.id == world.event.S_EVENT_UNIT_LOST then						--30
-			log_entry.type = "unit lost"
-		elseif event.id == world.event.S_EVENT_TAKEOFF then							--3
-			log_entry.type = "takeoff"
-		elseif event.id == world.event.S_EVENT_LAND then							--4
-			log_entry.type = "land"
-		elseif event.id == world.event.S_EVENT_LANDING_QUALITY_MARK then			--36
-			log_entry.type = "land quality"
-		elseif event.id == world.event.S_EVENT_CRASH then							--5
-			log_entry.type = "crash"
-		elseif event.id == world.event.S_EVENT_EJECTION then						--6
-			log_entry.type = "eject"
-		elseif event.id == world.event.S_EVENT_REFUELING then						--7
-			log_entry.type = "refueling"
-		elseif event.id == world.event.S_EVENT_DEAD then							--8
-			log_entry.type = "dead"
-		elseif event.id == world.event.S_EVENT_PILOT_DEAD then						--9
-			log_entry.type = "pilot dead"
-		elseif event.id == world.event.S_EVENT_DISCARD_CHAIR_AFTER_EJECTION then	--33
-			log_entry.type = "pilot seat separation"
-		elseif event.id == world.event.S_EVENT_LANDING_AFTER_EJECTION then			--31
-			log_entry.type = "pilot land"
-		elseif event.id == world.event.S_EVENT_BASE_CAPTURED then					--10
-			log_entry.type = "base captured"
-		elseif event.id == world.event.S_EVENT_MISSION_START then					--11
-			log_entry.type = "mission start"
-		elseif event.id == world.event.S_EVENT_MISSION_END then						--12
-			log_entry.type = "mission end"
-		elseif event.id == world.event.S_EVENT_TOOK_CONTROL then
-			log_entry.type = "took control"
-		elseif event.id == world.event.S_EVENT_BIRTH then							--15
-			log_entry.type = "birth"
-		elseif event.id == world.event.S_EVENT_ENGINE_STARTUP then					--18
-			log_entry.type = "engine startup"
-		elseif event.id == world.event.S_EVENT_ENGINE_SHUTDOWN then					--19
-			log_entry.type = "engine shutdown"
-		elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then				--20
-			log_entry.type = "player enter unit"
-		elseif event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then				--21
-			log_entry.type = "player leave unit"
-		end
-		
-		if campL.debug then
-			env.info("DCE_EventsTracker log_entry.type: "..tostring(log_entry.type).." | "..tostring(log_entry.infoEvent))
-		end
+	--custom events log
+	local log_entry = {															--create a custom log entry for this event
+		t = timer.getTime(),														--store time of event
+		infoEvent = Info_event[event.id] or "S_EVENT_UNKNOWN",		--store event name
+	}
+	if event.id == world.event.S_EVENT_SHOT then								--1
+		log_entry.type = "shot"
+	elseif event.id == world.event.S_EVENT_HIT then								--2
+		log_entry.type = "hit"
+	elseif event.id == world.event.S_EVENT_KILL then							--28
+		log_entry.type = "kill"
+	elseif event.id == world.event.S_EVENT_UNIT_LOST then						--30
+		log_entry.type = "unit lost"
+	elseif event.id == world.event.S_EVENT_TAKEOFF then							--3
+		log_entry.type = "takeoff"
+	elseif event.id == world.event.S_EVENT_LAND then							--4
+		log_entry.type = "land"
+	elseif event.id == world.event.S_EVENT_LANDING_QUALITY_MARK then			--36
+		log_entry.type = "land quality"
+	elseif event.id == world.event.S_EVENT_CRASH then							--5
+		log_entry.type = "crash"
+	elseif event.id == world.event.S_EVENT_EJECTION then						--6
+		log_entry.type = "eject"
+	elseif event.id == world.event.S_EVENT_REFUELING then						--7
+		log_entry.type = "refueling"
+	elseif event.id == world.event.S_EVENT_DEAD then							--8
+		log_entry.type = "dead"
+	elseif event.id == world.event.S_EVENT_PILOT_DEAD then						--9
+		log_entry.type = "pilot dead"
+	elseif event.id == world.event.S_EVENT_DISCARD_CHAIR_AFTER_EJECTION then	--33
+		log_entry.type = "pilot seat separation"
+	elseif event.id == world.event.S_EVENT_LANDING_AFTER_EJECTION then			--31
+		log_entry.type = "pilot land"
+	elseif event.id == world.event.S_EVENT_BASE_CAPTURED then					--10
+		log_entry.type = "base captured"
+	elseif event.id == world.event.S_EVENT_MISSION_START then					--11
+		log_entry.type = "mission start"
+	elseif event.id == world.event.S_EVENT_MISSION_END then						--12
+		log_entry.type = "mission end"
+	elseif event.id == world.event.S_EVENT_TOOK_CONTROL then
+		log_entry.type = "took control"
+	elseif event.id == world.event.S_EVENT_BIRTH then							--15
+		log_entry.type = "birth"
+	elseif event.id == world.event.S_EVENT_ENGINE_STARTUP then					--18
+		log_entry.type = "engine startup"
+	elseif event.id == world.event.S_EVENT_ENGINE_SHUTDOWN then					--19
+		log_entry.type = "engine shutdown"
+	elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT then				--20
+		log_entry.type = "player enter unit"
+	elseif event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then				--21
+		log_entry.type = "player leave unit"
+	end
+	
+	if campL.debug then
+		env.info("DCE_EventsTracker log_entry.type: "..tostring(log_entry.type).." | "..tostring(log_entry.infoEvent))
+	end
 
-		if not eventIdTotal[event.id] then eventIdTotal[event.id] = 0 end
-		eventIdTotal[event.id] = eventIdTotal[event.id] + 1
+	if not eventIdTotal[event.id] then eventIdTotal[event.id] = 0 end
+	eventIdTotal[event.id] = eventIdTotal[event.id] + 1
 
-		--recupere le SIDE une fois pour toute:
-		local initiatorSideName
-		local initiatorName
-        local targetSideName
-        local initiatorVec3
-		local initiatorId
+	--recupere le SIDE une fois pour toute:
+	local initiatorSideName
+	local initiatorName
+	local targetSideName
+	local initiatorVec3
+	local initiatorId
 
-		local initiatorObjCategory
-		local targetObjCategory
+	local initiatorObjCategory
+	local targetObjCategory
 
-		if event.initiator then
-			initiatorObjCategory = Object.getCategory(event.initiator)
-            initiatorName = event.initiator.getName and event.initiator:getName() or "unknown"
-            initiatorVec3 = event.initiator.getPoint and event.initiator:getPoint()
-			initiatorId = event.initiator.getID and event.initiator:getID() or "unknown"
+	if event.initiator then
+		initiatorObjCategory = Object.getCategory(event.initiator)
+		initiatorName = event.initiator.getName and event.initiator:getName() or "unknown"
+		initiatorVec3 = event.initiator.getPoint and event.initiator:getPoint()
+		initiatorId = event.initiator.getID and event.initiator:getID() or "unknown"
 
-			if Object_Category[initiatorObjCategory] then
-				if event.initiator.getCoalition then
-					local coalitionId = event.initiator:getCoalition()
-					initiatorSideName = CoalitionIdToName[tonumber(coalitionId)]
-				end
+		if Object_Category[initiatorObjCategory] then
+			if event.initiator.getCoalition then
+				local coalitionId = event.initiator:getCoalition()
+				initiatorSideName = CoalitionIdToName[tonumber(coalitionId)]
 			end
 		end
+	end
 
-        if event.target then
-            targetObjCategory = Object.getCategory(event.target)
+	if event.target then
+		targetObjCategory = Object.getCategory(event.target)
 
-        --    if Object_Category[targetObjCategory] then
-        --          if event.target.getCoalition then
-        --             if event.target.isExist and event.target:isExist() then
-        --                 local targetCoalId = event.target:getCoalition() --1079: Unit doesn't exist
-        --                 targetSideName = CoalitionIdToName[tonumber(targetCoalId)]
-        --             else -- pour éviter --779: Unit doesn't exist
-        --                 env.info("DCE_EventsTracker target Unit doesn't exist: Category: " .. tostring(targetObjCategory))
-        --                 -- if event.target.getDesc then
-        --                 -- 	local targetDesc = event.target:getDesc()
-        --                 -- 	_affiche(targetDesc, "DCE_EventsTracker targetDesc ")
-        --                 -- end
-        --             end
-        --         end
-        --     end
+		-- priorité : utiliser les données déjà présentes dans l'event (0 coût CPU, 0 risque)
+		local targetCoalId = event.target_coalition
 
-			-- priorité : utiliser les données déjà présentes dans l'event (0 coût CPU, 0 risque)
-			local targetCoalId = event.target_coalition
-
-			if targetCoalId and targetCoalId ~= 0 then
-				targetSideName = CoalitionIdToName[targetCoalId]
-			else
-				-- fallback uniquement si vraiment nécessaire
-				if Object_Category[targetObjCategory] then
-					-- filtre dur : uniquement les UNIT
-					if targetObjCategory == Object.Category.UNIT then
-						if event.target
-							and event.target.getCoalition
-							and event.target.isExist
-							and event.target:isExist()
-						then
-							targetCoalId = event.target:getCoalition()
-							targetSideName = CoalitionIdToName[targetCoalId]
-						else
-							env.info("DCE_EventsTracker target invalid (UNIT expected)")
-						end
+		if targetCoalId and targetCoalId ~= 0 then
+			targetSideName = CoalitionIdToName[targetCoalId]
+		else
+			-- fallback uniquement si vraiment nécessaire
+			if Object_Category[targetObjCategory] then
+				-- filtre dur : uniquement les UNIT
+				if targetObjCategory == Object.Category.UNIT then
+					if event.target
+						and event.target.getCoalition
+						and event.target.isExist
+						and event.target:isExist()
+					then
+						targetCoalId = event.target:getCoalition()
+						targetSideName = CoalitionIdToName[targetCoalId]
 					else
-						-- debug utile pour comprendre les cas foireux (point, weapon, etc.)
-						env.info("DCE_EventsTracker target skipped (not UNIT): " .. tostring(targetObjCategory))
+						env.info("DCE_EventsTracker target invalid (UNIT expected)")
 					end
+				else
+					-- debug utile pour comprendre les cas foireux (point, weapon, etc.)
+					env.info("DCE_EventsTracker target skipped (not UNIT): " .. tostring(targetObjCategory))
 				end
 			end
-
-        end
-
-		
+		end
 
 		if log_entry.type == "eject"  then
             env.info("DCE_EventT_eject A, id: " .. tostring(event.id) .. " event.initiator " .. tostring(event.initiator))
@@ -2304,15 +2072,6 @@ function eventHandlerDCE:onEvent(event)
 
             SatusGroupAircraft[groupName]["landing"] = true
         end
-		
-        if campL.debug then
-            local dt = os.clock() - t0
-            Perf_O = Perf_O + dt
-
-			Perf_EventsT[event.id].N = Perf_EventsT[event.id].N + 1
-			Perf_EventsT[event.id].timing = Perf_EventsT[event.id].timing + dt
-			Perf_EventsT[event.id].t_N = Perf_EventsT[event.id].timing / Perf_EventsT[event.id].N
-        end
 	
 	end
 end
@@ -2366,12 +2125,6 @@ end
 -- modification M18.c despawn/destroy Plane on BaseAirStart
 local function CheckRtbAirbase()
 
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-		Perf_I = 0
-		Perf_I_N = Perf_I_N + 1
-	end
 	-- BaseAirStart = {
 		-- ['BA Wahda'] = {
 			-- coalition = "blue"
@@ -2425,11 +2178,6 @@ local function CheckRtbAirbase()
 				env.info( "DCE_INFO : ***WARNING***, the AIRSTART base "..tostring(base_name).." does not have a declared coalition and therefore cannot despawn aircraft arriving at its level. ")
 			end
 		end
-	end
-
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_I = Perf_I + dt
 	end
 
 	return timer.getTime() + 30
