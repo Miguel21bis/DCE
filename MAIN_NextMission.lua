@@ -459,19 +459,19 @@ addFileTrigger("DCE_Util_Common.lua")										-- Chantier A DCE InGame : utilit
 addFileTrigger("camp_status.lua")
 addFileTrigger("DCE_RadioF10.lua")										-- Renomme depuis AddCommandRadioF10.lua
 addFileTrigger("DCE_Background.lua")										-- Chantier B2 DCE InGame : sous-systèmes tâche de fond (avoidArea, EWR, CarrierDeckMonitor...)
-addFileTrigger("EventsTracker.lua")
+addFileTrigger("DCE_EventsTracker.lua")
 addFileTrigger("Fuel_Check.lua")													-- Norman99 Modification	M57
 addFileTrigger("ATC_ShutUp_GENERIC.lua")											-- Psyko Modification		M59
 addFileTrigger("GCIdata.lua")
-addFileTrigger("GCIscript.lua")
-addFileTrigger("ARM_Defence_Script.lua")
-addFileTrigger("CustomTasksScript.lua")
-addFileTrigger("CarrierIntoWindScript.lua")
-addFileTrigger("Pedro.lua")
-addFileTrigger("SAR.lua")
-addFileTrigger("Cercle_City.lua")
-addFileTrigger("AirGroundAttackScript.lua")
-addFileTrigger("bombOnRunway.lua")
+addFileTrigger("DCE_GCIscript.lua")
+addFileTrigger("DCE_ARM_Defence_Script.lua")
+addFileTrigger("DCE_CustomTasksScript.lua")
+addFileTrigger("DCE_CarrierIntoWindScript.lua")
+addFileTrigger("DCE_Pedro.lua")
+addFileTrigger("DCE_SAR.lua")
+addFileTrigger("DCE_Cercle_City.lua")
+addFileTrigger("DCE_AirGroundAttackScript.lua")
+addFileTrigger("DCE_bombOnRunway.lua")
 addFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 addFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
 -- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
@@ -1355,29 +1355,29 @@ if PlayerFlight then
 	miz:zipAddFile("warehouses", "warFile.lua")
 	miz:zipAddFile("l10n/DEFAULT/dictionary", "dicFile.lua")
 	miz:zipAddFile("l10n/DEFAULT/mapResource", "resFile.lua")
-	miz:zipAddFile("l10n/DEFAULT/EventsTracker.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/EventsTracker.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_EventsTracker.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_EventsTracker.lua")
 	miz:zipAddFile("l10n/DEFAULT/GCIdata.lua", "GCIdata.lua")
-	miz:zipAddFile("l10n/DEFAULT/GCIscript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/GCIscript.lua")
-	miz:zipAddFile("l10n/DEFAULT/ARM_Defence_Script.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ARM_Defence_Script.lua")
-	miz:zipAddFile("l10n/DEFAULT/CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CustomTasksScript.lua")
-	miz:zipAddFile("l10n/DEFAULT/AirGroundAttackScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AirGroundAttackScript.lua")
-	miz:zipAddFile("l10n/DEFAULT/CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CarrierIntoWindScript.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_GCIscript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_GCIscript.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_ARM_Defence_Script.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_ARM_Defence_Script.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_CustomTasksScript.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_AirGroundAttackScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_AirGroundAttackScript.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_CarrierIntoWindScript.lua")
 	miz:zipAddFile("l10n/DEFAULT/DCE_Util_Common.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Util_Common.lua")						-- Chantier A DCE InGame
 	miz:zipAddFile("l10n/DEFAULT/DCE_RadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_RadioF10.lua")						-- Renomme depuis AddCommandRadioF10.lua (Modification M29)
 	miz:zipAddFile("l10n/DEFAULT/DCE_Background.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Background.lua")						-- Chantier B2 DCE InGame
 	miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
 	miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
-	miz:zipAddFile("l10n/DEFAULT/Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Pedro.lua")										-- Pedro TEST
+	miz:zipAddFile("l10n/DEFAULT/DCE_Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Pedro.lua")										-- Pedro TEST
 	-- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 	miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "campL.lua")
 	-- miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
-	miz:zipAddFile("l10n/DEFAULT/SAR.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/SAR.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_SAR.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_SAR.lua")
 
 	if camp.theatre  == "Caucasus" then
-		miz:zipAddFile("l10n/DEFAULT/Cercle_City.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Cercle_City.lua")
+		miz:zipAddFile("l10n/DEFAULT/DCE_Cercle_City.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Cercle_City.lua")
 	end
 
-	miz:zipAddFile("l10n/DEFAULT/bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/bombOnRunway.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_bombOnRunway.lua")
 	miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
 	
 	if AAA_Barrage then

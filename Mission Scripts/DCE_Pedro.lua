@@ -3,16 +3,6 @@
 -- Garde le Pedro (Helicoptere de sauvetage), proche du CV, malgr� les changements de cap
 -- Keeps the Pedro (Rescue Helicopter), close to the CV, in spite of course changes.
 ------------------------------------------------------------------------------------------------------- 
--- last modification cleanCode_b
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/Pedro.lua"] = "1.5.16"
-------------------------------------------------------------------------------------------------------- 
--- cleanCode_b				(b springCleaning)
--- adjustment_a				(CVN to CV)
--- debug_b					(b Pedro cycle)
--- modification M61_a		 SAR
--- modification M40_h		 Pedro Helicopter (i use new follow task)(h debug)(b: TakeOff)
--------------------------------------------------------------------------------------------------------
 
 
 ListPedro = {}

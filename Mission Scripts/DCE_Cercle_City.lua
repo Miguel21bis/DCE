@@ -2,12 +2,6 @@
 
 --circle around the cities, to prevent a SAR helicopter from landing in the city
 ------------------------------------------------------------------------------------------------------- 
--- last modification:  modification
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/Cercle_City.lua"] = "1.1.2"
-------------------------------------------------------------------------------------------------------- 
--- Miguel21 modification M61_a			SAR 
-------------------------------------------------------------------------------------------------------- 
 
 circleCity = {
 	caucasus = {

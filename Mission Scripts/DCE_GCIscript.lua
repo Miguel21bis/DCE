@@ -2,17 +2,6 @@
 --Script attached to mission and executed via trigger
 --Requires GCIdata.lua to be attached and run in mission in order to get access to table GCI
 ------------------------------------------------------------------------------------------------------- 
--- last modification debug_d
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/GCIscript.lua"] = "1.4.23"
-------------------------------------------------------------------------------------------------------- 
--- cleanCode_b					(b springCleaning)
--- debug_d						(d CheckPointInPoly_XY_2, XZ au lieu XY)(c getcategory again)(b unit category, tks ldnz)(a getheading Z)
--- adjustment_d					(d targetPlane)(c no Inter In Bad Side) in wrongSide)(b: intercept)(a recherche blocage)
--- modification M11_j			Multiplayer
-------------------------------------------------------------------------------------------------------- 
-
-env.info("DCE_GCI START LOADING GCIscript.lua "..tostring(versionDCE["Mission Scripts/GCIscript.lua"]))
 
 ControlTime = 0
 

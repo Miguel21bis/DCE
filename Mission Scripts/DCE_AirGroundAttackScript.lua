@@ -2,15 +2,8 @@
 -- improved air-ground attack tactics for DCS AI
 -- version 2021.12.28
 -- by Marc "MBot" Marbot
-
-------------------------------------------------------------------------------------------------------- 
--- last modification:  
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/AirGroundAttackScript.lua"] = "1.2.4"
 ------------------------------------------------------------------------------------------------------- 
 
--- cleanCode_b				(b springCleaning)
--- modification M65_a		add AirGroundAttackTask Mbot s file
 
 ---------------------------------------------------------------------------------------------------------------------------------
 -- AirGroundAttackTask(FlightName, Target, WeaponType, ExpendQty, Dive, OffsetAngle, ClimbAngle, PopAlt, AttackDist, Reattack) --
@@ -1147,7 +1140,7 @@ end
 
 
 --function to return true when an aircraft points in target direction
-local function matchHeading(acName, tgt)
+function MatchHeading(acName, tgt)
 	local ac = Unit.getByName(acName)																--get aircraft
 	if ac then																						--aircraft exists
 		local acPos = ac:getPosition()

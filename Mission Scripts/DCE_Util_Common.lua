@@ -9,39 +9,117 @@
 -- ces fonctions n'ont aucun rapport avec les menus radio F10, elles avaient juste fini
 -- par atterrir dans ce fichier au fil du temps. Code repris tel quel, aucune logique modifiée.
 -------------------------------------------------------------------------------------------------------
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/DCE_Util_Common.lua"] = "1.0.0"
+-- Constantes/tables ajoutées le 25/09/2026 : mêmes constatation que ci-dessus, déplacées
+-- depuis DCE_RadioF10.lua (ex-AddCommandRadioF10.lua) où elles étaient utilisées silencieusement
+-- par 6+ autres fichiers. Contenu repris tel quel, aucune valeur modifiée.
 -------------------------------------------------------------------------------------------------------
 
-env.info("DCE START LOADING DCE_Util_Common.lua "..tostring(versionDCE["Mission Scripts/DCE_Util_Common.lua"]))
+Cache_UnitCategoryByGetID = {}
+-- Unit.Category = {
+--   AIRPLANE      = 0,
+--   HELICOPTER    = 1,
+--   GROUND_UNIT   = 2,
+--   SHIP          = 3,
+--   STRUCTURE     = 4
+-- }
+
+--target tracks
+Target_tracks = {
+	["blue"] = {},
+	["red"] = {}
+}
+
+CoalitionIdAlphaToName = {
+	["0"] = "neutral",
+	["1"] = "red",
+	["2"] = "blue",
+}
+
+CoalitionIdToName = {
+	[0] = "neutral",
+	[1] = "red",
+	[2] = "blue",
+}
+
+CoalitionIdToENI_Id = {
+	[0] = 1,
+	[1] = 2,
+	[2] = 1,
+}
+
+CoalitionNameToId = {
+	["neutral"] = 0,
+	["red"] = 1,
+	["blue"] = 2,
+}
+
+--variable global
+DCS_Side = { "blue", "red", "neutrals" }
+
+DCS_ENI_Side = {
+	["blue"] = "red",
+	["red"] = "blue"
+}
+
+-- Unit.Category = {
+-- 	AIRPLANE      = 0,
+-- 	HELICOPTER    = 1,
+-- 	GROUND_UNIT   = 2,
+-- 	SHIP          = 3,
+-- 	STRUCTURE     = 4
+--   }
+DCS_CategoryById = {
+	[0] = Airplane,
+	[1] = Helicopters,
+
+}
+
+Object_Category = {
+	[1] = "UNIT",
+	[2] = "WEAPON",
+	[3] = "STATIC",
+	[4] = "BASE",
+	[5] = "SCENERY",
+	[6] = "Cargo",
+}
+
+Unit_Category = {
+	[0] = "AIRPLANE",
+	[1] = "HELICOPTER",
+	[2] = "GROUND_UNIT",
+	[3] = "SHIP",
+	[4] = "STRUCTURE",
+}
 
 
 function _affiche(t, indent)
-    indent = indent or ""
+	indent = indent or ""
 
-    if type(t) ~= "table" then
-        env.info(indent .. tostring(t)) -- Affiche directement la valeur si ce n'est pas une table
-        return
-    end
+	if type(t) ~= "table" then
+		env.info(indent .. tostring(t)) -- Affiche directement la valeur si ce n'est pas une table
+		return
+	end
 
-    for key, value in pairs(t) do
-        if type(value) == "table" then
-            env.info(indent .. tostring(key) .. ":")
-            _affiche(value, indent .. "  ") -- Correction : appel récursif correct
-        else
-            env.info(indent .. tostring(key) .. ": " .. tostring(value))
-        end
-    end
+	for key, value in pairs(t) do
+		if type(value) == "table" then
+			env.info(indent .. tostring(key) .. ":")
+			_affiche(value, indent .. "  ") -- Correction : appel récursif correct
+		else
+			env.info(indent .. tostring(key) .. ": " .. tostring(value))
+		end
+	end
 end
-
 
 -- sorts tables alphabetically, to be used in a "for" loop instead of pairs or ipairs
 -- http://www.lua.org/pil/19.3.html
-function PairsByKeys (t, f)
-    local a = {}
+function PairsByKeys(t, f)
+	local a = {}
 	local initType
 	local dontSort = false
-    for n in pairs(t) do initType = type(n) break end
+	for n in pairs(t) do
+		initType = type(n)
+		break
+	end
 	for n in pairs(t) do
 		table.insert(a, n)
 		if type(n) ~= initType then dontSort = true end
@@ -49,14 +127,16 @@ function PairsByKeys (t, f)
 	if not dontSort then
 		table.sort(a, f)
 	end
-    local i = 0      -- iterator variable
-    local iter = function ()   -- iterator function
-        i = i + 1
-        if a[i] == nil then return nil
-        else return a[i], t[a[i]]
-        end
-    end
-    return iter
+	local i = 0              -- iterator variable
+	local iter = function()  -- iterator function
+		i = i + 1
+		if a[i] == nil then
+			return nil
+		else
+			return a[i], t[a[i]]
+		end
+	end
+	return iter
 end
 
 local indentcache = {}
@@ -150,25 +230,42 @@ function GetDistance2D(a, b)
 	return math.sqrt(dx * dx + dy * dy)
 end
 
+-- Ajoutées le 25/09/2026 : déplacées depuis DCE_RadioF10.lua où elles étaient déclarées
+-- locales mais appelées depuis DCE_Background.lua (bug de portée introduit au Chantier B2,
+-- provoquait un plantage "attempt to call a nil value" dès que le code était atteint).
+-- Contenu repris tel quel, aucune logique modifiée.
+
+--function to return distance between two scalar points (x1,y1) et (x2,y2)
+function calculateDistance(x1, y1, x2, y2)
+	return math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
+end
+
+function getOppositePointOnCircle(posA, centerCircle)
+	-- Calculer les coordonnées opposées sur le cercle
+	local bx = 2 * centerCircle.x - posA.x
+	local by = 2 * centerCircle.y - posA.y
+	return bx, by
+end
+
 function radToDeg(_rad)
-	Deg = _rad * (180/math.pi)
+	Deg = _rad * (180 / math.pi)
 	return Deg
 end
 
 --function to make a deep copy of a table
 function Deepcopy(orig)
-    local orig_type = type(orig)
-    local copy
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[Deepcopy(orig_key)] = Deepcopy(orig_value)
-        end
-        setmetatable(copy, Deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-    return copy
+	local orig_type = type(orig)
+	local copy
+	if orig_type == 'table' then
+		copy = {}
+		for orig_key, orig_value in next, orig, nil do
+			copy[Deepcopy(orig_key)] = Deepcopy(orig_value)
+		end
+		setmetatable(copy, Deepcopy(getmetatable(orig)))
+	else -- number, string, boolean, etc
+		copy = orig
+	end
+	return copy
 end
 
 function GetHeading(p1, p2)
@@ -212,7 +309,7 @@ function GetHeadingByPos(unit)
 	if unitpos then
 		heading = math.atan2(unitpos.x.z, unitpos.x.x)
 		if heading < 0 then
-			heading = heading + 2*math.pi	-- put heading in range of 0 to 2*pi
+			heading = heading + 2 * math.pi -- put heading in range of 0 to 2*pi
 		end
 		return heading
 	else
@@ -233,11 +330,10 @@ end
 
 --check si un point est dans le polygone
 function CheckPointInPoly_XY_2(point, poly)
-
-    local crossings = 0
+	local crossings = 0
 	for n = 1, #poly - 1 do
-         if (poly[n].y < point.y and poly[n + 1].y > point.y) or (poly[n].y > point.y and poly[n + 1].y < point.y) then
-            local dx = poly[n + 1].x - poly[n].x
+		if (poly[n].y < point.y and poly[n + 1].y > point.y) or (poly[n].y > point.y and poly[n + 1].y < point.y) then
+			local dx = poly[n + 1].x - poly[n].x
 			local dy = poly[n + 1].y - poly[n].y
 			local delta_point_y = point.y - poly[n].y
 			local delta_point_x = dx / dy * delta_point_y
@@ -256,36 +352,111 @@ end
 
 -- Vérifie si un point est dans un polygone (algorithme robuste)
 function CheckPointInPoly_XY_3(point, poly)
-    local inside = false
-    local j = #poly
-    for i = 1, #poly do
-        if ((poly[i].y > point.y) ~= (poly[j].y > point.y)) and
-           (point.x < (poly[j].x - poly[i].x) * (point.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x) then
-            inside = not inside
-        end
-        j = i
-    end
-    return inside
+	local inside = false
+	local j = #poly
+	for i = 1, #poly do
+		if ((poly[i].y > point.y) ~= (poly[j].y > point.y)) and
+			(point.x < (poly[j].x - poly[i].x) * (point.y - poly[i].y) / (poly[j].y - poly[i].y) + poly[i].x) then
+			inside = not inside
+		end
+		j = i
+	end
+	return inside
 end
 
 --nettoie les noms de certain caractere spéciaux (" et ')
 function CleanName(name)
-    if type(name) ~= "string" then
-        return ""
-    end
-    return name:gsub("['\"]", '')
+	if type(name) ~= "string" then
+		return ""
+	end
+	return name:gsub("['\"]", '')
 end
 
 function NormalizeAngle(angle)
-    return (angle % 360 + 360) % 360
+	return (angle % 360 + 360) % 360
 end
 
 function GenerateIdAleatoire()
-    local chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    local id = ''
-    for i = 1, 10 do
-        local r = math.random(1, #chars)
-        id = id .. chars:sub(r, r)
-    end
-    return id
+	local chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+	local id = ''
+	for i = 1, 10 do
+		local r = math.random(1, #chars)
+		id = id .. chars:sub(r, r)
+	end
+	return id
 end
+
+-------------------------------------------------------------------------------------------------------
+-- Variables/tables globales ajoutées le 25/09/2026 (Chantier C) : déplacées depuis DCE_RadioF10.lua
+-- où elles étaient déclarées en global sans raison propre à RadioF10 (état de runtime partagé ou non,
+-- mais sans "propriétaire" évident). Restent globales comme demandé, contenu repris tel quel, aucune
+-- valeur ni logique modifiée. Exceptions non déplacées (dépendance de chargement sur campL, qui n'existe
+-- pas encore à ce stade) : TypePedroByCV et le bloc PathDD/PathDCE, restés dans DCE_RadioF10.lua.
+-------------------------------------------------------------------------------------------------------
+
+DCE_groupRouteCache = {} -- [groupId] = { base=..., station1=..., station2=..., orbitAlt=..., orbitSpeed=... }
+MissGroupByName = {}
+BaseDistCache = {}
+DCE_hotspotGrid = {}
+DCE_hotspotCellSize = 100000 -- même que ton clusterThreshold
+DCE_carriers = {}
+
+GroupMenusBuilt = GroupMenusBuilt or {}
+
+GroupEWRMenus = GroupEWRMenus or {}
+PlayerGroup = PlayerGroup or {}
+EWR_optionPlayer = {}
+EWR_rebuildPending = {}
+if not EWR_menuRootByGroup then
+	EWR_menuRootByGroup = {}
+end
+MenuF10ByGroupByCmd = MenuF10ByGroupByCmd or {}
+
+FuelCache = FuelCache or {}
+
+-- cache du descriptif d'un TYPE d'appareil (attributs, fuelMassMax, range...) : ne change jamais pour un type donné
+DescCacheByType = DescCacheByType or {}
+
+function getCachedDesc(unit)
+	local typeName = unit:getTypeName()
+	if not DescCacheByType[typeName] then
+		DescCacheByType[typeName] = unit:getDesc()
+	end
+	return DescCacheByType[typeName]
+end
+
+AFAC_available = {}       --liste les AFAC en position
+AFAC_targetStatus = {}    --table used by AFACs to monitor the status of targets and move on to the next ones
+
+LastInjectFlightPlan = {} --garde les derniers plan de vol injecté
+
+ScheduleTenth = {}        --table used to schedule the tenth of a second
+AgendaSeconde = {}
+
+ZoneSAR = {} --table enumérant les helico SAR pour eviter d'en envoyer plusieurs aux memes endroits
+EjectionSeatFrequency = {}
+EjectedPilotOnBoard = {}
+GroundDamagedFlyingMachine = {}
+SumSoldierAliasPilot = 0
+
+CustomLog = {}
+
+SatusGroupAircraft = {}    --table used to store the status of aircraft groups
+Players = {}               --table used to store player units
+BingoPlaneTab = {}
+AvgConsumptionKgPerKm = {} --table used to store the available distance in km for each unitCat
+PlayerInOutAircraft = {}
+
+EWR_Magic_DISTANCE_KM = 150 --distance en km pour detecter les cibles
+
+SmokeColor_EjectedPilot = trigger.smokeColor.Orange
+SmokeColor_TargetDesignation = trigger.smokeColor.Blue
+
+RadioWatt = 1 -- Radio power in watts, used for radio beacon transmission
+
+SAR_fct = {}  --table des fonction SAR, evite tous les pbs de monter une function avant l'autre
+
+AnnonceOneOunce = {}
+
+-- Table globale
+CarrierIndex = {}

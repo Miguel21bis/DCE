@@ -4,18 +4,6 @@
 -- detects the impact of ammunition on a runway.
 -- finds the life value of the runway
 ------------------------------------------------------------------------------------------------------- 
-------------------------------------------------------------------------------------------------------- 
--- last modification: Reglage_d
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts\bombOnRunway.lua"] = "1.4.10"
-------------------------------------------------------------------------------------------------------- 					
--- cleanCode_a	
--- debug_d					(d getCategory)	
--- Reglage_d				(d time & sort) (c December 10, 2020)(b September 10, 2019)(a April 15, 2019)
--- modification M66_b		bombOnRunway (b:explode trigger)					
-------------------------------------------------------------------------------------------------------- 
-
-env.info("DCE_bombOnRunway START LOADING bombOnRunway.lua "..tostring(versionDCE["Mission Scripts/bombOnRunway.lua"]))
 
 
 RunwayLife = {} 						-- nome das bases incluso FARP
