@@ -1,28 +1,9 @@
 --To turn carriers into wind for flight ops and resume route later
 --Script attached to mission and executed via trigger
 ------------------------------------------------------------------------------------------------------- 
--- last  Revision  cleanCode_a
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/CarrierIntoWindScript.lua"] = "1.5.14"
-------------------------------------------------------------------------------------------------------- 
--- adjustment_c					(c CVN to CV)(a: ajust function trigo)
--- cleanCode_a					(a springCleaning)
--- modification M45				compatible with 2.7.0
--- modification M36_d			(d: add timer) MenuRadio request manual TurnIntoWind
--- CIWS_Debug02_b				transforms an angle of more than 90° into 2 WPT of less than 90°
--- CIWS_Debug01_b				SuperCarrier don't turn
-------------------------------------------------------------------------------------------------------- 
 
-
-
-
--- function radToDeg(_rad)
--- 	radToDeg = _rad * (180/math.pi)
--- 	return radToDeg
--- end
-
-Vmax = 10																				--valeur limité pour spawner les F14 sans explosion
-windDeck = 9																			--valeur limité pour spawner les F14 sans explosion
+local Vmax = 10    --valeur limité pour spawner les F14 sans explosion
+local windDeck = 9 --valeur limité pour spawner les F14 sans explosion																			--valeur limité pour spawner les F14 sans explosion
 
 function ChangeValue()
 	Vmax = campL.CV_Vmax																--standard maxiumum speed value of carrier: 30 kts

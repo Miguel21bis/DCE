@@ -2,12 +2,6 @@
 -- 
 -- .
 ------------------------------------------------------------------------------------------------------- 
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/SAR.lua"] = "1.4.27"
-------------------------------------------------------------------------------------------------------- 
-
-
-env.info("DCE_SAR START LOADING SAR.lua "..tostring(versionDCE["Mission Scripts/SAR.lua"]))
 
 
 local nbManhunt = {
@@ -808,9 +802,6 @@ end
 
 function CheckImmediatSAR(ejPilot)
 
-	local t0 = os.clock()
-	Perf_S_N = Perf_S_N + 1
-
 	env.info( "DCE_CheckImmediatSAR START A "..tostring(ejPilot.name))
 
 	if ejPilot and ejPilot.pos.x then
@@ -860,8 +851,6 @@ function CheckImmediatSAR(ejPilot)
 			env.info( "DCE_CheckImmediatSAR C ?  boundary wrongSide ? __"..tostring(wrongSide))
 			if wrongSide  then
                 env.info("DCE_CheckImmediatSAR? D boundary rightSideOfBorder __FALSE__ Return ")
-				local dt = os.clock() - t0
-				Perf_S = Perf_S + dt
 				return
 			end
 		end
@@ -912,8 +901,6 @@ function CheckImmediatSAR(ejPilot)
 						end
 
                         ejPilot.landingPossible = false
-						local dt = os.clock() - t0
-						Perf_S = Perf_S + dt
 						return
 
 					end
@@ -1057,9 +1044,7 @@ function CheckImmediatSAR(ejPilot)
 		end
 	end
 
-	local dt = os.clock() - t0
-    Perf_S = Perf_S + dt
-	env.info("DCE_CheckImmediatSAR FIN Z " .. tostring(ejPilot.name) .. " dt " .. tostring(dt))
+	env.info("DCE_CheckImmediatSAR FIN Z " .. tostring(ejPilot.name))
 end
 
 --{selectedPoint, ejectedPilot}
@@ -1705,12 +1690,6 @@ end
 
 function LoopSAR()
 
-	local t0
-    if campL.debug then
-        t0 = os.clock()
-		Perf_D_N = Perf_D_N + 1
-    end
-	
 	--** allume le fumigene lorsque la SAR est proche
 	--** déclare le pilote dans l'helico meme s'il ne peut pas se poser
 
@@ -1920,11 +1899,6 @@ function LoopSAR()
 			end
 		end
 	end
-
-    if campL.debug then
-		local dt = os.clock() - t0
-		Perf_D = Perf_D + dt
-    end
 
 	return timer.getTime() + 10
 

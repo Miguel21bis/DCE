@@ -10,12 +10,8 @@
 -- Extrait de AddCommandRadioF10.lua le 19/09/2026 (Chantier B2 - réorganisation DCE InGame) :
 -- code repris tel quel, aucune logique modifiée.
 -------------------------------------------------------------------------------------------------------
-if not versionDCE then versionDCE = {} end
-versionDCE["Mission Scripts/DCE_Background.lua"] = "1.0.0"
--------------------------------------------------------------------------------------------------------
 
-env.info("DCE START LOADING DCE_Background.lua "..tostring(versionDCE["Mission Scripts/DCE_Background.lua"]))
-
+local flightPlanTimer = {}
 
 local function hotSpotSAM()
     if not campL.groundthreats then return end
@@ -823,7 +819,11 @@ local function avoidArea()
 	return timer.getTime() + 5
 end
 
--- modification M32	E-2C automatic retreat 
+--[[ ===================================================================================
+ANCIENNE VERSION (avant extension AWACS→Tankers/Transports, deux camps, GCI, 27/09/2026)
+conservée ici pour référence / retour en arrière si besoin, ne pas supprimer.
+
+-- modification M32	E-2C automatic retreat
 local function airRetreat()
 
 	local t0
@@ -843,7 +843,6 @@ local function airRetreat()
 			local units = gp:getUnits()
 			local unit = units[1]
 
-			-- if _unit and _unit:getTypeName() == "E-2C" and _unit:isActive() and _unit:inAir() then
             if unit and unit:isActive() and unit:inAir() then
                 local isAwacsCarrier = nil
 				if unit:getTypeName() == "E-2C" then
@@ -851,284 +850,381 @@ local function airRetreat()
 				end
 				local awacsVec3 = unit:getPoint()
 				local gpGid = Group.getID(gp)
-				-- local nameAwacs = unit:getName()
 				if not RetreatTimeGp then RetreatTimeGp = {} end
 				if not RetreatTimeGp[gpGid] then RetreatTimeGp[gpGid] = {} end
 				if not RetreatTimeGp[gpGid].rTime then RetreatTimeGp[gpGid].rTime = 0  end
 
-				if unit and current_time > RetreatTimeGp[gpGid].rTime then							--if _unit exists
-					local ctr = unit:getGroup():getController()										--get _unit controller
-					local ctrGroup = gp:getController() -- Récupère le contrôleur du GROUPE (sinon, l injectrion de task sur l unit leader fait planter DCS)
-					local targets = ctr:getDetectedTargets()											--get detected targets of this EWR
-					for t = 1, #targets do																--iterate through detected targets
+				if unit and current_time > RetreatTimeGp[gpGid].rTime then
+					local ctr = unit:getGroup():getController()
+					local ctrGroup = gp:getController()
+					local targets = ctr:getDetectedTargets()
+					for t = 1, #targets do
 						if targets[t].object and current_time > RetreatTimeGp[gpGid].rTime then
-							local objCat = Object.getCategory(targets[t].object)								--get object category
-							if objCat == Object.Category.UNIT then												--object is a _unit
-								local desc = targets[t].object:getDesc()								--get descriptor descriptor
+							local objCat = Object.getCategory(targets[t].object)
+							if objCat == Object.Category.UNIT then
+								local desc = targets[t].object:getDesc()
 								local descAwacs = unit:getDesc()
 
-								if desc.category == Unit.Category.AIRPLANE and (desc.attributes["Battle airplanes"] or desc.attributes.Fighters)  then												--descriptor category is airplane 
-									--To know what attributes the object type has, look for the unit type script in sub-directories planes/, helicopter/s, vehicles, navy/ of ./Scripts/Database/ directory.
-									--and desc.attributs ~= "Battleplane" and desc.attributs ~= "Fighter"
-
-									local targetVec3 = targets[t].object:getPoint()					--get target point					
+								if desc.category == Unit.Category.AIRPLANE and (desc.attributes["Battle airplanes"] or desc.attributes.Fighters)  then
+									local targetVec3 = targets[t].object:getPoint()
 									local distance = math.sqrt(math.pow(awacsVec3.x - targetVec3.x, 2) + math.pow(awacsVec3.z - targetVec3.z, 2))
 
 									if distance < 100000 then
-									-- if distance < 150000 then 
-
 										local callsign = unit:getCallsign()
-										env.info("ACRF10 DCE AWACS |03b|: Order to Retire "..distance)
-										env.info("ACRF10 DCE AWACS |03c|: Order to Retire "..callsign.." Retreat to the aircraft carrier")
 										trigger.action.outText(callsign.." Retreat to the aircraft carrier",10)
-
-										--active le waypoint du PA										
 										RetreatTimeGp[gpGid].rTime = current_time + 300
+										-- (... logique porte-avions / repli / re-injection tâches AWACS+EPLRS ...)
+									end
+								end
+							end
+						end
+					end
+				end
+            end
+		end
+	end
 
-										local carrierDistance = 99999999
-										local retreat_x = 0
-                                        local retreat_y = 0
-										if isAwacsCarrier and not campL.Aircraft_Carriers then
-											for coalition_name,coal in pairs(env.mission.coalition) do
-												if coalition_name == "blue" then
-													for country_n,country in ipairs(coal.country) do
-														if country.ship then
-															for group_n,group in ipairs(country.ship.group) do
-																local groupCarrier = Group.getByName(group.name)													--get carrier group
-																if groupCarrier then																				--group exists
-																	local carrier = groupCarrier:getUnit(1)															--get group leader (assumed to be the carrier)								
-																	local Desc = carrier:getDesc()
-																	if Desc.attributes.AircraftCarrier or Desc.attributes["Aircraft Carriers"] then
-																		local carrierVec3 = carrier:getPoint()
-																		local carrierTestDist = math.sqrt(math.pow(carrierVec3.x - awacsVec3.x, 2) + math.pow(carrierVec3.z - awacsVec3.z, 2))
-																		if carrierTestDist < carrierDistance then
-																			retreat_x = carrierVec3.x
-																			retreat_y = carrierVec3.z
-																			carrierDistance =  carrierTestDist
-																		end
-																	end
-																end
+	if campL.debug then
+		local dt = os.clock() - t0
+		Perf_C = Perf_C + dt
+		Perf_C_N = Perf_C_N + 1
+	end
+	
+	return timer.getTime() + 31
+end
+=================================================================================== ]]
+
+-- modification M32	E-2C automatic retreat -- étendu 27/09/2026 : AWACS/Tankers/Transports non armés,
+-- deux camps, détection via Target_tracks (GCI) plutôt que le capteur propre de l'unité,
+-- repli CV > zone SAM amie > direction base, annonce joueurs + reprise du poste d'origine pour les tankers
+
+if not RetreatTimeGp then RetreatTimeGp = {} end
+RetreatSavedPoint = RetreatSavedPoint or
+{}                                          -- NOUVEAU : sauvegarde position+task du point de patrouille écrasé, pour restauration après repli
+-- ré-injecte la position/task d'origine du point de patrouille, une fois le repli terminé
+-- pourquoi : sans ça, l'appareil continue vers le waypoint suivant de sa route (souvent le retour base)
+-- au lieu de reprendre son poste (orbite, TACAN, rôle Tanker/AWACS)
+local function restoreRetreatPatrolPoint(arg)
+	local gpGid, gpName = arg[1], arg[2]
+
+	local savedPt = RetreatSavedPoint[gpGid]
+	if not savedPt then return end
+
+	local gp = Group.getByName(gpName)
+	if not gp or not gp:isExist() then
+		RetreatSavedPoint[gpGid] = nil
+		return
+	end
+
+	local units = gp:getUnits()
+	local unit = units[1]
+	if not unit or not unit:isExist() then
+		RetreatSavedPoint[gpGid] = nil
+		return
+	end
+
+	local curVec3 = unit:getPoint()
+
+	local resumeRoute = {
+		{
+			x = curVec3.x,
+			y = curVec3.z,
+			alt = curVec3.y,
+			type = "Turning Point",
+			action = "Turning Point",
+			alt_type = "BARO",
+			speed_locked = true,
+			ETA_locked = true,
+			speed = savedPt.speed or 200,
+			formation_template = "",
+		},
+		{
+			x = savedPt.x,
+			y = savedPt.y,
+			alt = savedPt.alt,
+			alt_type = savedPt.alt_type or "BARO",
+			type = "Turning Point",
+			action = "Turning Point",
+			speed_locked = true,
+			ETA_locked = false,
+			speed = savedPt.speed or 200,
+			formation_template = "",
+			task = savedPt.task,
+		},
+	}
+
+	local ctr = gp:getController()
+	Controller.setTask(ctr, { id = "Mission", params = { route = { points = resumeRoute } } })
+
+	RetreatSavedPoint[gpGid] = nil
+	env.info("ACRF10 DCE airRetreat: " .. gpName .. " reprise de son poste d'origine")
+end
+
+-- effectue réellement l'injection de la route de repli (appelée immédiatement ou après le délai joueur)
+local function executeAirRetreat(arg)
+	local gpGid, gpName, retreat_x, retreat_y, acVec3, isAwacsRole, rTime = arg[1], arg[2], arg[3], arg[4], arg[5],
+		arg[6], arg[7]
+
+	local gp = Group.getByName(gpName)
+	if not gp or not gp:isExist() then return end
+	local ctrGroup = gp:getController()
+
+	local descAc = getCachedDesc(gp:getUnits()[1])
+
+	if not MissGroupByName[gpName] or not MissGroupByName[gpName].route then return end
+	local retreatRoute = MissGroupByName[gpName].route
+	.points                                                -- même mécanisme qu'avant : on garde la suite de la route intacte
+
+	-- sauvegarde du point de patrouille d'origine (position + task) avant de l'écraser, pour restauration plus tard
+	if not RetreatSavedPoint[gpGid] and retreatRoute[1] then
+		RetreatSavedPoint[gpGid] = Deepcopy({
+			x = retreatRoute[1].x,
+			y = retreatRoute[1].y,
+			alt = retreatRoute[1].alt,
+			alt_type = retreatRoute[1].alt_type,
+			speed = retreatRoute[1].speed,
+			task = retreatRoute[1].task,
+		})
+	end
+
+	local firstWPT = {
+		['alt'] = acVec3.y,
+		['type'] = 'Turning Point',
+		['action'] = 'Turning Point',
+		['alt_type'] = 'BARO',
+		['speed_locked'] = true,
+		['y'] = acVec3.z,
+		['x'] = acVec3.x,
+		['formation_template'] = '',
+		['speed'] = descAc.speedMax,
+		['ETA_locked'] = true,
+		['task'] = { ['id'] = 'ComboTask', ['params'] = { ['tasks'] = {} } },
+		['ETA'] = 0,
+	}
+
+	table.insert(retreatRoute, 1, firstWPT)
+
+	retreatRoute[2].x = retreat_x
+	retreatRoute[2].y = retreat_y
+	retreatRoute[2].alt = acVec3.y
+	retreatRoute[2].speed_locked = true
+	retreatRoute[2].ETA_locked = false
+	retreatRoute[2].speed = descAc.speedMax
+	retreatRoute[2].ETA = rTime
+
+	local idTasks = #retreatRoute[2].task.params.tasks
+	local orbitRetreat = {
+		['enabled'] = true,
+		['auto'] = false,
+		['id'] = 'ControlledTask',
+		['number'] = idTasks + 2,
+		['params'] = {
+			['task'] = {
+				['id'] = 'Orbit',
+				['params'] = { ['altitude'] = 7315.2, ['pattern'] = 'Circle', ['speed'] = 138.889 },
+			},
+			['stopCondition'] = { ['time'] = rTime },
+		},
+	}
+	retreatRoute[2].task.params.tasks[idTasks + 1] = orbitRetreat
+
+	-- ne garde une task de rôle active pendant la fuite QUE pour l'AWACS (le radar continue de tourner
+	-- pendant le repli) ; un Tanker ne ravitaille pas en fuite, donc pas de réinsertion de sa task ici
+	if isAwacsRole then
+		local TaskAwacs = {
+			['enabled'] = true,
+			['auto'] = false,
+			['id'] = 'ControlledTask',
+			['number'] = 1,
+			['params'] = { ['task'] = { ['id'] = 'AWACS', ['params'] = {} } },
+		}
+		table.insert(retreatRoute[2].task.params.tasks, 1, TaskAwacs)
+
+		local TaskEPLRS = {
+			['enabled'] = true,
+			['auto'] = true,
+			['id'] = 'WrappedAction',
+			['number'] = 2,
+			['params'] = { ['action'] = { ['id'] = 'EPLRS', ['params'] = { ['value'] = true, ['groupId'] = 1 } } },
+		}
+		table.insert(retreatRoute[2].task.params.tasks, 2, TaskEPLRS)
+	end
+
+	for j = 1, #retreatRoute[1].task.params.tasks do
+		retreatRoute[1].task.params.tasks[j].number = j
+	end
+
+	local mission = { id = 'Mission', params = { route = { points = retreatRoute } } }
+	Controller.setTask(ctrGroup, mission)
+
+	-- programme la reprise du poste d'origine une fois l'orbite de repli terminée
+	timer.scheduleFunction(restoreRetreatPatrolPoint, { gpGid, gpName }, rTime)
+end
+
+local function airRetreat()
+	local t0
+	if campL.debug then
+		t0 = os.clock()
+	end
+
+	local current_time = timer.getTime()
+
+	-- garde-fou fiabilité : sans GCI/Target_tracks, pas de détection fiable pour un appareil sans radar propre
+	if not GCI or not GCI.EWR or not Target_tracks then
+		if not AnnonceOneOunce["airRetreat"] then
+			env.info("ACRF10_airRetreat DCE_ERROR RETURN no GCI/Target_tracks available")
+			AnnonceOneOunce["airRetreat"] = true
+		end
+		return timer.getTime() + 31
+	end
+
+	for _, sideNum in ipairs({ coalition.side.BLUE, coalition.side.RED }) do
+		local sideName = CoalitionIdToName[sideNum]
+		local eniSideName = DCS_ENI_Side[sideName]
+
+		local groups = coalition.getGroups(sideNum, Group.Category.AIRPLANE)
+
+		for i, gp in pairs(groups) do
+			local units = gp:getUnits()
+			local unit = units[1]
+
+			if unit and unit:isActive() and unit:inAir() then
+				-- sélection structurelle (liste blanche) : AWACS / Tankers / Transports, quel que soit le nom du groupe
+				local desc = getCachedDesc(unit)
+				local isUnarmedRole = desc and desc.attributes and
+					(desc.attributes["AWACS"] or desc.attributes["Tankers"] or desc.attributes["Transports"])
+
+				if isUnarmedRole then
+					local gpName = Group.getName(gp)
+					local gpGid = Group.getID(gp)
+					local isAwacsRole = desc.attributes["AWACS"] or false
+					local isTanker = desc.attributes["Tankers"] or false
+					local isAwacsCarrier = (unit:getTypeName() == "E-2C")
+					local acVec3 = unit:getPoint()
+
+					if not RetreatTimeGp[gpGid] then RetreatTimeGp[gpGid] = {} end
+					if not RetreatTimeGp[gpGid].rTime then RetreatTimeGp[gpGid].rTime = 0 end
+
+					if current_time > RetreatTimeGp[gpGid].rTime then
+						-- détection de la menace via Target_tracks (table GCI partagée), pas le capteur de l'unité :
+						-- fiable même pour un appareil sans radar exploitable
+						local threatFound, threatDist = nil, nil
+
+						for target_name, target in pairs(Target_tracks[eniSideName]) do
+							if target.number and target.number > 0 and target.time and target.time > current_time - 30 and target.pointVec3 then
+								local dx = acVec3.x - target.pointVec3.x
+								local dz = acVec3.z - target.pointVec3.z
+								local dist = math.sqrt(dx * dx + dz * dz)
+								if dist < 100000 and (not threatDist or dist < threatDist) then
+									threatFound = target
+									threatDist = dist
+								end
+							end
+						end
+
+						if threatFound then
+							local callsign = unit:getCallsign()
+							env.info("ACRF10 DCE airRetreat: " ..
+								callsign .. " menace a " .. tostring(math.floor(threatDist or 0)) .. "m, repli")
+							trigger.action.outText(callsign .. " Retreat", 10)
+
+							RetreatTimeGp[gpGid].rTime = current_time + 300
+
+							-- ===== calcul du point de repli : porte-avions ami > zone SAM amie > direction base =====
+							local retreat_x, retreat_y = 0, 0
+							local carrierDistance = 99999999
+
+							if isAwacsCarrier and campL.Aircraft_Carriers then
+								for sideCarrier, carriers in ipairs(campL.Aircraft_Carriers) do
+									for group_n, carrier in ipairs(carriers) do
+										local carrierGroup = Group.getByName(carrier.name)
+										if carrierGroup then
+											local carrierVec3 = carrier:getPoint()
+											local carrierTestDist = math.sqrt(math.pow(carrierVec3.x - acVec3.x, 2) +
+											math.pow(carrierVec3.z - acVec3.z, 2))
+											if carrierTestDist < carrierDistance then
+												retreat_x, retreat_y, carrierDistance = carrierVec3.x, carrierVec3.z,
+													carrierTestDist
+											end
+										end
+									end
+								end
+							elseif isAwacsCarrier then
+								-- fallback scan direct, corrigé pour utiliser le camp réel de l'avion (plus "blue" en dur)
+								for coalition_name, coal in pairs(env.mission.coalition) do
+									if coalition_name == sideName then
+										for country_n, ctry in ipairs(coal.country) do
+											if ctry.ship then
+												for group_n, group in ipairs(ctry.ship.group) do
+													local groupCarrier = Group.getByName(group.name)
+													if groupCarrier then
+														local carrier = groupCarrier:getUnit(1)
+														local Desc = carrier:getDesc()
+														if Desc.attributes.AircraftCarrier or Desc.attributes["Aircraft Carriers"] then
+															local carrierVec3 = carrier:getPoint()
+															local carrierTestDist = math.sqrt(math.pow(
+															carrierVec3.x - acVec3.x, 2) +
+															math.pow(carrierVec3.z - acVec3.z, 2))
+															if carrierTestDist < carrierDistance then
+																retreat_x, retreat_y, carrierDistance = carrierVec3.x,
+																	carrierVec3.z, carrierTestDist
 															end
 														end
 													end
 												end
 											end
-                                        elseif campL.Aircraft_Carriers then
-											for sideCarrier, carriers in ipairs(campL.Aircraft_Carriers) do
-												for group_n, carrier in ipairs(carriers) do
-													local carrierGroup = Group.getByName(carrier.name) --get carrier group
-													if carrierGroup then --group exists
-														local carrierUnit = carrierGroup:getUnit(1) --get group leader (assumed to be the carrier)								
-														
-														local carrierVec3 = carrier:getPoint()
-														local carrierTestDist = math.sqrt(math.pow( carrierVec3.x - awacsVec3.x, 2) + math.pow(carrierVec3.z - awacsVec3.z, 2))
-														if carrierTestDist < carrierDistance then
-															retreat_x = carrierVec3.x
-															retreat_y = carrierVec3.z
-															carrierDistance = carrierTestDist
-															
-														end
-													end
+										end
+									end
+								end
+							end
+
+							if retreat_x == 0 then
+								local hotspot = chooseBestHotspot({ x = acVec3.x, y = acVec3.z }, sideName)
+								if hotspot then
+									retreat_x, retreat_y = hotspot.x, hotspot.y
+								end
+							end
+
+							if retreat_x == 0 and MissGroupByName[gpName] then
+								local ownRoute = MissGroupByName[gpName].route.points
+								local lastWpt = ownRoute[#ownRoute]
+								local heading = GetHeading({ x = acVec3.x, z = acVec3.z },
+									{ x = lastWpt.x, z = lastWpt.y })
+								local offsetPt = GetOffsetPoint({ x = acVec3.x, y = acVec3.z }, heading, 70000)
+								retreat_x, retreat_y = offsetPt.x, offsetPt.y
+							end
+
+							if retreat_x ~= 0 then
+								-- ===== annonce joueurs (tankers uniquement) et délai avant la manœuvre =====
+								local nearbyPlayer = false
+								if isTanker then
+									for _, coal in ipairs({ coalition.side.BLUE, coalition.side.RED }) do
+										local players = coalition.getPlayers(coal)
+										for _, pUnit in ipairs(players) do
+											if pUnit and pUnit:isExist() then
+												local pVec3 = pUnit:getPoint()
+												local dx = pVec3.x - acVec3.x
+												local dz = pVec3.z - acVec3.z
+												local pDist = math.sqrt(dx * dx + dz * dz)
+												if pDist <= 100 then
+													trigger.action.outTextForUnit(pUnit:getID(),
+														"Ravitailleur menace : deconnectez-vous immediatement", 15)
+													nearbyPlayer = true
+												elseif pDist <= 5000 then
+													trigger.action.outTextForUnit(pUnit:getID(),
+														"Ravitailleur menace, repli imminent", 15)
+													nearbyPlayer = true
 												end
 											end
 										end
-
-
-										-- for _coalition, coalition in pairs(env.mission.coalition) do
-										-- 	if _coalition  == "blue" then
-										-- 		for countryN, _country in pairs(coalition.country) do
-										-- 			if _country.plane then
-										-- 				for groupN, _group in pairs(_country.plane.group) do
-										-- 					if _group.groupId == gpGid then
-
-										local retreatRoute = MissGroupByName[gpName].route.points
-										
-										-- -- si aucun CVN n'a été trouvé, on prend comme position de retraite l'ID "land"
-										-- if retreat_x == 0 then
-										-- 	for key, value in ipairs(_group.route.points) do				-- recherche de la position safe du PA et une alti						
-										-- 		if value.type == 'Land' then
-										-- 			retreat_x = value.x
-										-- 			retreat_y = value.y
-										-- 		end
-										-- 	end
-										-- end
-										-- si aucun CVN n'a été trouvé, on prend comme position de retraite l'ID "land"
-										if retreat_x == 0 or not isAwacsCarrier then
-											local lastWpt = retreatRoute[#retreatRoute]
-											retreat_x = lastWpt.x
-											retreat_y = lastWpt.y
-										end
-
-										-- local retreatRoute = {}
-
-										-- retreatRoute = Deepcopy(_group.route.points)
-
-										-- ajoute comme premier wpt leur position initial pour garder la fonction AWACS
-										local firstWPT = {
-											['alt'] = awacsVec3.y,
-											['type'] = 'Turning Point',
-											['action'] = 'Turning Point',
-											['alt_type'] = 'BARO',
-											['speed_locked'] = true,
-											['y'] = awacsVec3.z,
-											['x'] = awacsVec3.x,
-											['formation_template'] = '',
-											['speed'] = descAwacs.speedMax,
-											['ETA_locked'] = true,
-											['task'] = {
-												['id'] = 'ComboTask',
-												['params'] = {
-													['tasks'] = {
-														[1] = {
-															['enabled'] = true,
-															['auto'] = false,
-															['id'] = 'ControlledTask',
-															['number'] = 1,
-															['params'] = {
-																['task'] = {
-																	['id'] = 'AWACS',
-																	['params'] = {
-																	},
-																},
-															},
-														},
-														[2] = {
-															['enabled'] = true,
-															['auto'] = false,
-															['id'] = 'WrappedAction',
-															['number'] = 2,
-															['params'] = {
-																['action'] = {
-																	['id'] = 'Option',
-																	['params'] = {
-																		['variantIndex'] = 1,
-																		['value'] = 458753,
-																		['name'] = 5,
-																		['formationIndex'] = 7,
-																	},
-																},
-															},
-														},
-														[3] = {
-															['enabled'] = true,
-															['auto'] = true,
-															['id'] = 'WrappedAction',
-															['number'] = 3,
-															['params'] = {
-																['action'] = {
-																	['id'] = 'EPLRS',
-																	['params'] = {
-																		['value'] = true,
-																		['groupId'] = 1,
-																	},
-																},
-															},
-														},
-														[4] = {
-															['enabled'] = true,
-															['auto'] = false,
-															['id'] = 'WrappedAction',
-															['number'] = 4,
-															['params'] = {
-																['action'] = {
-																	['id'] = 'Option',
-																	['params'] = {
-																		['value'] = 2,
-																		['name'] = 1,
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-											['ETA'] = 0,
-										}
-
-
-										table.insert(retreatRoute, 1, firstWPT)
-
-										--modifie les coordonées du premier wpt initial
-										retreatRoute[2].x = retreat_x
-										retreatRoute[2].y = retreat_y
-										retreatRoute[2].alt = awacsVec3.y
-										retreatRoute[2].speed_locked = true
-										retreatRoute[2].ETA_locked = false
-										retreatRoute[2].speed = descAwacs.speedMax
-										retreatRoute[2].ETA = RetreatTimeGp[gpGid].rTime
-
-										local idTasks = #retreatRoute[2].task.params.tasks
-										local orbitRetreat = {
-
-											['enabled'] = true,
-											['auto'] = false,
-											['id'] = 'ControlledTask',
-											['number'] = idTasks+2,
-											['params'] = {
-												['task'] = {
-													['id'] = 'Orbit',
-													['params'] = {
-														['altitude'] = 7315.2,
-														['pattern'] = 'Circle',
-														['speed'] = 138.889,
-													},
-												},
-												['stopCondition'] = {
-													['time'] = RetreatTimeGp[gpGid].rTime,
-												},
-											},
-
-										}
-
-										retreatRoute[2].task.params.tasks[idTasks +1] =  orbitRetreat
-
-										--ajoute la task awacs au premier wpt pour garder la fonction awacs operationnel
-										local TaskAwacs = {
-
-												['enabled'] = true,
-												['auto'] = false,
-												['id'] = 'ControlledTask',
-												['number'] = 1,
-												['params'] = {
-													['task'] = {
-														['id'] = 'AWACS',
-														['params'] = {
-														},
-													},
-												},
-
-											}
-										table.insert(retreatRoute[2].task.params.tasks, 1, TaskAwacs)
-
-										--renumerote les number des task																	
-										for j=1, #retreatRoute[1].task.params.tasks do
-											retreatRoute[1].task.params.tasks[j].number = i
-										end
-
-										local mission = {														--define mission for retreat AWACS
-												id = 'Mission',
-												params = {
-													route = {
-														points = retreatRoute
-													},
-												}
-											}
-
-
-										-- local logStr = "mission = " .. TableSerialization(mission, 0)
-										-- local logFile = io.open(PathDCE.."_"..nameAwacs.."_".. "Mission_AWACSretreatRoute.lua", "w")
-										-- logFile:write(logStr)
-										-- logFile:close()	
-
-										Controller.setTask(ctrGroup, mission)										--activate task with mission for retreat AWACS
-										-- 					end
-										-- 				end
-										-- 			end
-										-- 		end
-										-- 	end
-										-- end
 									end
 								end
+
+								local delay = nearbyPlayer and 10 or 0
+								timer.scheduleFunction(executeAirRetreat,
+									{ gpGid, gpName, retreat_x, retreat_y, acVec3, isAwacsRole, RetreatTimeGp[gpGid]
+										.rTime },
+									timer.getTime() + delay)
 							end
 						end
 					end
@@ -1142,7 +1238,7 @@ local function airRetreat()
 		Perf_C = Perf_C + dt
 		Perf_C_N = Perf_C_N + 1
 	end
-	
+
 	return timer.getTime() + 31
 end
 
@@ -1707,7 +1803,7 @@ function EventHandler2:onEvent(event)
 
 							if gpGid and groupObject then
 								env.info("DCE_EventHandler2 C1 playerName S_EVENT_BIRTH. MAKE addFuncs() ")
-								addFuncs(gpGid, groupObject, playerName)
+								AddFuncs(gpGid, groupObject, playerName)
 
 								local desc = event.initiator:getDesc()
 								env.info("DCE_EventHandler2 C2. desc" .. tostring(desc))
@@ -1791,7 +1887,7 @@ function EventHandler2:onEvent(event)
 						local gpGid = groupObject:getID() --1300: attempt to index a nil value
 						if gpGid and groupObject and playerName then
 							env.info("DCE_EventHandler2 E playerName event.subPlace MAKE addFuncs()")
-							addFuncs(gpGid, groupObject, playerName)
+							AddFuncs(gpGid, groupObject, playerName)
 						end
 					end
 				end
@@ -1927,50 +2023,6 @@ end
 world.addEventHandler(EventHandler2)
 
 
-local function showPerformance()
-
-	env.info("DCE_showPerformance, bingo(): " .. tonumber(Bingo_time) .. " n: " .. tonumber(Bingo_calls) .. " /n: " .. tonumber(Bingo_time / Bingo_calls))
-	env.info("DCE_showPerformance, avoidAera(): " .. tonumber(Perf_A) .." n: ".. tonumber(Perf_A_N).." /n: ".. tonumber(Perf_A / Perf_A_N))
-	env.info("DCE_showPerformance, EWR_magic(): " .. tonumber(Perf_B) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_B / Perf_B_N))
-	env.info("DCE_showPerformance, EWR_magic()Player: " .. tonumber(Perf_Bb) .." n: ".. tonumber(Perf_B_Nb).. " /n " .. tonumber(Perf_Bb / Perf_B_Nb))
-	
-	env.info("DCE_showPerformance, airRetreat(): " .. tonumber(Perf_C) .." n: ".. tonumber(Perf_B_N).. " /n " .. tonumber(Perf_C / Perf_C_N))
-	env.info("DCE_showPerformance, LoopSAR(): " .. tonumber(Perf_D) .." n: ".. tonumber(Perf_D_N).. " /n " .. tonumber(Perf_D / Perf_D_N))
-	env.info("DCE_showPerformance, loopAFAC_CAS(): " .. tonumber(Perf_F) .." n: ".. tonumber(Perf_F_N).. " /n " .. tonumber(Perf_F / Perf_F_N))
-
-	env.info("DCE_showPerformance, trackBomb(): " .. tonumber(Perf_E) .." n: ".. tonumber(Perf_E_N).. " /n " .. tonumber(Perf_E / Perf_E_N))
-	env.info("DCE_showPerformance, updateTrackedBombs(): " .. tonumber(Perf_H) .." n: ".. tonumber(Perf_H_N).. " /n " .. tonumber(Perf_H / Perf_H_N))
-	env.info("DCE_showPerformance, destructionScenaryInZone(): " .. tonumber(Perf_J) .." n: ".. tonumber(Perf_J_N).. " /n " .. tonumber(Perf_J / Perf_J_N))
-
-
-	env.info("DCE_showPerformance_B_40, Custom_Altitude(): " ..
-	tonumber(Perf_K) .. " n: " .. tonumber(Perf_K_N) .. " /n " .. tonumber(Perf_K / Perf_K_N))
-
-	
-	env.info("DCE_showPerformance, Custom_SAR(): " .. tonumber(Perf_L) .. " n: " .. tonumber(Perf_L_N) .. " /n " .. tonumber(Perf_L / Perf_L_N))
-	env.info("DCE_showPerformance, ARM_Defence_Script(): " .. tonumber(Perf_M) .. " n: " .. tonumber(Perf_M_N) .. " /n " .. tonumber(Perf_M / Perf_M_N))
-	env.info("DCE_showPerformance, CheckImmediatSAR(): " .. tonumber(Perf_S) .. " n: " .. tonumber(Perf_S_N) .. " /n " .. tonumber(Perf_S / Perf_S_N))
-	env.info("DCE_showPerformance, CheckRtbAirbase(): " ..
-        tonumber(Perf_I) .. " n: " .. tonumber(Perf_I_N) .. " /n " .. tonumber(Perf_I / Perf_I_N))
-		
-	env.info("DCE_showPerformance, CustomGroupAttack(): " ..
-        tonumber(Perf_P) .. " n: " .. tonumber(Perf_P_N) .. " /n " .. tonumber(Perf_P / Perf_P_N))
-
-	env.info("DCE_showPerformance, CustomMixClassAttack(): " ..
-		tonumber(Perf_Q) .. " n: " .. tonumber(Perf_Q_N) .. " /n " .. tonumber(Perf_Q / Perf_Q_N))
-
-	env.info("DCE_showPerformance, EventsTrackers: " ..
-		tonumber(Perf_O) .. " n: " .. tonumber(Perf_O_N) .. " /n " .. tonumber(Perf_O / Perf_O_N))
-
-    
-	_affiche(Perf_EventsT, "Perf_EventsT: ")
-		
-		
-	return timer.getTime() + 120
-
-end
-
-
 --/////////////////////////bootstrap (repris tel quel depuis AddCommandRadioF10.lua)
 timer.scheduleFunction(hotSpotSAM, nil, timer.getTime() + 0.03) --creation de la table de couverture anti aérienne AMI
 
@@ -1979,9 +2031,5 @@ timer.scheduleFunction(airRetreat, nil, timer.getTime() + 6)
 timer.scheduleFunction(avoidArea, nil, timer.getTime() + 7)
 
 timer.scheduleFunction(EWR_magic, nil, timer.getTime() + 31)
-
-if campL.debug then --ça, ça ne marche pas
-	timer.scheduleFunction(showPerformance, nil, timer.getTime() + 30)
-end
 
 env.info("DCE_Background END OF LOADING")
