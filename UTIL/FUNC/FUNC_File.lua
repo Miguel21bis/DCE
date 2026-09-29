@@ -661,216 +661,153 @@ end
 
 
 
--- function ModifiCampInit()
-
--- 	if not REF_PATH then
--- 		print("[ModifiCampInit] UTIL_REF_camp_init.lua introuvable (racine testée : " .. MOD_PATH .. ")")
--- 		return false
--- 	end
-
--- 	local REF_camp, refErr = loadDataFile(REF_PATH, REF_ROOT_NAME)
--- 	if not REF_camp then print("[ModifiCampInit] " .. refErr) return false end
-
--- 	local camp, campErr = loadDataFile(CAMP_INIT_PATH, LOCAL_ROOT_NAME)
--- 	if not camp then print("[ModifiCampInit] " .. campErr) return false end
-
--- 	local refFile = io.open(REF_PATH, "r")
--- 	if not refFile then print("[ModifiCampInit] impossible d'ouvrir " .. REF_PATH) return false end
-
--- 	local localFlat   = flatten(camp, nil, {})
--- 	local visited     = {}
--- 	local pathStack   = {}
--- 	local skippingList = false
--- 	local outLines    = {}
-
--- 	local function currentPath()
--- 		return table.concat(pathStack, ".")
--- 	end
-
--- 	local isRootLine = true -- traite la toute première ligne "REF_camp = {" à part
-
--- 	for line in refFile:lines() do
-
--- 		local key = line:match("^%s*([%a_][%w_]*)%s*=")
-
--- 		if isRootLine and key == REF_ROOT_NAME then
--- 			-- la ligne d'ouverture porte le nom de la référence (REF_camp) ;
--- 			-- on la réécrit avec le nom réellement utilisé dans camp_init.lua (camp)
--- 			outLines[#outLines + 1] = line:gsub("^(%s*)" .. REF_ROOT_NAME, "%1" .. LOCAL_ROOT_NAME)
--- 			isRootLine = false
-
--- 		elseif skippingList then
--- 			-- on saute les lignes d'exemple d'une liste déjà régénérée
--- 			if line:match("^%s*}") then
--- 				outLines[#outLines + 1] = line
--- 				pathStack[#pathStack] = nil
--- 				skippingList = false
--- 			end
-
--- 		elseif key and line:match("=%s*{") then
--- 			-- ouverture d'une sous-table
--- 			pathStack[#pathStack + 1] = key
--- 			outLines[#outLines + 1] = line
-
--- 			-- ne régénère que si la donnée locale à ce chemin est un vrai
--- 			-- tableau-liste ; sinon ce n'est qu'un conteneur (ex: pictureBrief
--- 			-- au-dessus de blue/red), on continue la récursion normalement
--- 			local path = currentPath()
--- 			local values = localFlat[path]
--- 			if type(values) == "table" and values[1] ~= nil then
--- 				local indent = (line:match("^(%s*)") or "") .. "\t"
--- 				for _, picName in ipairs(values) do
--- 					outLines[#outLines + 1] = indent .. serializeScalar(picName) .. ","
--- 				end
--- 				skippingList = true
--- 			end
-
--- 		elseif key then
--- 			-- ligne "clé = valeur, -- commentaire"
--- 			local path = currentPath() ~= "" and (currentPath() .. "." .. key) or key
--- 			visited[path] = true
--- 			local value = localFlat[path]
--- 			outLines[#outLines + 1] = (value ~= nil) and setValueOnLine(line, value) or line
-
--- 		else
--- 			outLines[#outLines + 1] = line
--- 			if line:match("^%s*}") and #pathStack > 0 then
--- 				pathStack[#pathStack] = nil
--- 			end
--- 		end
--- 	end
--- 	refFile:close()
-
--- 	-- variables locales absentes de REF_camp : à porter, ou obsolètes
--- 	local portable = {}
--- 	for path, value in pairs(localFlat) do
--- 		if not visited[path] then
--- 			local target = MIGRATE_TO_CONFMOD[path]
--- 			if target then
--- 				portable[#portable + 1] = { fromPath = path, toPath = target, value = value }
--- 			else
--- 				-- print("[ModifiCampInit] variable obsolète supprimée : " .. path)
--- 			end
--- 		end
--- 	end
-
--- 	local outFile = io.open(CAMP_INIT_PATH, "w")
--- 	if not outFile then print("[ModifiCampInit] impossible d'écrire " .. CAMP_INIT_PATH) return false end
--- 	outFile:write(table.concat(outLines, "\n"))
--- 	outFile:close()
-
--- 	if #portable > 0 then
--- 		PortLegacyFieldsToConfMod(CONF_MOD_PATH, portable)
--- 	end
-
--- 	dofile(CAMP_INIT_PATH)
--- 	return true
--- end
 
 function ModifiCampInit()
 
-	local REF_camp, refErr = loadDataFile(REF_PATH, REF_ROOT_NAME)
-	if not REF_camp then print("[ModifiCampInit] " .. refErr) return false end
-
-	local camp, campErr = loadDataFile(CAMP_INIT_PATH, LOCAL_ROOT_NAME)
-	if not camp then print("[ModifiCampInit] " .. campErr) return false end
-
-	local refFile = io.open(REF_PATH, "r")
-	if not refFile then print("[ModifiCampInit] impossible d'ouvrir " .. REF_PATH) return false end
-
-	local localFlat   = flatten(camp, nil, {})
-	local visited     = {}
-	local pathStack   = {}
-	local skippingList = false
-	local outLines    = {}
-
-	local function currentPath()
-		return table.concat(pathStack, ".")
+	-- Journal écrit dans Debug/ModifiCampInit.log (la console peut être cachée quand DCE_Manager pilote)
+	local logLines = {}
+	local function log(msg)
+		logLines[#logLines + 1] = tostring(msg)
+		-- print("[ModifiCampInit] " .. tostring(msg))
+	end
+	local function flushLog()
+		local f = io.open("Debug/ModifiCampInit.log", "w")
+		if f then
+			f:write(table.concat(logLines, "\n") .. "\n")
+			f:close()
+		end
 	end
 
-	local isRootLine = true -- traite la toute première ligne "REF_camp = {" à part
+	local function run()
 
-	for line in refFile:lines() do
+		-- résolu à l'appel (et non au chargement du fichier) : MOD_PATH est alors définitif
+		local refPath = IncludeResolve("UTIL_REF_camp_init.lua")
+		log("MOD_PATH = " .. tostring(MOD_PATH))
+		log("pathScriptsMod = " .. tostring(pathScriptsMod) .. " | VersionPackageICM = " .. tostring(VersionPackageICM))
+		log("REF utilisé = " .. tostring(refPath))
+		log("camp_init cible = " .. CAMP_INIT_PATH)
 
-		local key = line:match("^%s*([%a_][%w_]*)%s*=")
+		if not refPath then
+			log("ERREUR : UTIL_REF_camp_init.lua introuvable, rien n'est modifié")
+			return false
+		end
 
-		if isRootLine and key == REF_ROOT_NAME then
-			-- la ligne d'ouverture porte le nom de la référence (REF_camp) ;
-			-- on la réécrit avec le nom réellement utilisé dans camp_init.lua (camp)
-			outLines[#outLines + 1] = line:gsub("^(%s*)" .. REF_ROOT_NAME, "%1" .. LOCAL_ROOT_NAME)
-			isRootLine = false
+		local REF_camp, refErr = loadDataFile(refPath, REF_ROOT_NAME)
+		if not REF_camp then log("ERREUR " .. tostring(refErr)) return false end
 
-		elseif skippingList then
-			-- on saute les lignes d'exemple d'une liste déjà régénérée
-			if line:match("^%s*}") then
-				outLines[#outLines + 1] = line
-				pathStack[#pathStack] = nil
-				skippingList = false
-			end
+		local camp, campErr = loadDataFile(CAMP_INIT_PATH, LOCAL_ROOT_NAME)
+		if not camp then log("ERREUR " .. tostring(campErr)) return false end
 
-		elseif key and line:match("=%s*{") then
-			-- ouverture d'une sous-table
-			pathStack[#pathStack + 1] = key
-			outLines[#outLines + 1] = line
+		local refFile = io.open(refPath, "r")
+		if not refFile then log("ERREUR impossible d'ouvrir " .. refPath) return false end
 
-			-- ne régénère que si la donnée locale à ce chemin est un vrai
-			-- tableau-liste ; sinon ce n'est qu'un conteneur (ex: pictureBrief
-			-- au-dessus de blue/red), on continue la récursion normalement
-			local path = currentPath()
-			local values = localFlat[path]
-			if type(values) == "table" and values[1] ~= nil then
-				local indent = (line:match("^(%s*)") or "") .. "\t"
-				for _, picName in ipairs(values) do
-					outLines[#outLines + 1] = indent .. serializeScalar(picName) .. ","
+		local localFlat   = flatten(camp, nil, {})
+		local visited     = {}
+		local pathStack   = {}
+		local skippingList = false
+		local outLines    = {}
+
+		local function currentPath()
+			return table.concat(pathStack, ".")
+		end
+
+		local isRootLine = true -- traite la toute première ligne "REF_camp = {" à part
+
+		for line in refFile:lines() do
+
+			local key = line:match("^%s*([%a_][%w_]*)%s*=")
+
+			if isRootLine and key == REF_ROOT_NAME then
+				-- la ligne d'ouverture porte le nom de la référence (REF_camp) ;
+				-- on la réécrit avec le nom réellement utilisé dans camp_init.lua (camp)
+				outLines[#outLines + 1] = line:gsub("^(%s*)" .. REF_ROOT_NAME, "%1" .. LOCAL_ROOT_NAME)
+				isRootLine = false
+
+			elseif skippingList then
+				-- on saute les lignes d'exemple d'une liste déjà régénérée
+				if line:match("^%s*}") then
+					outLines[#outLines + 1] = line
+					pathStack[#pathStack] = nil
+					skippingList = false
 				end
-				skippingList = true
-			end
 
-		elseif key then
-			-- ligne "clé = valeur, -- commentaire"
-			local path = currentPath() ~= "" and (currentPath() .. "." .. key) or key
-			visited[path] = true
-			local value = localFlat[path]
-			outLines[#outLines + 1] = (value ~= nil) and setValueOnLine(line, value) or line
+			elseif key and line:match("=%s*{") then
+				-- ouverture d'une sous-table
+				pathStack[#pathStack + 1] = key
+				outLines[#outLines + 1] = line
 
-		else
-			outLines[#outLines + 1] = line
-			if line:match("^%s*}") and #pathStack > 0 then
-				pathStack[#pathStack] = nil
-			end
-		end
-	end
-	refFile:close()
+				-- ne régénère que si la donnée locale à ce chemin est un vrai
+				-- tableau-liste ; sinon ce n'est qu'un conteneur (ex: pictureBrief
+				-- au-dessus de blue/red), on continue la récursion normalement
+				local path = currentPath()
+				visited[path] = true
+				local values = localFlat[path]
+				if type(values) == "table" and values[1] ~= nil then
+					local indent = (line:match("^(%s*)") or "") .. "\t"
+					for _, picName in ipairs(values) do
+						outLines[#outLines + 1] = indent .. serializeScalar(picName) .. ","
+					end
+					skippingList = true
+				end
 
-	-- variables locales absentes de REF_camp : à porter, ou obsolètes
-	local portable = {}
-	for path, value in pairs(localFlat) do
-		if not visited[path] then
-			local target = MIGRATE_TO_CONFMOD[path]
-			if target then
-				portable[#portable + 1] = { fromPath = path, toPath = target, value = value }
+			elseif key then
+				-- ligne "clé = valeur, -- commentaire"
+				local path = currentPath() ~= "" and (currentPath() .. "." .. key) or key
+				visited[path] = true
+				local value = localFlat[path]
+				outLines[#outLines + 1] = (value ~= nil) and setValueOnLine(line, value) or line
+
 			else
-				-- print("[ModifiCampInit] variable obsolète supprimée : " .. path)
+				outLines[#outLines + 1] = line
+				if line:match("^%s*}") and #pathStack > 0 then
+					pathStack[#pathStack] = nil
+				end
 			end
 		end
+		refFile:close()
+
+		-- variables locales absentes de REF_camp : à porter, ou obsolètes
+		local portable = {}
+		for path, value in pairs(localFlat) do
+			if not visited[path] then
+				local target = MIGRATE_TO_CONFMOD[path]
+				if target then
+					portable[#portable + 1] = { fromPath = path, toPath = target, value = value }
+				else
+					log("variable obsolète supprimée : " .. path)
+				end
+			end
+		end
+
+		local outFile = io.open(CAMP_INIT_PATH, "w")
+		if not outFile then log("ERREUR impossible d'écrire " .. CAMP_INIT_PATH) return false end
+		outFile:write(table.concat(outLines, "\n"))
+		outFile:close()
+		log("OK : " .. #outLines .. " lignes écrites dans " .. CAMP_INIT_PATH)
+		log("code_loadout dans la REF : " .. tostring(REF_camp.code_loadout ~= nil) .. " | valeur locale conservée : " .. tostring(localFlat["code_loadout"]))
+
+		if #portable > 0 then
+			PortLegacyFieldsToConfMod(CONF_MOD_PATH, portable)
+		end
+
+		-- NE PAS faire dofile(CAMP_INIT_PATH) ici : ça écraserait la variable
+		-- globale "camp" (état vivant de campagne : mission en cours, date, etc.)
+		-- avec le template de départ de campagne. Init/camp_init.lua a été
+		-- réécrit sur disque ci-dessus, c'est suffisant : il sera relu au
+		-- prochain BAT_FirstMission. Ici on ne veut RIEN en mémoire.
+		return true
 	end
 
-	local outFile = io.open(CAMP_INIT_PATH, "w")
-	if not outFile then print("[ModifiCampInit] impossible d'écrire " .. CAMP_INIT_PATH) return false end
-	outFile:write(table.concat(outLines, "\n"))
-	outFile:close()
-
-	if #portable > 0 then
-		PortLegacyFieldsToConfMod(CONF_MOD_PATH, portable)
+	local ok, result = pcall(run)
+	if not ok then
+		log("ERREUR Lua : " .. tostring(result))
+		result = false
 	end
-
-	-- NE PAS faire dofile(CAMP_INIT_PATH) ici : ça écraserait la variable
-	-- globale "camp" (état vivant de campagne : mission en cours, date, etc.)
-	-- avec le template de départ de campagne. Init/camp_init.lua a été
-	-- réécrit sur disque ci-dessus, c'est suffisant : il sera relu au
-	-- prochain BAT_FirstMission. Ici on ne veut RIEN en mémoire.
-	return true
+	flushLog()
+	return result
 end
+
+
 
 --=========================================================================
 -- UpdateConfMod(setWeather, setDate, from)
@@ -888,76 +825,7 @@ local function dateToNumber(d)
     return (d.year or 0) * 10000 + (d.month or 0) * 100 + (d.day or 0)
 end
 
--- function UpdateConfMod(setWeather, setDate, from)
 
---     from = from or "unknown"
-
---     if not setWeather and not setDate then
---         -- if Debug.debug then print("[UpdateConfMod] appel depuis '" .. from .. "' sans rien à changer, ignoré") end
---         return true
---     end
-
---     local updates = {}
-
---     if setWeather then
---         for field, value in pairs(setWeather) do
---             updates["mission_ini.weather." .. field] = value
---             -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] weather." .. field .. " -> " .. tostring(value)) end
---         end
---     end
-
---     if setDate then
-
---         setDate.setDateInNextMission = false
-
---         -- date proposée = date actuelle + les champs fournis
---         local newDate = {
---             day   = setDate.day   or camp.date.day,
---             month = setDate.month or camp.date.month,
---             year  = setDate.year  or camp.date.year,
---         }
-
---         if dateToNumber(newDate) < dateToNumber(camp.date) then
---             if Debug.debug then 
---                 print("[UpdateConfMod][" .. from .. "] REFUS date : "
---                     .. string.format("%04d-%02d-%02d", newDate.year, newDate.month, newDate.day)
---                     .. " antérieure à "
---                     .. string.format("%04d-%02d-%02d", camp.date.year, camp.date.month, camp.date.day)
---                     .. " -> changement de date ignoré, le reste est appliqué")
---             end
---         else
---             camp.date = newDate
-
---             for field, value in pairs(setDate) do
---                 updates["mission_ini.current_date." .. field] = value
---                 -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] current_date." .. field .. " -> " .. tostring(value)) end
---             end
---         end
---     end
-
---     -- la date a pu être refusée et il n'y avait rien d'autre : plus rien à écrire
---     if next(updates) == nil then
---         -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] aucune mise à jour à écrire") end
---         return true
---     end
-
---     local ok, applied = applyUpdatesToFile(CONF_MOD_PATH, updates)
---     if not ok then
---         -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] échec de l'écriture de " .. CONF_MOD_PATH) end
---         return false
---     end
---     applied = applied or {}
-
---     for path in pairs(updates) do
---         if not applied[path] and Debug.debug then
---             -- print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path)
---         end
---     end
-
---     dofile(CONF_MOD_PATH) -- recharge mission_ini en mémoire avec les nouvelles valeurs
-
---     return true
--- end
 
 function UpdateConfMod(setWeather, setDate, from)
 
@@ -1018,9 +886,12 @@ function UpdateConfMod(setWeather, setDate, from)
         return false
     end
 
-    for path in pairs(updates) do
-        if not applied[path] then
-            -- if Debug.debug then print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path) end
+    -- clés demandées mais introuvables dans conf_mod.lua (avertissement visible seulement en mode debug)
+    if Debug.debug then
+        for path in pairs(updates) do
+            if not applied[path] then
+                print("[UpdateConfMod][" .. from .. "] AVERTISSEMENT : clé introuvable dans conf_mod.lua : " .. path)
+            end
         end
     end
 
@@ -1038,6 +909,7 @@ function UpdateConfMod(setWeather, setDate, from)
 
     return true
 end
+
 
 
 function ShowBugsWindows()

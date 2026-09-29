@@ -9,6 +9,7 @@ REF_camp = {
 	version       = "",              -- @ui text group="Identity" label="Version" help=Free-text version tag for this campaign package. [default: ""]
 	campaignId    = "",             -- @ui text group="Identity" label="Campaign ID" help=Internal identifier used to link this campaign to its repository and to update checks. [default: ""]
 	repositoryUrl = "",             -- @ui text group="Identity" label="Repository URL" help=Source repository for this campaign. [default: ""]
+	code_loadout  = "",             -- @ui text group="Identity" label="Loadout code" help=Code selecting which loadouts of the central db_loadouts this campaign uses (must exist in campaigns_code_loadout). Leave empty to auto-detect from the campaign title (legacy behaviour). [default: ""]
 	mission       = 1,              -- @ui numeric min=1 group="Identity" label="Starting mission number" help=Mission number the campaign starts at (almost always 1). [default: 1]
 
 	date = {                             --campaign date
