@@ -541,12 +541,6 @@ local function updateBaseDistance(unit, baseX, baseY)
 end
 
 local function bingo(gpId, gpObj)
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-	end
-
-
 
 	for n, unit in pairs(gpObj:getUnits()) do
 		-- Bingo_prof.units = Bingo_prof.units + 1

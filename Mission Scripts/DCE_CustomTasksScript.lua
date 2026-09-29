@@ -28,11 +28,6 @@ function CustomGroupAttack(flightName, targetName, expend, weaponType, attackTyp
 	
 	env.info("DCE_CustomGroupAttack start| "..tostring(flightName))
 
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-		Perf_P_N = Perf_P_N + 1
-	end
 
 	-- Weapon.Category
 	-- SHELL     0
@@ -273,10 +268,7 @@ function CustomGroupAttack(flightName, targetName, expend, weaponType, attackTyp
             execute()
         end
     end
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_P = Perf_P + dt
-	end
+
 end
 
 
@@ -516,12 +508,7 @@ end
 function CustomMixClassAttack(flightName, targetList, expend, weaponType, attackType, attackAlt, id_task)
 	
     env.info("DCE_CustomMixClassAttack | start| " .. tostring(flightName))
-	
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-		Perf_Q_N = Perf_Q_N + 1
-	end
+
 
 	--{cntrl, comboTask, n}
 	local function execute(arg)
@@ -766,10 +753,6 @@ function CustomMixClassAttack(flightName, targetList, expend, weaponType, attack
 		
     end
 	
-    if campL.debug then
-        local dt = os.clock() - t0
-		Perf_Q = Perf_Q + dt
-    end
 	
 end
 ----- attack multiple map objects -----
@@ -3939,10 +3922,6 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 	local t0
 	
     local function execute()
-		if campL.debug then
-			t0 = os.clock()
-			Perf_L_N = Perf_L_N + 1
-		end
 	
 		current_time = timer.getTime()
 		local flight = Group.getByName(grpname)								--get Group
@@ -4050,11 +4029,7 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 
 		-- si pas de présence de soldat, simulant le piloteEjecté: on sort (cas des ejected en mer, par exemple)
 		if pt_dest.x == 0 then
-            -- env.info( "Custom_SAR Ib RETURN ************* ")
-			if campL.debug then
-				local dt = os.clock() - t0
-				Perf_L = Perf_L + dt
-			end
+
 			return
 		end
 
@@ -4576,11 +4551,6 @@ function Custom_SAR(grpname, baseName, baseNameX, baseNameY, mgrsChute, speed, a
 		local ctr = flight:getController()
 		Controller.setTask(ctr, mission)
 
-		if campL.debug then
-			local dt = os.clock() - t0
-			Perf_L = Perf_L + dt
-		end
-
 	end     --fin execute
 
 	timer.scheduleFunction(execute, nil, timer.getTime() + 1)
@@ -4668,27 +4638,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 	
 	TerrainStats_N = 0
     TerrainStats_Cache_N = 0
-	
-	if campL.debug then
-		t_init = os.clock()
-		Perf_K_N = Perf_K_N + 1
-	end
-
-    if not Perf_CustAlt then
-        Perf_CustAlt = {}
-    end
-	
-	if not Perf_CustAlt[grpName] then
-		Perf_CustAlt[grpName] = {
-			-- N_interval = 0,
-			N_addHeading = 0,
-			timeTotal = 0,
-            TerrainStats_N = 0,
-			TerrainStats_Cache_N = 0,
-			N_interval = 0,
-		}
-	end
-
 
 	if wptTag then
 		wptTag = tonumber(wptTag) or 0
@@ -4758,8 +4707,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 		end
 
 		if not selectedMember then
-			local dt = os.clock() - t_init
-			Perf_K = Perf_K + dt
 			return
 		end
 
@@ -4775,8 +4722,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 
 		-- local str_selectedMember = selectedMember:getTypeName()
 		if type(str_selectedMember) ~= "string" then
-			local dt = os.clock() - t_init
-			Perf_K = Perf_K + dt
 			return
 		end
 
@@ -5204,8 +5149,7 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 							-- for AddHeading = -30 , 30 do
 							for addHeading = addHeadingMin, addHeadingMax do--B-
 							-- for addHeading = math.max(addHeadingMin, centerHeading - 15), math.min(addHeadingMax, centerHeading + 15) do--B+
-								Perf_CustAlt[grpName]["N_addHeading"] = Perf_CustAlt[grpName]["N_addHeading"] + 1
-
+								
 								local addHeading_str = tostring(addHeading)
 
 								for interval0 = addDistance, interDistance, addDistance do
@@ -5235,8 +5179,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 								for interval0 = 600, 10000, 500 do--B-
 								-- for interval0 = 600, 10000, 800 do--B+
 							
-									Perf_CustAlt[grpName]["N_interval"] = Perf_CustAlt[grpName]["N_interval"] + 1
-
 									headingAlt = heading + addHeading
 									sondagePt = GetOffsetPoint(selectedPoint, headingAlt, interval0)
 									-- sondageAlti = GetTerrainHeightCached(sondagePt.x, sondagePt.y) --B-
@@ -5457,18 +5399,6 @@ function Custom_Altitude(grpName, wptAlti, wptTag)
 
 	end
 
-
 	execute()
-
-	if campL.debug then
-		local dt = os.clock() - t_init
-		Perf_K = Perf_K + dt
-		Perf_CustAlt[grpName]["timeTotal"] = dt
-
-		Perf_CustAlt[grpName].TerrainStats_N = TerrainStats_N
-		Perf_CustAlt[grpName].TerrainStats_Cache_N = TerrainStats_Cache_N
-
-		_affiche(Perf_CustAlt, "Perf_CustAlt: ")
-	end
 	
 end

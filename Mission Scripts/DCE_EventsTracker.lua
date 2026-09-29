@@ -672,11 +672,52 @@ Info_event = {
 		[61] = "S_EVENT_MAX",
 	}
 
+	-- ============================================================================
+-- LISTE BLANCHE DES EVENTS TRAITÉS PAR CE FICHIER — SEULE AUTORITÉ.
+-- Si un event.id n'est PAS dans cette table, TOUT LE RESTE DE eventHandlerDCE
+-- L'IGNORE (early return juste après le bloc debug, plus bas dans la fonction).
+-- Avant d'ajouter un nouveau "if event.id == world.event.S_EVENT_XXX" n'importe
+-- où plus bas dans cette fonction, il FAUT d'abord l'ajouter ICI, sinon le
+-- nouveau code ne sera jamais exécuté.
+-- ============================================================================
+local DCE_EventsTracker_Whitelist = {
+    [world.event.S_EVENT_BDA]                          = true, -- anti-flood BDA
+    [world.event.S_EVENT_SHOT]                         = true, -- log_entry "shot" + tracking bombes (trackBomb)
+    [world.event.S_EVENT_HIT]                          = true, -- log_entry "hit" + queue hit1s (scenery)
+    [world.event.S_EVENT_KILL]                         = true, -- log_entry "kill" + destruction scenery (kill)
+    [world.event.S_EVENT_UNIT_LOST]                    = true, -- log_entry "unit lost" + destruction scenery
+    [world.event.S_EVENT_TAKEOFF]                      = true, -- log_entry "takeoff" + SatusGroupAircraft
+    [world.event.S_EVENT_LAND]                         = true, -- log_entry "land" + despawn Pedro/CV + SatusGroupAircraft
+    [world.event.S_EVENT_LANDING_QUALITY_MARK]         = true, -- log_entry "land quality"
+    [world.event.S_EVENT_CRASH]                        = true, -- log_entry "crash"
+    [world.event.S_EVENT_EJECTION]                     = true, -- log_entry "eject" + startTrack (parachute)
+    [world.event.S_EVENT_REFUELING]                    = true, -- log_entry "refueling" + CheckRefuelProgress
+    [world.event.S_EVENT_REFUELING_STOP]               = true, -- fin de ravitaillement (2e chaîne)
+    [world.event.S_EVENT_DEAD]                         = true, -- log_entry "dead" + destruction scenery
+    [world.event.S_EVENT_PILOT_DEAD]                   = true, -- log_entry "pilot dead"
+    [world.event.S_EVENT_DISCARD_CHAIR_AFTER_EJECTION] = true, -- log_entry "pilot seat separation"
+    [world.event.S_EVENT_LANDING_AFTER_EJECTION]       = true, -- log_entry "pilot land"
+    [world.event.S_EVENT_BASE_CAPTURED]                = true, -- log_entry "base captured"
+    [world.event.S_EVENT_MISSION_START]                = true, -- log_entry "mission start"
+    [world.event.S_EVENT_MISSION_END]                  = true, -- log_entry "mission end" + export debriefing complet
+    [world.event.S_EVENT_TOOK_CONTROL]                 = true, -- log_entry "took control"
+    [world.event.S_EVENT_BIRTH]                        = true, -- log_entry "birth"
+    [world.event.S_EVENT_ENGINE_STARTUP]               = true, -- log_entry "engine startup"
+    [world.event.S_EVENT_ENGINE_SHUTDOWN]              = true, -- log_entry "engine shutdown"
+    [world.event.S_EVENT_PLAYER_ENTER_UNIT]            = true, -- log_entry "player enter unit"
+    [world.event.S_EVENT_PLAYER_LEAVE_UNIT]            = true, -- log_entry "player leave unit"
+}
+
 --###################  ######   #####################################
 --###################  MAIN   #####################################
 --###################  ######   #####################################
 
 function eventHandlerDCE:onEvent(event)
+
+	-- LOG DEBRIEF (temporaire)
+	if event and event.id == world.event.S_EVENT_MISSION_END then
+		env.info("DCE_DEBRIEF 0 S_EVENT_MISSION_END arrive dans eventHandlerDCE")
+	end
 
 	if campL.debug then
 		if event and event.id then
@@ -691,10 +732,16 @@ function eventHandlerDCE:onEvent(event)
 		end
 	end
 
-		
-	-- Anti-flood BDA (global, sans getID ni getName)
-	if event.id == world.event.S_EVENT_BDA then
+	-- FILTRE PRINCIPAL : voir DCE_EventsTracker_Whitelist en haut du fichier.
+	-- La liste blanche fait foi : un event absent d'ici est ignoré, point.
+	if not DCE_EventsTracker_Whitelist[event.id] then
+		return
+	end
+	
 
+	-- Anti-flood BDA (global, sans getID ni getName)
+    if event.id == world.event.S_EVENT_BDA then
+		
 		if survey_EVENT_BDA then
 
 			-- Vérification du flood BDA
@@ -886,6 +933,7 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 		end
+	end -- fin de "if event.target then" (ce end manquait : tout le reste du handler, dont l'export de fin de mission, etait saute quand l'event n'a pas de cible)
 
 		if log_entry.type == "eject"  then
             env.info("DCE_EventT_eject A, id: " .. tostring(event.id) .. " event.initiator " .. tostring(event.initiator))
@@ -1617,6 +1665,13 @@ function eventHandlerDCE:onEvent(event)
 
 		--mission end
         if event.id == world.event.S_EVENT_MISSION_END then
+            -- LOG DEBRIEF (temporaire) : chercher "DCE_DEBRIEF" dans dcs.log
+            env.info("DCE_DEBRIEF 1 S_EVENT_MISSION_END recu")
+            env.info("DCE_DEBRIEF 1 PathDCE = " .. tostring(PathDCE))
+            env.info("DCE_DEBRIEF 1 PathDD = " .. tostring(PathDD))
+            env.info("DCE_DEBRIEF 1 campL.path = " .. tostring(campL.path))
+            env.info("DCE_DEBRIEF 1 campL.title = " .. tostring(campL.title))
+            env.info("DCE_DEBRIEF 1 campL.DCEManagerExe = " .. tostring(campL.DCEManagerExe))
             --collect health of ships
             if campL.ShipHealth == nil then --table to store ship damage does not exist yet
                 campL.ShipHealth = {} --create table to store ship damage
@@ -1668,25 +1723,29 @@ function eventHandlerDCE:onEvent(event)
             end
 
 
+            env.info("DCE_DEBRIEF 2 bloc navires passe, debut ecriture des fichiers")
+
             --export custom mission log
             local logStr = "events = " .. TableSerialization(CustomLog, 0)
-            local logFile = io.open(PathDCE .. "MissionEventsLog.lua", "w")
+            local logFile, logErr = io.open(PathDCE .. "MissionEventsLog.lua", "w")
             if logFile then
                 logFile:write(logStr)
                 logFile:close()
+                env.info("DCE_DEBRIEF 3 OK " .. tostring(PathDCE) .. "MissionEventsLog.lua")
             else
-                env.info("DCE_MissionEventsLog: Failed to open log file for writing.")
+                env.info("DCE_MissionEventsLog: Failed to open log file for writing. " .. tostring(logErr))
             end
 
             --export data for destroyed static objects (this is not tracked in DCS's debrief.log)
             local scenDescr = "--Destroyed scenery objects\n\n"
             local scenStr = "scen_log = " .. TableSerialization(scenLog, 0)
-            local scenFile = io.open(PathDCE .. "scen_destroyed.lua", "w")
+            local scenFile, scenErr = io.open(PathDCE .. "scen_destroyed.lua", "w")
             if scenFile then
                 scenFile:write(scenStr)
                 scenFile:close()
+                env.info("DCE_DEBRIEF 3 OK " .. tostring(PathDCE) .. "scen_destroyed.lua")
             else
-                env.info("DCE_scen_destroyed: Failed to open log file for writing.")
+                env.info("DCE_scen_destroyed: Failed to open log file for writing. " .. tostring(scenErr))
             end
 
 
@@ -1699,22 +1758,24 @@ function eventHandlerDCE:onEvent(event)
 
             --export camp stats file
             local campStr = "campL = " .. TableSerialization(campL, 0)
-            local campFile = io.open(PathDCE .. "camp_status.lua", "w")
+            local campFile, campErr = io.open(PathDCE .. "camp_status.lua", "w")
             if campFile then
                 campFile:write(campStr)
                 campFile:close()
+                env.info("DCE_DEBRIEF 3 OK " .. tostring(PathDCE) .. "camp_status.lua")
             else
-                env.info("DCE_camp_status: Failed to open log file for writing.")
+                env.info("DCE_camp_status: Failed to open log file for writing. " .. tostring(campErr))
             end
 
             --export zoneSAR file
             local SAR_Str = "zoneSAR = " .. TableSerialization(ZoneSAR, 0)
-            local SAR_File = io.open(PathDCE .. "zoneSAR.lua", "w")
+            local SAR_File, SAR_Err = io.open(PathDCE .. "zoneSAR.lua", "w")
             if SAR_File then
                 SAR_File:write(SAR_Str)
                 SAR_File:close()
+                env.info("DCE_DEBRIEF 3 OK " .. tostring(PathDCE) .. "zoneSAR.lua")
             else
-                env.info("DCE_zoneSAR: Failed to open log file for writing.")
+                env.info("DCE_zoneSAR: Failed to open log file for writing. " .. tostring(SAR_Err))
             end
 
 
@@ -1772,10 +1833,14 @@ function eventHandlerDCE:onEvent(event)
 				local savedGames = string.gsub(campL.path, "[/\\]+$", "")
 				savedGames = string.gsub(savedGames, "/", "\\")
 
-				os.execute('start "" "' .. exe .. '" --debrief "' .. campL.title ..
-					'" --saved-games "' .. savedGames .. '"')
+				local cmdDCEM = 'start "" "' .. exe .. '" --debrief "' .. campL.title ..
+					'" --saved-games "' .. savedGames .. '"'
+				env.info("DCE_DEBRIEF 4 appel DCE_Manager : " .. cmdDCEM)
+				local retDCEM = os.execute(cmdDCEM)
+				env.info("DCE_DEBRIEF 5 retour os.execute : " .. tostring(retDCEM))
 			else
 				--Ancien fonctionnement : console DOS + luae.exe.
+				env.info("DCE_DEBRIEF 4 pas de campL.DCEManagerExe : ancien fonctionnement (console DOS)")
 				os.execute('start "Debriefing" cmd  /k "set \"DCSDIR=%cd%\" &  ' ..
 					PathDD ..
 					' & cd ' ..
@@ -2073,7 +2138,6 @@ function eventHandlerDCE:onEvent(event)
             SatusGroupAircraft[groupName]["landing"] = true
         end
 	
-	end
 end
 
 

@@ -338,11 +338,6 @@ end
 
 -- interdit aux CAP et Intercepteur d'entrer dans une zone SAM connu
 local function avoidArea()
-
-	local t0
-	if campL.debug then
-    	t0 = os.clock()
-	end
 	
 	local debug_avoidArea = false
 
@@ -810,11 +805,6 @@ local function avoidArea()
 
 	local groups = coalition.getGroups(coalition.side.BLUE, Group.Category.AIRPLANE)
 
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_A = Perf_A + dt
-		Perf_A_N = Perf_A_N + 1
-	end
 
 	return timer.getTime() + 5
 end
@@ -825,11 +815,6 @@ conservée ici pour référence / retour en arrière si besoin, ne pas supprimer
 
 -- modification M32	E-2C automatic retreat
 local function airRetreat()
-
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-	end
 
 	local current_time = timer.getTime()
 
@@ -882,12 +867,6 @@ local function airRetreat()
 				end
             end
 		end
-	end
-
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_C = Perf_C + dt
-		Perf_C_N = Perf_C_N + 1
 	end
 	
 	return timer.getTime() + 31
@@ -1062,10 +1041,6 @@ local function executeAirRetreat(arg)
 end
 
 local function airRetreat()
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-	end
 
 	local current_time = timer.getTime()
 
@@ -1233,12 +1208,6 @@ local function airRetreat()
 		end
 	end
 
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_C = Perf_C + dt
-		Perf_C_N = Perf_C_N + 1
-	end
-
 	return timer.getTime() + 31
 end
 
@@ -1281,11 +1250,6 @@ end
 
 
 local function EWR_magic()
-
-	local t0
-	if campL.debug then
-		t0 = os.clock()
-	end
 
 	local target_tracks = {
 		["blue"] = {},
@@ -1494,11 +1458,6 @@ local function EWR_magic()
 
 						if EWR_optionPlayer[trucName] and ( not EWR_optionPlayer[trucName]["lasTime"] or EWR_optionPlayer[trucName]["lasTime"] +15  < locTimer) then
 
-							local t0b
-							if campL.debug then
-                            	t0b = os.clock()
-							end
-							
 							local player = _unit
 							local playerId = Unit.getID(player)
 							local playerVec3 = player:getPoint()				--get target point
@@ -1672,24 +1631,11 @@ local function EWR_magic()
 
 							end
 
-							if campL.debug then
-								local dtb = os.clock() - t0b
-								Perf_Bb = Perf_Bb + dtb
-								Perf_B_Nb = Perf_B_Nb + 1
-							end
-
-
 						end
 					end
 				end
 			end
 		end
-	end
-
-	if campL.debug then
-		local dt = os.clock() - t0
-		Perf_B = Perf_B + dt
-		Perf_B_N = Perf_B_N + 1
 	end
 	
 	return timer.getTime() + 60
@@ -1841,8 +1787,7 @@ function EventHandler2:onEvent(event)
 									-- local route = DCE_GetRoute(groupName)
 									local route = DCE_GetRoute(groupName)
 
-									-- env.info("DCE_Perf Perf_Tot " .. tostring(Perf_Tot))
-
+									
 									if route and #route > 0 then
 										SatusGroupAircraft[groupName]["waypoints"] = route
 										SatusGroupAircraft[groupName]["task"] = "escort"
