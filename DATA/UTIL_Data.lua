@@ -1393,12 +1393,14 @@ Data_divers = {
 	},
 
 	["Mirage-F1CE"] = {
+		playable = true,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
 		inherited_All_Mod_From = "Mirage-F1C",
 		refuellingReceptacleType = "drogue",
 	},
 	["Mirage-F1EE"] = {
+		playable = true,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
 		inherited_All_Mod_From = "Mirage-F1C",
@@ -1414,6 +1416,7 @@ Data_divers = {
 		
 	},
 	["Mirage-F1BE"] = {
+		playable = true,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
 		inherited_All_Mod_From = "Mirage-F1B",
