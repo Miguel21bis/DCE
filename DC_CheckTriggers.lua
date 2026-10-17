@@ -1,68 +1,7 @@
 --To run the campaign triggers. Evaluate trigger conditions, run trigger actions and append briefing text
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
-------------------------------------------------------------------------------------------------------- 
--- last modification: M71_c
-if not versionDCE then versionDCE = {} end
-versionDCE["DC_CheckTriggers.lua"] = "1.16.98"
-------------------------------------------------------------------------------------------------------- 
 
-if Debug.debug then
-	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-	-- os.execute 'pause'
-end
-
-
---List of Return functions to build conditions:
---Return.Time()												returns time of day in seconds
---Return.Day()												returns day of month
---Return.Month()											returns month as number
---Return.Year()												returns year as number
---Return.Mission()											returns campaign mission number
---Return.DatePassed(y, m, d)								Returns true if campaign date is on or after the given date*
---Return.CampFlag(flag-n)									returns value of campaign flag
---Return.AirUnitActive("UnitName")							returned boolean whether the air unit is active			
---Return.AirUnitReady("UnitName")							returns amount of ready aircraft in unit
---Return.AirUnitAlive("UnitName")							returns amount of ready and damaged aircraft in unit
---Return.AirUnitBase("UnitName")							returns the name of the airbase the unit operats from
---Return.AirUnitPlayer("UnitName")							returns boolean whether the air units is playable
---Return.TargetAlive("TargetName")							returns percentage of alive sub elements in target
---Return.UnitDead(unitname)									(ADD) return vehicle/ship units dead (ADD)
---Return.GroupHidden("GroupName")							returns group hidden status
---Return.GroupProbability("GroupName")						returns group spawn probability value between 0 and 1
---Return.ShipGroupInPoly(GroupName, PolyZonesTable)			(ADD) return boolean whether ship group is in polygon (ADD)
-
---List of Action functions for trigger actions:
---Action.None()
---Action.Text("your briefing text")
---Action.TextPlayMission(arg)																--add trigger text to briefing text of this mission only if it is playable
---Action.SetCampFlag(flag-n, boolean/number)												--
---Action.AddCampFlag(flag-n, number)														--
---Action.AddImage("filname.jpg")															--
---Action.CampaignEnd("win"/"draw"/"loss")													--
---Action.TargetActive("TargetName", boolean)												--
---Action.AirUnitActive("UnitName", boolean)													--
-
---Action.UnitResuscitateOrKill("UnitName", boolean, value)								--
-
---Action.AirUnitBase("UnitName", "BaseName")												--
---Action.AirUnitPlayer("UnitName", boolean)													--
---Action.AirUnitReinforce("SourceUnitName", "DestinationUnitName", destNumber)				--
---Action.AirUnitRepair()																	--
---Action.GroundUnitRepair()																	-- Repair Ground
---Action.AddGroundTargetIntel("sideName")													--
---Action.GroupHidden("GroupName", boolean)													--
---Action.GroupProbability("GroupName", number 0-1)											--
---Action.GroupMove(GroupName, ZoneName)														-- move vehicle group to refpoint (See the DC_CheckTriggers.lua file for more explanation)
---Action.GroupSlave(GroupName, master, bearing, distance)									-- (ADD)
---Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				-- assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
---Action.TemplateActive(TabFile)															-- Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
---Action.SetWeather( "weather = { pHigh = 78, etc... }" )									-- modifies conf_mod weather parameters during the campaign
---Action.RestrictedLoadout(file)															-- (ADD) only for players, prohibits certain items, targets the file name Restricted_loadouts/restricted_loadoutnamX.miz
---Action.AuthorizedLoadout(authName)														-- (ADD) Essentially for AIs, allows you to add certain loadouts containing the variable: restrictedCondition = “restricted_loadoutnamX”,
-
---Important notes:
---for condition and action strings: outside with single quotes '', inside with double quotes ""!
 
 
 -- ===== DOCUMENTATION LUE PAR DCE_Manager (lignes --@ au-dessus d'une function) =====
@@ -632,6 +571,86 @@ Return = {}
 				end
 			end
 		end
+	end
+	
+	
+	--------------------------------------------------------------------------------
+	-- Wargame (DCE_Manager) : etat des zones, lu dans Active/wargame_zones.lua
+	-- Fichier reecrit par DCE_Manager juste avant la generation de la mission.
+	--------------------------------------------------------------------------------
+	local wargameCache = { loaded = false, zones = {} }
+
+	local function getWargameZones()
+		if not wargameCache.loaded then
+			wargameCache.loaded = true
+			local chunk = loadfile("Active/wargame_zones.lua")
+			if chunk then
+				local env = {}
+				setfenv(chunk, env)
+				local ok = pcall(chunk)
+				if ok and type(env.wargame_zones_active) == "table" then
+					wargameCache.zones = env.wargame_zones_active
+				end
+			end
+		end
+		return wargameCache.zones
+	end
+
+	--@doc    Side that holds a wargame zone.
+	--@doc    Returns nothing (nil) if the zone does not exist or the wargame has not run yet.
+	--@param  zone        | Name of the wargame zone, for example "CQ95"
+	--@returns text | "blue" or "red"
+	--@example Return.WargameZoneSide("CQ95") == "blue"
+	--@category wargame
+	function Return.WargameZoneSide(zone)
+		local z = getWargameZones()[zone]
+		if z then
+			return z.control
+		end
+	end
+
+	--@doc    Is this wargame zone held by the given side?
+	--@param  zone        | Name of the wargame zone, for example "CQ95"
+	--@param  side        | source=blue/red | Side: "blue" or "red"
+	--@returns boolean | true if that side holds the zone
+	--@example Return.WargameZoneHeldBy("CQ95", "blue")
+	--@category wargame
+	function Return.WargameZoneHeldBy(zone, side)
+		return Return.WargameZoneSide(zone) == side
+	end
+
+	--@doc    Total force of one side inside a wargame zone (0 if nothing there).
+	--@param  zone        | Name of the wargame zone, for example "CQ95"
+	--@param  side        | source=blue/red | Side: "blue" or "red"
+	--@returns number | Force power (for example 50)
+	--@example Return.WargameZoneForce("CQ95", "red") < 20
+	--@category wargame
+	function Return.WargameZoneForce(zone, side)
+		local total = 0
+		local z = getWargameZones()[zone]
+		if z and z.formations then
+			for _, f in pairs(z.formations) do
+				if f.side == side then
+					total = total + (f.forcePower or 0)
+				end
+			end
+		end
+		return total
+	end
+
+	--@doc    Number of wargame zones held by one side.
+	--@param  side        | source=blue/red | Side: "blue" or "red"
+	--@returns number | Count of zones
+	--@example Return.WargameSideZones("red") <= 5
+	--@category wargame
+	function Return.WargameSideZones(side)
+		local n = 0
+		for _, z in pairs(getWargameZones()) do
+			if z.control == side then
+				n = n + 1
+			end
+		end
+		return n
 	end
 
 ----- functions to buld trigger actions -----
