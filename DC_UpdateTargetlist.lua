@@ -37,8 +37,54 @@ if Debug.debug then
 	print("START DC_UpdateTargetlist.lua "..versionDCE["DC_UpdateTargetlist.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+-- if not targetlist.blue[1] then
+-- 	TargetlistToNum(targetlist)
+-- end
+
+--rend un côté de targetlist séquentiel (1..n) : supprime les trous, intègre les clés nommées (ex: formations wargame)
+local function CompactTargetlistSide(targets)
+	local numKeys, strKeys = {}, {}
+	for k in pairs(targets) do
+		if type(k) == "number" then
+			numKeys[#numKeys + 1] = k
+		else
+			strKeys[#strKeys + 1] = k
+		end
+	end
+	table.sort(numKeys)
+	table.sort(strKeys, function(a, b) return tostring(a) < tostring(b) end)
+
+	local list = {}
+	for _, k in ipairs(numKeys) do
+		if type(targets[k]) == "table" then
+			list[#list + 1] = targets[k]
+		end
+	end
+	for _, k in ipairs(strKeys) do
+		local t = targets[k]
+		if type(t) == "table" then
+			if not t.name then t.name = k end
+			if not t.titleName then t.titleName = k end
+			list[#list + 1] = t
+		end
+	end
+
+	local changed = (#list ~= #numKeys) or (#strKeys > 0)
+	for k in pairs(targets) do targets[k] = nil end
+	for i = 1, #list do targets[i] = list[i] end
+	return changed
+end
+
 if not targetlist.blue[1] then
 	TargetlistToNum(targetlist)
+end
+
+for sideName, targets in pairs(targetlist) do
+	if CompactTargetlistSide(targets) then
+		local txt = "DC_UT targetlist."..tostring(sideName).." avait des trous ou des clés nommées, réindexé ("..#targets.." targets)"
+		print(txt)
+		AddLog(txt)
+	end
 end
 
 if not DC_UpdateTargetlist_counter then

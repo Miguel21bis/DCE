@@ -142,6 +142,399 @@ local function applyUpdatesToFile(path, updates)
 	return true, applied
 end
 
+
+--=========================================================================
+-- WARGAME TRACE : log à part, dédié au suivi des éléments wargame
+--   fichier : Debug/WargameTrace.log (ajout en fin de fichier, un en-tête par lancement)
+--   si le fichier dépasse WG_TRACE_MAX_SIZE au 1er appel d'un lancement, il est
+--   renommé en Debug/WargameTrace_old.log (on garde donc 2 fichiers au maximum)
+--
+--   WgTrace(msg)              : ligne dans le fichier de trace uniquement
+--   WgTrace(msg, true)        : idem + console (print) + AddLog (BugList)
+--   WgTraceSection(titre)     : ligne de séparation + titre
+--   WgTraceFlush()            : force l'écriture sur disque (appelé en fin de chaque script)
+--=========================================================================
+
+local WG_TRACE_FILE = "Debug/WargameTrace.log"
+local WG_TRACE_OLD_FILE = "Debug/WargameTrace_old.log"
+local WG_TRACE_MAX_SIZE = 3 * 1024 * 1024		--3 Mo
+local WG_TRACE_BUFFER_MAX = 200					--écrit sur disque toutes les 200 lignes
+
+local wgTraceBuffer = {}
+local wgTraceStarted = false
+
+function WgTraceFlush()
+	if #wgTraceBuffer == 0 then return end
+
+	local f = io.open(WG_TRACE_FILE, "a")
+	if f then
+		f:write(table.concat(wgTraceBuffer, "\n") .. "\n")
+		f:close()
+	end
+	wgTraceBuffer = {}
+end
+
+local function wgTraceStart()
+	wgTraceStarted = true
+
+	--rotation si le fichier est devenu trop gros
+	local f = io.open(WG_TRACE_FILE, "r")
+	if f then
+		local size = f:seek("end") or 0
+		f:close()
+		if size > WG_TRACE_MAX_SIZE then
+			os.remove(WG_TRACE_OLD_FILE)
+			os.rename(WG_TRACE_FILE, WG_TRACE_OLD_FILE)
+		end
+	end
+
+	local title, missionN = "?", "?"
+	if camp then
+		title = tostring(camp.title)
+		missionN = tostring(camp.mission)
+	end
+
+	table.insert(wgTraceBuffer, "")
+	table.insert(wgTraceBuffer, "#####################################################################################")
+	table.insert(wgTraceBuffer, "# "..os.date("%Y-%m-%d %H:%M:%S").." | campagne "..title.." | camp.mission "..missionN
+		.." | Firstmission_flag "..tostring(Firstmission_flag).." | ArgTools "..tostring(ArgTools))
+	table.insert(wgTraceBuffer, "#####################################################################################")
+end
+
+function WgTrace(msg, important)
+	if not wgTraceStarted then
+		wgTraceStart()
+	end
+
+	msg = tostring(msg)
+	table.insert(wgTraceBuffer, os.date("%H:%M:%S").." "..msg)
+
+	if important then
+		print(msg)
+		if AddLog then AddLog(msg) end
+	end
+
+	if #wgTraceBuffer >= WG_TRACE_BUFFER_MAX then
+		WgTraceFlush()
+	end
+end
+
+function WgTraceSection(title)
+	WgTrace("")
+	WgTrace("===== "..tostring(title).." =====")
+end
+
+--génération d'un bloc wargame d'après son nom : "RED_089_MECH_G3" -> 3, "RED_089_MECH" -> 1
+function WgGeneration(name)
+	local g = string.match(tostring(name), "_G(%d+)$")
+	return tonumber(g) or 1
+end
+
+--un nom qui ressemble à un élément wargame (sert à repérer un bloc wargame qui aurait perdu son drapeau)
+function WgLooksLikeWargameName(name)
+	name = tostring(name)
+	if string.find(name, "^RED_%d") or string.find(name, "^BLUE_%d") or string.find(name, "^WG_") or string.find(name, "^OBJ_") then
+		return true
+	end
+	return false
+end
+
+--nom de base d'un groupe oob_ground wargame : "RED_089_MECH_G2#3" -> "RED_089_MECH_G2"
+local function wgBaseGroupName(groupName)
+	return (string.gsub(tostring(groupName), "#%d+$", ""))
+end
+
+--côté (dans targetlist) attendu pour un nom wargame : targetlist.blue = cibles du bleu = unités ROUGES
+local function wgExpectedTargetSide(name)
+	name = tostring(name)
+	if string.find(name, "^RED_") or string.find(name, "^WG_POINT_RED") then
+		return "blue"
+	elseif string.find(name, "^BLUE_") or string.find(name, "^WG_POINT_BLUE") then
+		return "red"
+	end
+	return nil
+end
+
+--charge wargame_zones (écrit par DCE_Manager) sans toucher aux variables globales existantes
+local function wgLoadZones()
+	local paths = {"Active/wargame_zones.lua", "Init/Wargame/wargame_zones.lua", "Init/wargame_zones.lua"}
+	for _, path in ipairs(paths) do
+		if FileExists(path) then
+			local data, err = loadDataFile(path, "wargame_zones_active")
+			if data then
+				return data, path
+			end
+			WgTrace("  WgCheck: lecture impossible de "..path.." : "..tostring(err))
+		end
+	end
+	return nil, nil
+end
+
+local WG_CATEGORIES = {"vehicle", "static", "ship"}
+
+--=========================================================================
+-- WargameCheckConsistency(from)
+--   Contrôle de cohérence targetlist <-> oob_ground <-> wargame_zones, sans RIEN modifier.
+--   Détail dans Debug/WargameTrace.log, une ligne de synthèse en console + BugList.
+--=========================================================================
+function WargameCheckConsistency(from)
+	from = tostring(from or "?")
+	WgTraceSection("Controle de coherence wargame ("..from..")")
+
+	local nb = {
+		blocks = 0,				--blocs wargameFormation
+		objectives = 0,			--blocs wargameObjective
+		groups = 0,				--groupes wargame dans oob_ground
+		blockNoGroup = 0,		--bloc sans groupe principal du même nom
+		groupIdShift = 0,		--groupId du bloc différent de celui du groupe
+		nameCollision = 0,		--le nom du bloc est porté par un groupe NON wargame
+		idMismatch = 0,			--groupe du même nom mais autre wargameFormationId
+		groupNoBlock = 0,		--groupe wargame sans bloc correspondant
+		dupBlockId = 0,			--plusieurs blocs pour un même wargameFormationId
+		dupGroupName = 0,		--plusieurs groupes de même nom (dont au moins un wargame)
+		dupGroupId = 0,			--plusieurs groupes de même groupId (dont au moins un wargame)
+		dupObjective = 0,		--objectif présent plusieurs fois
+		wrongSide = 0,			--bloc rangé dans la mauvaise table de targetlist
+		deadUnits = 0,			--unités dead dans les groupes wargame
+		hiddenGroups = 0,		--groupes wargame hidden
+		dissolved = 0,			--bloc pour une formation forcePower = 0
+		wrongGeneration = 0,	--nom du bloc différent du nom + génération de wargame_zones
+		notInZones = 0,			--bloc absent de wargame_zones
+	}
+
+	--1) index de oob_ground
+	local groupsByName = {}
+	local groupIdOwner = {}
+	local wargameGroups = {}
+
+	if oob_ground then
+		for sideName, countries in pairs(oob_ground) do
+			for countryN, country in pairs(countries) do
+				if type(country) == "table" then
+					for _, category in ipairs(WG_CATEGORIES) do
+						local classG = country[category]
+						if type(classG) == "table" and classG.group then
+							for _, group in pairs(classG.group) do
+								if group.name then
+									local other = groupsByName[group.name]
+									if other then
+										if group.wargameFormationId or other.group.wargameFormationId then
+											nb.dupGroupName = nb.dupGroupName + 1
+											WgTrace("  NOM DE GROUPE EN DOUBLE |"..tostring(group.name).."| groupId "..tostring(other.group.groupId).." (formationId "..tostring(other.group.wargameFormationId)..") et groupId "..tostring(group.groupId).." (formationId "..tostring(group.wargameFormationId)..")")
+										end
+									else
+										groupsByName[group.name] = {group = group, side = sideName, category = category}
+									end
+								end
+
+								if group.groupId then
+									local owner = groupIdOwner[group.groupId]
+									if owner and owner ~= group then
+										if group.wargameFormationId or owner.wargameFormationId then
+											nb.dupGroupId = nb.dupGroupId + 1
+											WgTrace("  GROUPID EN DOUBLE "..tostring(group.groupId).." : |"..tostring(owner.name).."| et |"..tostring(group.name).."|")
+										end
+									else
+										groupIdOwner[group.groupId] = group
+									end
+								end
+
+								if group.wargameFormationId then
+									table.insert(wargameGroups, {group = group, side = sideName, category = category})
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	--2) blocs de targetlist
+	local blocksByName = {}
+	local blocksById = {}
+	local objectivesByName = {}
+
+	for sideName, targets in pairs(targetlist or {}) do
+		for key, target in pairs(targets) do
+			if type(target) == "table" then
+				local name = target.name or key
+
+				if target.wargameFormation and target.wargameFormationId then
+					nb.blocks = nb.blocks + 1
+					local id = target.wargameFormationId
+					blocksByName[name] = target
+					blocksById[id] = blocksById[id] or {}
+					table.insert(blocksById[id], {name = name, side = sideName})
+
+					local desc = "|"..tostring(name).."| targetlist."..sideName.." formationId "..tostring(id).." gen "..WgGeneration(name)
+
+					local expectedSide = wgExpectedTargetSide(name)
+					if expectedSide and expectedSide ~= sideName then
+						nb.wrongSide = nb.wrongSide + 1
+						WgTrace("  BLOC DANS LA MAUVAISE TABLE "..desc.." (attendu targetlist."..expectedSide..")")
+					end
+
+					local entry = groupsByName[name]
+					if not entry then
+						nb.blockNoGroup = nb.blockNoGroup + 1
+						WgTrace("  BLOC SANS GROUPE "..desc.." (groupId du bloc "..tostring(target.groupId)..", foundOobGround "..tostring(target.foundOobGround)..")")
+					else
+						local g = entry.group
+						if not g.wargameFormationId then
+							nb.nameCollision = nb.nameCollision + 1
+							WgTrace("  COLLISION DE NOM "..desc.." : le groupe oob_ground de ce nom n'est PAS wargame (groupId "..tostring(g.groupId)..")")
+						elseif g.wargameFormationId ~= id then
+							nb.idMismatch = nb.idMismatch + 1
+							WgTrace("  FORMATIONID DIFFERENT "..desc.." : groupe du meme nom avec formationId "..tostring(g.wargameFormationId))
+						end
+						if target.groupId ~= g.groupId then
+							nb.groupIdShift = nb.groupIdShift + 1
+							WgTrace("  GROUPID DECALE "..desc.." : bloc "..tostring(target.groupId).." / groupe "..tostring(g.groupId))
+						end
+					end
+
+				elseif target.wargameObjective then
+					nb.objectives = nb.objectives + 1
+					objectivesByName[name] = objectivesByName[name] or {}
+					table.insert(objectivesByName[name], {side = sideName, key = key, supply = target.wargameSupply, lost = target.wargameSupplyLost})
+				end
+			end
+		end
+	end
+
+	--3) doublons de blocs par formationId
+	for id, list in pairs(blocksById) do
+		if #list > 1 then
+			nb.dupBlockId = nb.dupBlockId + 1
+			local names = {}
+			for _, b in ipairs(list) do
+				table.insert(names, "|"..tostring(b.name).."| (targetlist."..b.side..")")
+			end
+			WgTrace("  PLUSIEURS BLOCS POUR formationId "..tostring(id).." : "..table.concat(names, ", "))
+		end
+	end
+
+	--4) doublons d'objectifs (log seulement, pas de nettoyage automatique)
+	for name, list in pairs(objectivesByName) do
+		if #list > 1 then
+			nb.dupObjective = nb.dupObjective + 1
+			local parts = {}
+			for _, o in ipairs(list) do
+				table.insert(parts, "targetlist."..o.side.."["..tostring(o.key).."] supply="..tostring(o.supply).." lost="..tostring(o.lost))
+			end
+			WgTrace("  OBJECTIF EN DOUBLE |"..tostring(name).."| x"..#list.." : "..table.concat(parts, " ; "))
+		end
+	end
+
+	--5) groupes wargame de oob_ground
+	for _, entry in ipairs(wargameGroups) do
+		local group = entry.group
+		nb.groups = nb.groups + 1
+
+		local baseName = wgBaseGroupName(group.name)
+		local block = blocksByName[baseName]
+		if not block then
+			nb.groupNoBlock = nb.groupNoBlock + 1
+			WgTrace("  GROUPE SANS BLOC |"..tostring(group.name).."| oob_ground."..entry.side.."."..entry.category.." formationId "..tostring(group.wargameFormationId).." groupId "..tostring(group.groupId))
+		elseif block.wargameFormationId ~= group.wargameFormationId then
+			nb.groupNoBlock = nb.groupNoBlock + 1
+			WgTrace("  GROUPE AVEC BLOC D'UN AUTRE ID |"..tostring(group.name).."| formationId groupe "..tostring(group.wargameFormationId).." / bloc "..tostring(block.wargameFormationId))
+		end
+
+		local dead = 0
+		for _, unit in pairs(group.units or {}) do
+			if unit.dead then dead = dead + 1 end
+		end
+		if dead > 0 then
+			nb.deadUnits = nb.deadUnits + dead
+			WgTrace("  UNITES DEAD dans |"..tostring(group.name).."| : "..dead.."/"..#(group.units or {}))
+		end
+		if group.hidden then
+			nb.hiddenGroups = nb.hiddenGroups + 1
+			WgTrace("  GROUPE HIDDEN |"..tostring(group.name).."|")
+		end
+	end
+
+	--6) contrôle croisé avec wargame_zones (DCE_Manager)
+	local zones, zonesPath = wgLoadZones()
+	if not zones then
+		WgTrace("  wargame_zones introuvable (Active/, Init/Wargame/, Init/), controle croise ignore")
+	else
+		WgTrace("  wargame_zones lu depuis "..zonesPath)
+
+		local formations = {}
+		for zoneName, zone in pairs(zones) do
+			if type(zone) == "table" and type(zone.formations) == "table" then
+				for _, f in pairs(zone.formations) do
+					if type(f) == "table" and f.formationId then
+						formations[f.formationId] = {f = f, zone = zoneName}
+					end
+				end
+			end
+		end
+
+		for id, list in pairs(blocksById) do
+			if type(id) == "number" and id < 900000 then				--les WG_POINT (900001+, 910001+) ne sont pas dans wargame_zones
+				local zf = formations[id]
+				if not zf then
+					nb.notInZones = nb.notInZones + 1
+					WgTrace("  BLOC ABSENT DE wargame_zones : formationId "..tostring(id).." |"..tostring(list[1].name).."|")
+				else
+					local power = tonumber(zf.f.forcePower) or 0
+					local gen = tonumber(zf.f.spawnGeneration) or 1
+					local expected = tostring(zf.f.name)
+					if gen > 1 then expected = expected.."_G"..gen end
+
+					if power <= 0 then
+						nb.dissolved = nb.dissolved + 1
+						WgTrace("  ERREUR FORMATION DISSOUTE (forcePower 0) AVEC BLOC : |"..tostring(list[1].name).."| formationId "..tostring(id).." zone "..tostring(zf.zone))
+					end
+
+					for _, b in ipairs(list) do
+						if b.name ~= expected then
+							nb.wrongGeneration = nb.wrongGeneration + 1
+							WgTrace("  NOM/GENERATION INATTENDU : bloc |"..tostring(b.name).."| alors que wargame_zones attend |"..expected.."| (formationId "..tostring(id)..", zone "..tostring(zf.zone)..")")
+						end
+					end
+				end
+			end
+		end
+
+		--info : formations vivantes sans bloc (peut être normal : hors des zones jouées)
+		for id, zf in pairs(formations) do
+			if (tonumber(zf.f.forcePower) or 0) > 0 and not blocksById[id] then
+				WgTrace("  info : formation vivante sans bloc |"..tostring(zf.f.name).."| formationId "..tostring(id).." zone "..tostring(zf.zone).." forcePower "..tostring(zf.f.forcePower))
+			end
+		end
+	end
+
+	local anomalies = nb.blockNoGroup + nb.groupIdShift + nb.nameCollision + nb.idMismatch + nb.groupNoBlock
+		+ nb.dupBlockId + nb.dupGroupName + nb.dupGroupId + nb.wrongSide + nb.dissolved + nb.wrongGeneration
+
+	WgTrace("WgCheck ["..from.."] : "..nb.blocks.." bloc(s), "..nb.groups.." groupe(s) wargame, "..nb.objectives.." objectif(s) | "
+		..anomalies.." anomalie(s) : "
+		..nb.blockNoGroup.." bloc(s) sans groupe, "
+		..nb.groupIdShift.." groupId decale(s), "
+		..nb.groupNoBlock.." groupe(s) sans bloc, "
+		..nb.dupBlockId.." id avec plusieurs blocs, "
+		..nb.dupGroupName.." nom(s) de groupe en double, "
+		..nb.dupGroupId.." groupId en double, "
+		..nb.nameCollision.." collision(s) de nom, "
+		..nb.idMismatch.." formationId different(s), "
+		..nb.wrongSide.." bloc(s) mal range(s), "
+		..nb.dissolved.." formation(s) dissoute(s) avec bloc, "
+		..nb.wrongGeneration.." generation(s) inattendue(s), "
+		..nb.notInZones.." bloc(s) absent(s) de wargame_zones | "
+		..nb.dupObjective.." objectif(s) en double, "
+		..nb.deadUnits.." unite(s) dead, "
+		..nb.hiddenGroups.." groupe(s) hidden", true)
+
+	WgTraceFlush()
+	return anomalies
+end
+
+
 function LoadFileAndUpdate(from)
 
 	if Debug.debug then print("START UTIL_Functions LoadFileAndUpdate() "..tostring(from).." /1/1/1/1/1/1/1///1/1 /1/1/1/1/1/1/1///1/1 /1/1/1/1/1/1/1///1/1 /1/1/1/1/1/1/1///1/1") end
@@ -195,6 +588,8 @@ function LoadFileAndUpdate(from)
 
 
 	--********************************* targetlist ******************************************************
+	WgTraceSection("LoadFileAndUpdate("..tostring(from)..") : recopie Init/targetlist_init.lua -> Active/targetlist.lua")
+
 	dofile("Init/targetlist_init.lua")
 	local targetlist_init = DeepCopy(targetlist)
 	if not targetlist_init.blue[1] then
@@ -210,22 +605,64 @@ function LoadFileAndUpdate(from)
 
 	local changes = CompareTargetLists(targetlist_init, targetlist)
 
-	-- Afficher les résultats
-	for _, added in ipairs(changes.added) do
-		print("Added TargetList: Name:", added.data.name)
+	--index des noms présents dans l'Active, toutes tables confondues
+	--(sert à repérer un objectif que DCE_Manager a déplacé d'une table à l'autre)
+	local activeNameSide = {}
+	for sideName, targets in pairs(targetlist) do
+		for _, target in pairs(targets) do
+			if type(target) == "table" and target.name then
+				activeNameSide[target.name] = sideName
+			end
+		end
 	end
-	-- for _, removed in ipairs(changes.removed) do
-	-- 	print("Removed TargetList: Name:", removed.data.name)
-	-- end
 
 	-- Ajout des éléments manquants dans targetlist
+	-- SAUF les blocs wargame (formations et objectifs) : ils appartiennent à DCE_Manager, qui les a
+	-- déjà posés (ou volontairement retirés : formation dissoute, reposée sous "_G<n>", objectif
+	-- déplacé de table) dans Active/targetlist.lua. Les recopier ressusciterait de vieux blocs.
+	local nbAdded = 0
+	local nbWargameIgnored = 0
+
 	for _, added in ipairs(changes.added) do
-		if not targetlist[added.side] then
-			targetlist[added.side] = {}
+		local data = added.data
+		local name = data and tostring(data.name)
+
+		if data and (data.wargameFormation or data.wargameObjective) then
+			nbWargameIgnored = nbWargameIgnored + 1
+
+			local kind = "objectif"
+			if data.wargameFormation then kind = "formation" end
+
+			local info = "  IGNORE (wargame "..kind..") |"..name.."| targetlist."..tostring(added.side)
+			if data.wargameFormationId then
+				info = info.." formationId "..tostring(data.wargameFormationId).." gen "..WgGeneration(name)
+			end
+			if activeNameSide[data.name] then
+				info = info.." -> present dans l'Active sous targetlist."..activeNameSide[data.name].." (deplace par DCE_Manager)"
+			else
+				info = info.." -> absent de l'Active (dissous, repose en _G<n> ou hors zone)"
+			end
+			WgTrace(info)
+
+		elseif data then
+			if WgLooksLikeWargameName(name) then
+				WgTrace("  ATTENTION recopie d'un bloc au nom wargame SANS drapeau wargameFormation/wargameObjective : |"..name.."| targetlist."..tostring(added.side), true)
+			end
+
+			print("Added TargetList: Name:", data.name)
+			WgTrace("  AJOUT |"..name.."| targetlist."..tostring(added.side).." (absent de l'Active)")
+
+			if not targetlist[added.side] then
+				targetlist[added.side] = {}
+			end
+			-- Insérer l'élément à la fin de la table numérique
+			table.insert(targetlist[added.side], data)
+			nbAdded = nbAdded + 1
 		end
-		-- Insérer l'élément à la fin de la table numérique
-		table.insert(targetlist[added.side], added.data)
 	end
+
+	WgTrace("LoadFileAndUpdate: "..nbAdded.." bloc(s) recopie(s) de Init vers Active, "
+		..nbWargameIgnored.." bloc(s) wargame de Init/targetlist_init.lua ignore(s) (geres par DCE_Manager)", (nbAdded + nbWargameIgnored) > 0)
 
 	-- -- Suppression des éléments retirés de targetlist
 	-- for _, removed in ipairs(changes.removed) do
@@ -256,9 +693,11 @@ function LoadFileAndUpdate(from)
 	-- Afficher les résultats
 	for _, added in ipairs(changes.added) do
 		-- print("Added triggers: Name:", added.name)
+		WgTrace("  AJOUT camp_triggers |"..tostring(added.name).."| (absent de l'Active)")
 	end
 	for _, removed in ipairs(changes.removed) do
 		-- print("Removed triggers: Name:", removed.name)
+		WgTrace("  RETRAIT camp_triggers |"..tostring(removed.name).."| (absent de l'Init)")
 	end
 
 	-- Ajouter les éléments manquants dans camp_triggers
@@ -291,6 +730,7 @@ function LoadFileAndUpdate(from)
 	-- Afficher les résultats
 	for _, added in ipairs(changes.added) do
 		print("\nAdded db_airbases Name:", added.name)
+		WgTrace("  AJOUT db_airbases |"..tostring(added.name).."| (absent de l'Active)")
 	end
 	-- for _, removed in ipairs(changes.removed) do
 	-- 	print("\nRemoved db_airbases: Name:", removed.name)
@@ -329,14 +769,14 @@ function LoadFileAndUpdate(from)
 				if unitInit.name and not activeByName[unitInit.name] then
 
 					unitInit.roster = {
-						ready = unitInit.number,																	--number of airframes ready for operations
-						lost = 0,																				--number of airframes lost
-						damaged = 0																				--number of airframes damaged
+						ready = unitInit.number,												--number of airframes ready for operations
+						lost = 0,																--number of airframes lost
+						damaged = 0																--number of airframes damaged
 					}
 					unitInit.score = {
-						kills_air = 0,																			--air kills
-						kills_ground = 0,																		--ground kills
-						kills_ship = 0																			--ship kills
+						kills_air = 0,															--air kills
+						kills_ground = 0,														--ground kills
+						kills_ship = 0															--ship kills
 					}
 					if unitInit.reserve then
 						unitInit.roster.reserve = unitInit.reserve
@@ -347,12 +787,14 @@ function LoadFileAndUpdate(from)
 					local idx = #oob_air[side] + 1
 					oob_air[side][idx] = unitInit
 					print("Ajouté à oob_air["..side.."] : "..unitInit.name)
+					WgTrace("  AJOUT oob_air."..side.." |"..tostring(unitInit.name).."| (absent de l'Active)")
 				end
 			end
 		end
 	end
 
-	
+	WgTraceFlush()
+
 	--****************************************************************************************
 	--ajout automatique d'elements en cours de campagne: FIN
 	--****************************************************************************************
@@ -460,7 +902,7 @@ function LoadFileAndUpdate(from)
 	--////////////////////////////////////////////////////////
 
 	CreateAircraftListInCampaign()
-	
+
 	--/////////////////////////////////////////////////////////////////////
 	--/////////////////////////////////////////////////////////////////////
 
@@ -543,6 +985,8 @@ function LoadFileAndUpdate(from)
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
 	Include("DC_CheckTriggers.lua")
 
+	--état wargame après les DC_UpdateTargetlist/DC_CheckTriggers de LoadFileAndUpdate
+	WargameCheckConsistency("fin LoadFileAndUpdate")
 
 	print('campDate E '..camp.date.year)
 	--**************INITIALEMENT DANS MAIN_NextMission *****************************
@@ -591,7 +1035,7 @@ local MIGRATE_TO_CONFMOD = {
 	["weather.windActivity"] = "mission_ini.weather.windActivity",
 	["weather.winDirection"] = "mission_ini.weather.winDirection",
 }
--- 
+--
 -- Aplatit une table imbriquée en {["a.b.c"] = valeur}. Un tableau-liste
 -- (v[1] existe) est traité comme une feuille, pas aplati plus loin.
 local function flatten(t, prefix, out)
@@ -857,7 +1301,7 @@ function UpdateConfMod(setWeather, setDate, from)
         }
 
         if dateToNumber(newDate) < dateToNumber(camp.date) then
-			if Debug.debug then 
+			if Debug.debug then
 				print("[UpdateConfMod][" .. from .. "] REFUS date : "
 					.. string.format("%04d-%02d-%02d", newDate.year, newDate.month, newDate.day)
 					.. " antérieure à "

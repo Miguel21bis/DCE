@@ -3,7 +3,7 @@
 --(pour que oobGroupIndex retrouve les groupes fraichement créés/déplacés dès CE cycle).
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateWargame.lua"] = "1.1.1"
+versionDCE["DC_UpdateWargame.lua"] = "1.2.1"
 -------------------------------------------------------------------------------------------------------
 -- ScriptsMod ne décide jamais rien pour une formation wargame (position, force, vie/mort...) :
 -- ce fichier ne fait QUE réconcilier oob_ground avec ce que targetlist contient déjà.
@@ -13,6 +13,10 @@ versionDCE["DC_UpdateWargame.lua"] = "1.1.1"
 -- DCE_Manager. Un template peut contenir plusieurs country/category/group : chaque groupe-template
 -- engendre un groupe oob_ground distinct, nommé target.name (1er groupe rencontré en parcourant le
 -- template) puis target.name.."#"..n (suivants). Cf mémoire "DCE wargame sync" pour l'historique.
+--
+-- Section 3 : lit Active/wargame_logistics.lua (écrit par DCE_Manager) et construit le global
+-- WG_ConvoysData, consommé par MAIN_NextMission.lua pour injecter campL.wargame_convoys.
+-- DCE_InGame lit campL et spawne dynamiquement les convois 5s après le démarrage de la mission.
 -------------------------------------------------------------------------------------------------------
 
 if Debug.debug then
@@ -85,7 +89,7 @@ local function tryLoadTemplateFile(side, fileName)
 	end
 
 	local loaded = staticTemplate
-	staticTemplate = nil						--evite qu'un dofile suivant (hors wargame) ne retrouve une valeur perimee par erreur
+	staticTemplate = nil					--evite qu'un dofile suivant (hors wargame) ne retrouve une valeur perimee par erreur
 	return loaded
 end
 
@@ -141,7 +145,7 @@ local function getWargameTemplateData(expectedSide, fileName)
 	end
 
 	--échec sur les deux côtés: là, c'est une vraie erreur
-	dcuwLog("DcUW ERREUR: impossible de charger le template wargame |"..tostring(fileName).."| (essayé sous Templates/wargame_"..expectedSide.."/ et Templates/wargame_"..otherSide.."/)")
+	dcuwLog("DcUW ERREUR: impossible de charger le template wargame |"..tostring(fileName).."|  (essayé sous Templates/wargame_"..expectedSide.."/ et Templates/wargame_"..otherSide.."/)")
 	return nil, nil
 end
 
@@ -223,7 +227,7 @@ local function rebuildUnitsFromBucket(group, elements, unitIndex)
 			newUnit.name = element.name
 			newUnit.x = element.x
 			newUnit.y = element.y
-			if element.heading then							--sinon on garde le heading du template (repli)
+			if element.heading then						--sinon on garde le heading du template (repli)
 				newUnit.heading = element.heading
 			end
 
@@ -247,7 +251,7 @@ local wargameFormationSeen = {}				--[formationId][groupOrdinal] = true si toujo
 
 local dbgFormationsFound = 0					--nb de targets avec wargameFormation==true rencontrés dans targetlist
 local dbgGroupsUpserted = 0					--nb de (sous-)groupes oob_ground créés ou mis à jour
-local dbgGroupsRemoved = 0						--nb de (sous-)groupes oob_ground retirés
+local dbgGroupsRemoved = 0					--nb de (sous-)groupes oob_ground retirés
 
 for sideName, targets in pairs(targetlist) do
 	for target_key, target in pairs(targets) do
@@ -273,7 +277,7 @@ for sideName, targets in pairs(targetlist) do
 
 			else
 				--regroupe les elements du target par groupe-template d'origine (via templateUnitName)
-				local buckets = {}							--ordinal -> liste d'elements
+				local buckets = {}				--ordinal -> liste d'elements
 
 				if target.elements then
 					for _, element in pairs(target.elements) do
@@ -316,7 +320,7 @@ for sideName, targets in pairs(targetlist) do
 							--nouveau (sous-)groupe: on clone la structure du groupe du template (route, heading, task...)
 							group = DeepCopy(templateGroup)
 							group.groupId = GenerateIDGroup(oobGroupName)
-							group.taskSelected = true							--convention reprise de Action.TemplateActive
+							group.taskSelected = true								--convention reprise de Action.TemplateActive
 
 							local groupList = getOrCreateCountryGroupList(targetside, templateCountry, category)
 							table.insert(groupList, group)
@@ -362,7 +366,7 @@ for sideName, targets in pairs(targetlist) do
 				end
 
 				if mainGroupFound then
-					target.foundOobGround = true			--le groupe #1 (nommé target.name) porte le lien principal utilisé par oobGroupIndex[target.name]
+					target.foundOobGround = true		--le groupe #1 (nommé target.name) porte le lien principal utilisé par oobGroupIndex[target.name]
 				else
 					dcuwLog("DcUW ERREUR: formation |"..tostring(target.name).."| n'a produit aucun groupe principal (aucun element corrélé au 1er groupe du template ?)")
 				end
@@ -401,3 +405,101 @@ for sideName, countries in pairs(oob_ground) do
 end
 
 print("DcUW synthese: "..dbgFormationsFound.." formation(s) wargame trouvee(s) dans targetlist, "..dbgGroupsUpserted.." (sous-)groupe(s) cree(s)/mis a jour, "..dbgGroupsRemoved.." groupe(s) retire(s)")
+
+--=====================================================================================================
+-- 3) construit WG_ConvoysData depuis Active/wargame_logistics.lua (écrit par DCE_Manager)
+--    Ce global est consommé par MAIN_NextMission.lua -> campL.wargame_convoys -> DCE_InGame
+--=====================================================================================================
+
+WG_ConvoysData = nil		--reset explicite : si la section sort tôt (fichier absent ou vide), le global reste nil
+
+local wgLogisticsPath = "Active/wargame_logistics.lua"
+
+if not FileExists(wgLogisticsPath) then
+	if Debug.debug then
+		print("DcUW wargame_logistics: fichier absent ("..wgLogisticsPath.."), WG_ConvoysData = nil")
+	end
+else
+	--chargement sûr : sauvegarde/nil/restaure du global wargame_logistics
+	--pattern repris de loadDataFile (FUNC_File.lua), qui est LOCAL et non accessible ici
+	local wgPrev = wargame_logistics
+	wargame_logistics = nil
+
+	local ok, err = pcall(dofile, wgLogisticsPath)
+
+	local wgLoaded = wargame_logistics
+	wargame_logistics = wgPrev		--restaure systématiquement (même en cas d'erreur)
+
+	if not ok then
+		dcuwLog("DcUW ERREUR: échec lecture "..wgLogisticsPath.." : "..tostring(err))
+	elseif not wgLoaded or type(wgLoaded) ~= "table" then
+		dcuwLog("DcUW ERREUR: "..wgLogisticsPath.." ne définit pas la table wargame_logistics")
+	elseif not wgLoaded.convoys or type(wgLoaded.convoys) ~= "table" then
+		if Debug.debug then
+			print("DcUW wargame_logistics: pas de table convoys, WG_ConvoysData = nil")
+		end
+	else
+		--indexe les supplyPoints par nom pour récupérer le polygone associé à chaque convoi
+		local supplyPointByName = {}
+		if type(wgLoaded.supplyPoints) == "table" then
+			for _, sp in ipairs(wgLoaded.supplyPoints) do
+				if sp.name then
+					supplyPointByName[sp.name] = sp
+				end
+			end
+		end
+
+		local convoys = wgLoaded.convoys
+		local builtCount = 0
+		local skippedCount = 0
+		local result = {}
+
+		for i = 1, #convoys do
+			local c = convoys[i]
+
+			--validation minimale : liste vehicles non vide
+			local hasVehicles = (type(c.vehicles) == "table" and #c.vehicles > 0)
+
+			if not hasVehicles then
+				dcuwLog("DcUW wargame_logistics convoi["..i.."]: vehicles vide ou absent, convoi ignoré (slot="..tostring(c.slot)..")")
+				skippedCount = skippedCount + 1
+			else
+				--polygone : récupéré depuis le supply point cible (si disponible)
+				local polygon = nil
+				local sp = supplyPointByName[c.supplyPoint]
+				if sp and type(sp.polygon) == "table" then
+					polygon = DeepCopy(sp.polygon)
+				end
+
+				local entry = {
+					name        = c.name,
+					slot        = c.slot,
+					side        = c.side,
+					country     = c.country,
+					countryId   = c.countryId,
+					priority    = c.priority,
+					attributes  = c.attributes and DeepCopy(c.attributes) or nil,
+					vehicles    = DeepCopy(c.vehicles),
+					from        = c.from and DeepCopy(c.from) or nil,
+					fromZone    = c.fromZone,
+					to          = c.to and DeepCopy(c.to) or nil,
+					toZone      = c.toZone,
+					supplyPoint = c.supplyPoint,
+					destination = c.destination and DeepCopy(c.destination) or nil,
+					route       = c.route and DeepCopy(c.route) or nil,
+					polygon     = polygon,
+				}
+
+				table.insert(result, entry)
+				builtCount = builtCount + 1
+			end
+		end
+
+		if builtCount > 0 then
+			WG_ConvoysData = result
+		end
+		--si builtCount == 0 (tous skippes), WG_ConvoysData reste nil : campL.wargame_convoys sera absent
+
+		print("DcUW wargame_logistics: "..builtCount.." convoi(s) injecte(s) dans WG_ConvoysData, "..skippedCount.." ignore(s)")
+	end
+end

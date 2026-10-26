@@ -732,6 +732,52 @@ Action = {}
 	function Action.AddCampFlag(n, add)
 		camp.flag[n] = camp.flag[n] + add
 	end
+	
+	
+	--send a reserve formation to a wargame zone
+	--@category wargame
+	--@doc    Sends a formation from the reserve to a wargame zone, at full strength.
+	--@doc    It arrives on the next wargame turn if the zone is friendly and not full, otherwise it waits.
+	--@doc    Use the exact formation name and zone name from the wargame editor, without accents.
+	--@param  formation   | Name of the formation in the reserve, for example "Secteur-30"
+	--@param  zone        | Name of the zone that receives it, for example "CQ95"
+	--@example Action.WargameDeploy("Secteur-30", "CQ95")
+	function Action.WargameDeploy(formation, zone)
+		-- meme nettoyage que DCE_Manager : tout ce qui n'est pas lettre ou chiffre devient _
+		local function cle(s)
+			return (string.gsub(tostring(s or ""), "[^%w]", "_"))
+		end
+		camp.flag["wg_deploy__" .. cle(formation) .. "__" .. cle(zone)] = true
+	end
+
+	--land a wave plan on a wargame beach
+	--@category wargame
+	--@doc    Launches a landing plan (a LANDING box drawn in the wargame editor). ONE trigger starts the whole plan:
+	--@doc    the waves land one after the other, in the order of their Wave numbers, with no other trigger.
+	--@doc    A wave that attacks an enemy beach is judged like a fight: it arrives with a strength proportional to the force ratio.
+	--@doc    If it fails it tries again next turn while it still has a chance, then it is abandoned and the next wave goes.
+	--@doc    The beach is the one drawn on the plan, unless you give another zone (for example when the forces change).
+	--@param  plan        | Name of the landing plan, for example "LANDING_1"
+	--@param  zone        | Optional. Beach to attack instead of the one of the plan, for example "Secteur-26"
+	--@param  gap         | Optional. Turns between two waves (default: the setting of wargame_balance.lua)
+	--@example Action.WargameLand("LANDING_1")
+	--@example Action.WargameLand("LANDING_1", "Secteur-26", 2)
+	function Action.WargameLand(plan, zone, gap)
+		-- meme nettoyage que DCE_Manager : tout ce qui n'est pas lettre ou chiffre devient _
+		local function cle(s)
+			return (string.gsub(tostring(s or ""), "[^%w]", "_"))
+		end
+		local name = "wg_land__" .. cle(plan)
+		if zone ~= nil and zone ~= "" then
+			name = name .. "__" .. cle(zone)
+		elseif gap ~= nil then
+			name = name .. "__default"
+		end
+		if gap ~= nil then
+			name = name .. "__" .. math.floor(tonumber(gap) or 0)
+		end
+		camp.flag[name] = true
+	end
 
 	--end campaign
 	--@doc    Ends the campaign with this result. The engine stops and asks to press a key.
