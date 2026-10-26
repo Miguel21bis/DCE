@@ -1,6 +1,6 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
-------------------------------------------------------------------------------------------------------- 
+-------------------------------------------------------------------------------------------------------
 
 
 local t0 = os.clock()
@@ -66,17 +66,17 @@ if mission.version < 19 then --19ok 18bad
 	local msg = "(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update."
 
 	Attention(msg)
-	
+
 	os.execute 'pause'
 
 	if Debug.debug then
 	else
 		os.exit()
 	end
-	
+
 end
 
---parse la table original trigrules pour reperer les a_do_script_file 
+--parse la table original trigrules pour reperer les a_do_script_file
 -- et ainsi garde en mémoire les fichiers à remettre, exemple: ["file"] = "ResKey_Action_34"
 for trigN, trig in pairs(mission.trigrules) do
 	if trig and trig.actions then
@@ -151,8 +151,8 @@ end
 -- require("Active/oob_scen")
 local addTriggersZOne
 local destN = 0
-for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
-	if destN <= 5 and scen.x and scen.y then														--destroyed scenery object has x and z coordinates
+for scen_name, scen in pairs(oob_scen) do									--iterate through destroyed scenery objects
+	if destN <= 5 and scen.x and scen.y then																--destroyed scenery object has x and z coordinates
 
 		local isForest = false
 		if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
@@ -210,7 +210,7 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 			destN = destN + 1
 		end
 	end
-	
+
 end
 
 if addTriggersZOne then
@@ -232,31 +232,31 @@ local function addFileTrigger(filename, cond0, predicate1, predicate2)
 
 	--attention, les sons sont à telecharger de cette maniere
 	--	[4] = "a_out_sound_c(21, getValueResourceByKey(\"ResKey_Action_2\"), 0);a_out_sound_c(8, getValueResourceByKey(\"ResKey_Action_3\"), 0);",
--- 	["rules"] = 
+-- 	["rules"] =
 -- 	{
 -- 	}, -- end of ["rules"]
 -- 	["comment"] = "Sounds",
 -- 	["eventlist"] = "",
 -- 	["predicate"] = "triggerStart",
--- 	["actions"] = 
+-- 	["actions"] =
 -- 	{
--- 		[1] = 
+-- 		[1] =
 -- 		{
 -- 			["file"] = "ResKey_Action_2",
 -- 			["countrylist"] = 21,
 -- 			["predicate"] = "a_out_sound_c",
--- 			["ai_task"] = 
+-- 			["ai_task"] =
 -- 			{
 -- 				[1] = "",
 -- 				[2] = "",
 -- 			}, -- end of ["ai_task"]
 -- 		}, -- end of [1]
--- 		[2] = 
+-- 		[2] =
 -- 		{
 -- 			["countrylist"] = 8,
 -- 			["file"] = "ResKey_Action_3",
 -- 			["predicate"] = "a_out_sound_c",
--- 			["ai_task"] = 
+-- 			["ai_task"] =
 -- 			{
 -- 				[1] = "",
 -- 				[2] = "",
@@ -295,8 +295,8 @@ local function addFileTrigger(filename, cond0, predicate1, predicate2)
 	mapResource["ResKey_Action_" .. mission.maxDictId] = filename
 	mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
-	mission.trig.conditions[trig_n] = cond																			--"return(true)"
-	--						[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
+	mission.trig.conditions[trig_n] = cond																						--"return(true)"
+	--							[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 	if predicate2 == "a_out_sound_c" then
 		mission.trig.actions[trig_n] = "a_out_sound_c(\"\", getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"), 0);"
 	else
@@ -356,7 +356,7 @@ function AddFileTriggerTempo(arg_filename, arg_time, arg_predicat0, arg_actionPr
 				}
 			}
 			--ref:		a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, true,\\\"all\\\",1)\");a_do_script(\"ctld.JTACAutoLase(
-			s = s.."a_do_script(\\\"ctld.JTACAutoLase(\\\'"..value.NameJTAC.."\\\', 1688, true,\\\"all\\\",1));"
+			s = s.."a_do_script(\\\"ctld.JTACAutoLase(\\\\'\"..value.NameJTAC..\"\\\\', 1688, true,\\\"all\\\",1));"
 		end
 
 		table.insert(table_trigrulesAction, trigrulesAction)
@@ -368,9 +368,9 @@ function AddFileTriggerTempo(arg_filename, arg_time, arg_predicat0, arg_actionPr
 		mapResource["ResKey_Action_" .. mission.maxDictId] = arg_filename
 		--							[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 		mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey('ResKey_Action_"..mission.maxDictId.."')); mission.trig.func[" .. trig_n .. "]=nil;"
-		
+
 	else
-		--[3] = "a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, false,\\\"all\\\")\"); mission.trig.func[3]=nil;",		
+		--[3] = "a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, false,\\\"all\\\")\"); mission.trig.func[3]=nil;",
 		mission.trig.actions[trig_n] = s..' mission.trig.func[' .. trig_n .. ']=nil;'
 
 	end
@@ -455,13 +455,14 @@ local function makePayloadRestricted()
 end
 
 
-addFileTrigger("DCE_Util_Common.lua")										-- Chantier A DCE InGame : utilitaires génériques (avant tout le reste)
+addFileTrigger("DCE_Util_Common.lua")																-- Chantier A DCE InGame : utilitaires génériques (avant tout le reste)
+addFileTrigger("DCE_Convoys.lua")       -- Logistics wargame : spawn convois depuis campL.wargame_convoys
 addFileTrigger("camp_status.lua")
-addFileTrigger("DCE_RadioF10.lua")										-- Renomme depuis AddCommandRadioF10.lua
-addFileTrigger("DCE_Background.lua")										-- Chantier B2 DCE InGame : sous-systèmes tâche de fond (avoidArea, EWR, CarrierDeckMonitor...)
+addFileTrigger("DCE_RadioF10.lua")																-- Renomme depuis AddCommandRadioF10.lua
+addFileTrigger("DCE_Background.lua")																-- Chantier B2 DCE InGame : sous-systèmes tâche de fond (avoidArea, EWR, CarrierDeckMonitor...)
 addFileTrigger("DCE_EventsTracker.lua")
-addFileTrigger("Fuel_Check.lua")													-- Norman99 Modification	M57
-addFileTrigger("ATC_ShutUp_GENERIC.lua")											-- Psyko Modification		M59
+addFileTrigger("Fuel_Check.lua")																				-- Norman99 Modification	M57
+addFileTrigger("ATC_ShutUp_GENERIC.lua")																		-- Psyko Modification		M59
 addFileTrigger("GCIdata.lua")
 addFileTrigger("DCE_GCIscript.lua")
 addFileTrigger("DCE_ARM_Defence_Script.lua")
@@ -474,7 +475,7 @@ addFileTrigger("DCE_AirGroundAttackScript.lua")
 addFileTrigger("DCE_bombOnRunway.lua")
 addFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 addFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
--- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
+-- AddFileTrigger("CG_ArtySpotter.lua")																		--https://www.digitalcombatsimulator.com/fr/files/3339128/
 
 
 
@@ -502,11 +503,11 @@ end
 --weather
 mission.weather = WeatherParams
 
-camp.SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck								-- modification M37.d SuperCarrier
-camp.CV_Vmax = Data_configuration.CV_Vmax												-- modification M37.d SuperCarrier
-camp.CV_windDeck = Data_configuration.CV_windDeck										-- modification M37.d SuperCarrier
-camp.CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding				-- modification M18.e despawn (e: option confMod)
-camp.SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind)					-- modification M36.d	MenuRadio request manual TurnIntoWind
+camp.SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck																-- modification M37.d SuperCarrier
+camp.CV_Vmax = Data_configuration.CV_Vmax																			-- modification M37.d SuperCarrier
+camp.CV_windDeck = Data_configuration.CV_windDeck																	-- modification M37.d SuperCarrier
+camp.CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding												-- modification M18.e despawn (e: option confMod)
+camp.SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind)												-- modification M36.d	MenuRadio request manual TurnIntoWind
 camp.debug = Debug.debug
 -- camp.makeCampaign = Debug.makeCampaign
 camp.debugInGamePopup = Debug.debugInGamePopup
@@ -528,7 +529,7 @@ for k=1, Multi.NbGroup do
 end
 
 
--- applique silenceATC si true et si auto (multi >= 2)									---- Psyko modification M59_a			silences the tower
+-- applique silenceATC si true et si auto (multi >= 2)																---- Psyko modification M59_a			silences the tower
 if mission_ini.silenceATC and type(mission_ini.silenceATC) == "boolean" then
 	camp.silenceATC = true
 elseif  mission_ini.silenceATC == "auto" and nbTotalClient >= 2 then
@@ -627,7 +628,7 @@ if MissionInstance >= 2 then
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
-	
+
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
@@ -738,7 +739,7 @@ Include("UTIL_Debug.lua")
 camp["groundthreats"] = groundthreats
 
 
-mission.currentKey = 1500000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
+mission.currentKey = 1500000																--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 
 --########   1   ##############
 --########   1   ##############
@@ -776,7 +777,7 @@ for _, side in pairs(mission.coalition) do
 							-- print("MainNM error, duplicate of |"..categorie.."| name |".. name[group_.name] .."|and|"..tostring(group_.name))
 						end
 
-						
+
 						if not groupId[group_.groupId] then
 							groupId[group_.groupId] = group_.groupId
 						else
@@ -849,7 +850,7 @@ for _ , refName in pairs(groupIdError) do
 
 	--change l'Id dans la mission
 	for _, side in pairs(mission.coalition) do																--iterate through sides
-		for _, country_ in pairs(side.country) do															--iterate through countries
+		for _, country_ in pairs(side.country) do																--iterate through countries
 			for _, categorie_ in pairs(country_) do
 				if type(categorie_) == "table" and categorie_.group then
 					for _, group in pairs(categorie_) do
@@ -905,7 +906,7 @@ for _ , refNameB in pairs(unitIdError) do
 	end
 
 	for _, sideB in pairs(mission.coalition) do																--iterate through sides
-		for _, countryB in pairs(sideB.country) do															--iterate through countries
+		for _, countryB in pairs(sideB.country) do																--iterate through countries
 			for _, categorieB in pairs(countryB) do
 				if type(categorieB) == "table" and categorieB.group then
 					for _, groupsB in pairs(categorieB) do
@@ -935,7 +936,7 @@ uniId = {}
 name = {}
 
 for _, side in pairs(mission.coalition) do																--iterate through sides
-	for _, country_ in pairs(side.country) do															--iterate through countries
+	for _, country_ in pairs(side.country) do																--iterate through countries
 		for _, categorie_ in pairs(country_) do
 			if type(categorie_) == "table" and categorie_.group then
 				for _, group in pairs(categorie_) do
@@ -979,7 +980,7 @@ end
 
 if Debug.allUnhide then
 	for _, side in pairs(mission.coalition) do																--iterate through sides
-		for _, country_ in pairs(side.country) do															--iterate through countries
+		for _, country_ in pairs(side.country) do																--iterate through countries
 			for _, categorie_ in pairs(country_) do
 				if type(categorie_) == "table" and categorie_.group then
 					for _, groups in pairs(categorie_) do
@@ -1055,7 +1056,7 @@ if not (EndCampaign or camp.endCampaign )then
 end
 
 if PlayerFlight then
-	
+
 	if ListRequiredModules then
 		local infoShow = false
 		for _, module in pairs(ListRequiredModules) do
@@ -1085,7 +1086,7 @@ for baseName, base in pairs(db_airbases) do
 
 end
 
---ajoute dans la table campL.Aircraft_Carriers.side 
+--ajoute dans la table campL.Aircraft_Carriers.side
 -- les noms des CV, CVN et CLA, tout porte aéronef
 Aircraft_Carriers = {
 	red = {},
@@ -1170,11 +1171,11 @@ local campL = {
 	--weather
 	weather = WeatherParams,
 
-	SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck,								-- modification M37.d SuperCarrier
-	CV_Vmax = Data_configuration.CV_Vmax,												-- modification M37.d SuperCarrier
-	CV_windDeck = Data_configuration.CV_windDeck,										-- modification M37.d SuperCarrier
-	CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding,				-- modification M18.e despawn (e: option confMod)
-	SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind),					-- modification M36.d	MenuRadio request manual TurnIntoWind
+	SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck,																-- modification M37.d SuperCarrier
+	CV_Vmax = Data_configuration.CV_Vmax,																			-- modification M37.d SuperCarrier
+	CV_windDeck = Data_configuration.CV_windDeck,																	-- modification M37.d SuperCarrier
+	CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding,												-- modification M18.e despawn (e: option confMod)
+	SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind),												-- modification M36.d	MenuRadio request manual TurnIntoWind
 
 	theatre = NameTheatreLower,
 	EjectedPilotFrequency = EjectedPilotFrequency,
@@ -1204,6 +1205,7 @@ local campL = {
 	Aircraft_Carriers = Aircraft_Carriers,
 	AAA_Barrage = AAA_Barrage,
 	MsgForPlayerInMsn = MsgForPlayerInMsn,
+	wargame_convoys = WG_ConvoysData or nil,	--convois logistiques wargame pour cette mission (nil si absent/non activé)
 
 
 	-- if not camp.missionHistory then camp.missionHistory = {} end
@@ -1233,47 +1235,47 @@ UpdateConfMod(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
 --on traite tous les fichiers uniquement si ça vaut le coup
 --bref, si DCE à trouver un siege au joueur
 if PlayerFlight then
-	
+
 	local c_miz = os.clock()
-		
+
 	----- create temporary content files of new mission file -----
 	misStr = "mission = " .. TableSerialization(mission, 0)
-	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")											--mission
+	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")																	--mission
 	misFile:write(misStr)
 	misFile:close()
 
 	optStr = "options = " .. TableSerialization(options, 0)
-	local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")											--options
+	local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")																	--options
 	optFile:write(optStr)
 	optFile:close()
 
 	warStr = "warehouses = " .. TableSerialization(warehouses, 0)
-	local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")											--warehouses
+	local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")																	--warehouses
 	warFile:write(warStr)
 	warFile:close()
 
 	dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
-	local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")											--dictionary
+	local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")																	--dictionary
 	dicFile:write(dicStr)
 	dicFile:close()
 
 	resStr = "mapResource = " .. TableSerialization(mapResource, 0)
-	local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")										--mapResource
+	local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")																	--mapResource
 	resFile:write(resStr)
 	resFile:close()
 
 	local gciStr = "GCI = " .. TableSerialization(GCI, 0)
-	local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")											--GCI data file (EWR radars, AWACS, interceptors)
+	local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")																	--GCI data file (EWR radars, AWACS, interceptors)
 	gciFile:write(gciStr)
 	gciFile:close()
 
 	local cmpStr = "camp = " .. TableSerialization(camp, 0)
-	local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")								--campaign status file
+	local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")														--campaign status file
 	cmpFile:write(cmpStr)
 	cmpFile:close()
 
 	local cmpL_Str = "campL = " .. TableSerialization(campL, 0)
-	local cmpL_File = io.open("campL.lua", "w") or error("Failed to open debug file")								--campaign status file
+	local cmpL_File = io.open("campL.lua", "w") or error("Failed to open debug file")																	--campaign status file
 	cmpL_File:write(cmpL_Str)
 	cmpL_File:close()
 
@@ -1286,7 +1288,7 @@ if PlayerFlight then
 	if mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true then
 		if not Firstmission_flag then
 			NbMission = tostring(camp.mission - 1)
-			--en skipMission, la mission n'a pas �t� jou�e, donc c'est la suivante
+			--en skipMission, la mission n'a pas été jouée, donc c'est la suivante
 			if Skipmission_flag then
 				NbMission = NbMission + 1
 			end
@@ -1362,12 +1364,13 @@ if PlayerFlight then
 	miz:zipAddFile("l10n/DEFAULT/DCE_CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_CustomTasksScript.lua")
 	miz:zipAddFile("l10n/DEFAULT/DCE_AirGroundAttackScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_AirGroundAttackScript.lua")
 	miz:zipAddFile("l10n/DEFAULT/DCE_CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_CarrierIntoWindScript.lua")
-	miz:zipAddFile("l10n/DEFAULT/DCE_Util_Common.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Util_Common.lua")						-- Chantier A DCE InGame
-	miz:zipAddFile("l10n/DEFAULT/DCE_RadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_RadioF10.lua")						-- Renomme depuis AddCommandRadioF10.lua (Modification M29)
-	miz:zipAddFile("l10n/DEFAULT/DCE_Background.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Background.lua")						-- Chantier B2 DCE InGame
+	miz:zipAddFile("l10n/DEFAULT/DCE_Util_Common.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Util_Common.lua")					-- Chantier A DCE InGame
+	miz:zipAddFile("l10n/DEFAULT/DCE_Convoys.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Convoys.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_RadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_RadioF10.lua")					-- Renomme depuis AddCommandRadioF10.lua (Modification M29)
+	miz:zipAddFile("l10n/DEFAULT/DCE_Background.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Background.lua")					-- Chantier B2 DCE InGame
 	miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
 	miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
-	miz:zipAddFile("l10n/DEFAULT/DCE_Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Pedro.lua")										-- Pedro TEST
+	miz:zipAddFile("l10n/DEFAULT/DCE_Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Pedro.lua")									-- Pedro TEST
 	-- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 	miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "campL.lua")
 	-- miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
@@ -1379,23 +1382,23 @@ if PlayerFlight then
 
 	miz:zipAddFile("l10n/DEFAULT/DCE_bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_bombOnRunway.lua")
 	miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
-	
+
 	if AAA_Barrage then
 		miz:zipAddFile("l10n/DEFAULT/AAA_barrage.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AAA_barrage.lua")
 	end
 
 	if not existing_files["l10n/DEFAULT/beacon.ogg"] then
-		miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")	
+		miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")
 	end
 
 	miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beaconsilent.ogg")
 	miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")
 
 	if mission_ini.load_mist then
-		miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/mist.lua")											-- modification M60 CTLD
+		miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/mist.lua")																-- modification M60 CTLD
 	end
 	if mission_ini.load_CTLD then
-		miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CTLD.lua")											-- modification M60 CTLD
+		miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CTLD.lua")																-- modification M60 CTLD
 	end
 
 
@@ -1506,14 +1509,14 @@ end
 
 
 if Debug.debug then
-	local data_str = "campL = " .. TableSerialization(campL, 0)								--make a string
+	local data_str = "campL = " .. TableSerialization(campL, 0)																--make a string
 	local dataFile = io.open("Debug/campL.lua", "w") or error("Failed to open debug file")
-	dataFile:write(data_str)																		--save new data
+	dataFile:write(data_str)																											--save new data
 	dataFile:close()
 
-	data_str = "mapResource = " .. TableSerialization(mapResource, 0)								--make a string
+	data_str = "mapResource = " .. TableSerialization(mapResource, 0)																	--make a string
 	dataFile = io.open("Debug/mapResource.lua", "w") or error("Failed to open debug file")
-	dataFile:write(data_str)																		--save new data
+	dataFile:write(data_str)																											--save new data
 	dataFile:close()
 end
 
@@ -1521,24 +1524,24 @@ end
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
 table.sort(oob_air.red, function(a, b) return a.type:upper() < b.type:upper() end)
 
-local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a string
+local air_str = "oob_air = " .. TableSerialization(oob_air, 0)																--make a string
 local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
-airFile:write(air_str)																		--save new data
+airFile:write(air_str)																											--save new data
 airFile:close()
 
-local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string
+local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)																--make a string
 local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
-groundFile:write(ground_str)																--save new data
+groundFile:write(ground_str)																									--save new data
 groundFile:close()
 
-local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
+local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)																--make a string
 local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
-tgtFile:write(tgt_str)																		--save new data
+tgtFile:write(tgt_str)																											--save new data
 tgtFile:close()
 
-local scen_str = "oob_scen = " .. TableSerialization(oob_scen, 0)							--make a string
+local scen_str = "oob_scen = " .. TableSerialization(oob_scen, 0)																	--make a string
 local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
-scenFile:write(scen_str)																	--save new data
+scenFile:write(scen_str)																										--save new data
 scenFile:close()
 
 local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)
@@ -1546,14 +1549,14 @@ local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to op
 trigFile:write(trigStr)
 trigFile:close()
 
-local miss_str = "last_Mission = " .. TableSerialization(mission, 0, { writeNumericTable = true })						--make a string
+local miss_str = "last_Mission = " .. TableSerialization(mission, 0, { writeNumericTable = true })																--make a string
 local missFile = io.open("Active/last_Mission.lua", "w") or error("Failed to open debug file")
-missFile:write(miss_str)															--save new data
+missFile:write(miss_str)																								--save new data
 missFile:close()
 
 local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)	--make a string
 local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
-loadoutFile:write(loadout_str)																--save new data
+loadoutFile:write(loadout_str)																									--save new data
 loadoutFile:close()
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
@@ -1562,9 +1565,9 @@ trigFile:write(airbases_Str)
 trigFile:close()
 
 if camp_ZoneSAR then
-	local ZoneSAR_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)					--make a string
+	local ZoneSAR_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)																--make a string
 	local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w") or error("Failed to open debug file")
-	ZoneSARFile:write(ZoneSAR_str)																	--save new data
+	ZoneSARFile:write(ZoneSAR_str)																										--save new data
 	ZoneSARFile:close()
 end
 
@@ -1715,4 +1718,3 @@ t_backup = t_backup + (os.clock() - c_backup)
 
 	-- print("MAIN_NM test fin")
 
-	
