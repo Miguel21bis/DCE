@@ -2309,6 +2309,34 @@ db_loadouts = {
 				},
 			},
 		},
+		Transport = {
+			["Airlift_Test"] = {
+				-- minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = false,
+				},
+				attributes =  { },
+				code_loadout = {"All"},
+				night = true,
+				adverseWeather = true,
+				range = 500000,
+				firepower = 1,
+				vCruise = 75,
+				vAttack = 85,
+				hCruise = 500,
+				hAttack = 500,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					},
+					fuel = 1701,
+					flare = 192,
+					chaff = 0,
+					gun = 100,
+				},
+			},
+		},
 		Escort = {
 			["Escort 4x9M114, 4xAA-60"] = {
 				attributes =  { },
@@ -3232,14 +3260,15 @@ db_loadouts = {
 			},
 		},
 		Transport = {
-			["Cyprus Default"] = {
+			["Airlift_Test"] = {
 				support = {
-					Escort = true,
+					Escort = false,
 					SEAD = false,
 				},
 				attributes =  { },
-				code_loadout =  { "All" },
+				code_loadout =  {"All"},
 				adverseWeather = true,
+				night = true,
 				range = 300000,
 				firepower = 1,
 				vCruise = 55,

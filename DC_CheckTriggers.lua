@@ -2209,13 +2209,13 @@ Action = {}
 		--cherche la valeur UnitID la plus haute
 		local CurrentUnitId = 0
 		local CurrentGroupId = 0
-	
+
 		-- local function findGroup(Group_name, category)
 		local function findGroup(groupName, sideName, countryId, category)
-			for O_sideName, O_countries in pairs(oob_ground) do																--iterate through sides
+			for O_sideName, O_countries in pairs(oob_ground) do							--iterate through sides
 				if O_sideName == sideName  then
-					for O_country_n, O_country in pairs(O_countries) do															--iterate through countries
-						if O_country.id == countryId and O_country[category] and O_country[category].group then																			--country has vehicles
+					for O_country_n, O_country in pairs(O_countries) do						--iterate through countries
+						if O_country.id == countryId and O_country[category] and O_country[category].group then		--country has vehicles
 							for g = 1, #O_country[category].group do
 								if O_country[category].group[g].name  == groupName then
 									return true
@@ -2229,11 +2229,11 @@ Action = {}
 
 		local function movedXY(Unit, Category)
 			local foundInGround = false
-			for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
-				for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
-					if Ocountry[Category] then																			--country has vehicles
+			for Oside_name, Oside in pairs(oob_ground) do							--iterate through sides
+				for Ocountry_n, Ocountry in pairs(Oside) do						--iterate through countries
+					if Ocountry[Category] then							--country has vehicles
 						for g = 1, #Ocountry[Category].group do
-							for u = 1, #Ocountry[Category].group[g].units do											--iterate through units								
+							for u = 1, #Ocountry[Category].group[g].units do			--iterate through units
 								if Ocountry[Category].group[g].units[u].name == Unit.name then
 
 									if not Ocountry[Category].group[g].units[u].dead then
@@ -2260,9 +2260,9 @@ Action = {}
 
 		function SetRouteXY(Groupname, Category, Route )
 			local foundInGround = false
-			for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
-				for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
-					if Ocountry[Category] then																			--country has vehicles
+			for Oside_name, Oside in pairs(oob_ground) do							--iterate through sides
+				for Ocountry_n, Ocountry in pairs(Oside) do						--iterate through countries
+					if Ocountry[Category] then							--country has vehicles
 						for g = 1, #Ocountry[Category].group do
 							if Ocountry[Category].group[g].name == Groupname then
 								Ocountry[Category].group[g].route = Route
@@ -2345,31 +2345,48 @@ Action = {}
 									unit.unitId = GenerateIDUnit(unitname, unit.type)
 
 									if unit.category == "Heliports" then
-										db_airbases[groupData.name] = {
-											["airdromeId"] = unit.unitId,
-											["side"] = sideName,
-											["LimitedParkNb"] = 4,
-											["x"] = unit.x,
-											-- ["TACAN"] = "40X",
-											["divert"] = false,
-											["inactive"] = false,
-											["elevation"] = groupData.route.points[1].alt,
-											-- ["code"] = 
-											-- {
-											-- 	["ICAO"] = "LOND",
-											-- },
-											["baseAlive"] = 100,
-											["runwayAlive"] = 100,
-											["ATC_frequency"] = 
-											{
-												[1] = unit.heliport_frequency,
-											},
-											["y"] = unit.y,
-											["name"] = groupData.name,
-											
-										}
+
+										local oldEntry = db_airbases[groupData.name]
+
+										if type(oldEntry) == "table" and oldEntry.wargameFarp then
+											--FARP pilote par le wargame (DCE_Manager) : on complete l'entree existante,
+											--on n'efface pas wargameFarp / wargamePlan / wargameBeach / x / y / inactive / side
+											oldEntry.airdromeId = unit.unitId
+											oldEntry.helipadId = unit.unitId
+											if oldEntry.name == nil then oldEntry.name = groupData.name end
+											if oldEntry.LimitedParkNb == nil then oldEntry.LimitedParkNb = 4 end
+											if oldEntry.divert == nil then oldEntry.divert = false end
+											if oldEntry.baseAlive == nil then oldEntry.baseAlive = 100 end
+											if oldEntry.runwayAlive == nil then oldEntry.runwayAlive = 100 end
+											if oldEntry.elevation == nil then oldEntry.elevation = groupData.route.points[1].alt end
+											if oldEntry.ATC_frequency == nil then oldEntry.ATC_frequency = unit.heliport_frequency end		--chaine, comme les autres entrees (WargameFarpSync la rend ensuite unique)
+										else
+											db_airbases[groupData.name] = {
+												["airdromeId"] = unit.unitId,
+												["side"] = sideName,
+												["LimitedParkNb"] = 4,
+												["x"] = unit.x,
+												-- ["TACAN"] = "40X",
+												["divert"] = false,
+												["inactive"] = false,
+												["elevation"] = groupData.route.points[1].alt,
+												-- ["code"] =
+												-- {
+												-- 	["ICAO"] = "LOND",
+												-- },
+												["baseAlive"] = 100,
+												["runwayAlive"] = 100,
+												["ATC_frequency"] =
+												{
+													[1] = unit.heliport_frequency,
+												},
+												["y"] = unit.y,
+												["name"] = groupData.name,
+
+											}
+										end
 									end
-									
+
 								end
 							end
 
@@ -2414,7 +2431,7 @@ Action = {}
 						end
 					end
 				end
-				
+
 			end
 		end
 	end
@@ -2574,6 +2591,617 @@ if not BriefingImagesR then
 BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
 end
 
+----- WARGAME : pose / retrait automatique des FARP (DCE_Manager) -----
+-- Source de verite : db_airbases["FARP-<plage>"] avec wargameFarp = true (ecrit par DCE_Manager).
+--   inactive == false -> le FARP doit exister dans oob_ground (template "farp" du camp de l'entree)
+--   inactive ~= false -> le FARP ne doit pas exister (groupes retires, airdromeId/helipadId vides)
+-- Le camp (side) de l'entree ne change jamais. x, y = position du premier heliport du template.
+-- Les groupes poses sont marques group.wargameFarp = "<cle db_airbases>" : c'est ce marqueur
+-- qui permet de les retrouver, de les deplacer ou de les retirer (DC_UpdateWargame ne les touche pas).
+-- Idempotent : peut etre appele plusieurs fois par mission sans effet de bord.
+-- Le template est cherche dans le catalogue Init/Wargame/wargame_templates.lua (entree type = "farp"
+-- du bon camp), puis charge depuis Init/Wargame/Templates_<camp>/<fichier>.
+
+local function wfLog(msg)
+	print(msg)
+	AddLog(msg)
+end
+
+--lit le catalogue; retourne la liste des entrees farp {side=, key=, entry=}
+--Le catalogue est ecrit par DCE_Manager dans Init/Wargame/DCE_Generated/ ; on essaie aussi Init/Wargame/ (ancien emplacement).
+--Lecture "a la main" (io.open + loadstring) pour pouvoir dire POURQUOI le catalogue n'est pas lisible
+--(fichier absent / BOM UTF-8 / erreur de syntaxe), et accepter un fichier commencant par un BOM.
+local function wfFarpCatalog()
+	local list = {}
+	local paths = {
+		"Init/Wargame/DCE_Generated/wargame_templates.lua",
+		"Init/Wargame/wargame_templates.lua",
+	}
+
+	local path, text
+	for _, p in ipairs(paths) do
+		local file = io.open(p, "rb")
+		if file then
+			path = p
+			text = file:read("*a")
+			file:close()
+			break
+		end
+	end
+
+	if not path then
+		wfLog("DcCT WargameFarp ERREUR: catalogue absent, cherche dans : "..table.concat(paths, " , "))
+		return list
+	end
+
+	if string.sub(text, 1, 3) == "\239\187\191" then		--BOM UTF-8 : Lua 5.1 ne sait pas le sauter
+		text = string.sub(text, 4)
+	end
+
+	local chunk, loadErr = loadstring(text, "@"..path)
+	if not chunk then
+		wfLog("DcCT WargameFarp ERREUR: catalogue illisible (syntaxe): "..tostring(loadErr))
+		return list
+	end
+
+	local env = {}
+	setfenv(chunk, env)
+	local ok, err = pcall(chunk)
+	if not ok then
+		wfLog("DcCT WargameFarp ERREUR: catalogue en erreur: "..tostring(err))
+		return list
+	end
+
+	--parcours recursif (profondeur limitee) : le nom exact de la table du catalogue n'a pas d'importance
+	local function scan(tbl, key, depth)
+		if type(tbl) ~= "table" or depth > 4 then return end
+
+		if type(tbl.type) == "string" and string.lower(tbl.type) == "farp" and (tbl.side == "blue" or tbl.side == "red") then
+			table.insert(list, { side = tbl.side, key = key, entry = tbl })
+			return
+		end
+
+		for k, v in pairs(tbl) do
+			scan(v, k, depth + 1)
+		end
+	end
+
+	for k, v in pairs(env) do
+		scan(v, k, 1)
+	end
+
+	return list
+end
+
+
+--nom(s) de fichier .stm possibles pour l'entree du catalogue (le nom exact est celui de l'entree)
+local function wfTemplateCandidates(item)
+	local e = item.entry
+	local names = {}
+	local function add(n)
+		if type(n) == "string" and n ~= "" then
+			table.insert(names, n)
+			if not string.find(string.lower(n), "%.stm$") then
+				table.insert(names, n..".stm")
+			end
+		end
+	end
+	add(e.file) add(e.fileName) add(e.stm) add(e.template) add(e.templateFile) add(e.name)
+	if type(item.key) == "string" then add(item.key) end
+	return names
+end
+
+--charge un .stm; retourne la table staticTemplate ou nil
+local function wfLoadTemplate(side, fileName)
+	staticTemplate = nil
+	local ok = pcall(dofile, "Init/Wargame/Templates_"..side.."/"..fileName)
+	local loaded = staticTemplate
+	staticTemplate = nil
+	if ok and type(loaded) == "table" then
+		return loaded
+	end
+	return nil
+end
+
+--parcourt tous les groupes de oob_ground portant le marqueur wargameFarp = key
+--action(sideName, countryTable, category, groupList, index, group)
+local function wfEachFarpGroup(key, action)
+	for sideName, countries in pairs(oob_ground) do
+		for _, country in pairs(countries) do
+			if type(country) == "table" then
+				for category, class in pairs(country) do
+					if type(class) == "table" and class.group then
+						for i = #class.group, 1, -1 do
+							if class.group[i].wargameFarp == key then
+								action(sideName, country, category, class.group, i, class.group[i])
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+--decale un groupe (et ses unites, et sa route) de dx, dy
+local function wfShiftGroup(group, dx, dy)
+	if type(group.x) == "number" then group.x = group.x + dx end
+	if type(group.y) == "number" then group.y = group.y + dy end
+	for _, unit in ipairs(group.units or {}) do
+		if type(unit.x) == "number" then unit.x = unit.x + dx end
+		if type(unit.y) == "number" then unit.y = unit.y + dy end
+	end
+	if group.route and group.route.points then
+		for _, point in pairs(group.route.points) do
+			if type(point.x) == "number" then point.x = point.x + dx end
+			if type(point.y) == "number" then point.y = point.y + dy end
+		end
+	end
+end
+
+--retrouve (ou cree) la liste de groupes oob_ground[side] pour un country de template et une categorie
+local function wfGroupList(side, templateCountry, category)
+	local countryN
+	local maxN = 0
+	for n, country in pairs(oob_ground[side]) do
+		if type(n) == "number" and n > maxN then maxN = n end
+		if type(country) == "table" and country.name == templateCountry.name then
+			countryN = n
+		end
+	end
+
+	if not countryN then
+		countryN = maxN + 1
+		oob_ground[side][countryN] = {
+			["id"] = templateCountry.id,
+			["name"] = templateCountry.name,
+		}
+	end
+
+	if not oob_ground[side][countryN][category] then
+		oob_ground[side][countryN][category] = { ["group"] = {} }
+	end
+
+	return oob_ground[side][countryN][category].group
+end
+
+--tous les unitId deja pris dans la mission (mission, oob_ground, warehouses, autres entrees db_airbases)
+--exceptKey : l'entree db_airbases du FARP lui-meme n'est pas comptee
+local function wfUsedUnitIds(exceptKey)
+	local used = {}
+
+	local function mark(v)
+		v = tonumber(v)
+		if v then used[v] = true end
+	end
+
+	--meme structure side > country > categorie > group > units pour mission.coalition et oob_ground
+	local function scan(coal)
+		if type(coal) ~= "table" then return end
+		for _, side in pairs(coal) do
+			if type(side) == "table" then
+				local countries = side.country or side
+				for _, country in pairs(countries) do
+					if type(country) == "table" then
+						for _, class in pairs(country) do
+							if type(class) == "table" and class.group then
+								for _, group in pairs(class.group) do
+									for _, unit in pairs(group.units or {}) do
+										mark(unit.unitId)
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	scan(mission and mission.coalition)
+	scan(oob_ground)
+
+	if type(warehouses) == "table" then
+		for _, section in pairs({ warehouses.warehouses, warehouses.airports }) do
+			if type(section) == "table" then
+				for k in pairs(section) do mark(k) end
+			end
+		end
+	end
+
+	for name, b in pairs(db_airbases) do
+		if name ~= exceptKey and type(b) == "table" then
+			mark(b.airdromeId)
+			mark(b.helipadId)
+		end
+	end
+
+	--compteurs de FUNC_Ids (format inconnu : on reserve cles et valeurs numeriques, sans risque)
+	if type(AllIdUnit) == "table" then
+		for k, v in pairs(AllIdUnit) do
+			mark(k)
+			mark(v)
+		end
+	end
+
+	return used
+end
+
+--choisit un unitId libre dans toute la mission (GenerateIDUnit tant que l'id est deja pris)
+local function wfPickUnitId(used, name, unitType)
+	for i = 1, 500 do
+		local id = GenerateIDUnit(name, unitType)
+		if type(id) == "number" and not used[id] then
+			used[id] = true
+			return id
+		end
+	end
+
+	--secours : plus grand id connu + 1
+	local maxId = 0
+	for k in pairs(used) do
+		if k > maxId then maxId = k end
+	end
+	used[maxId + 1] = true
+	return maxId + 1
+end
+
+--frequence (nombre, "129.600", table, Hz...) -> entier en kHz (129600), ou nil
+local function wfFreqKey(f)
+	if type(f) == "table" then f = f[1] end
+	local n = tonumber(f)
+	if not n or n <= 0 then return nil end
+	if n > 100000 then n = n / 1000000 end		--donnee en Hz
+	return math.floor(n * 1000 + 0.5)
+end
+
+--frequences deja prises : autres entrees db_airbases et autres heliports de la mission/oob_ground
+local function wfUsedFrequencies(exceptKey)
+	local used = {}
+
+	local function markAny(f)
+		if type(f) == "table" then
+			for _, v in pairs(f) do
+				local k = wfFreqKey(v)
+				if k then used[k] = true end
+			end
+		else
+			local k = wfFreqKey(f)
+			if k then used[k] = true end
+		end
+	end
+
+	for name, b in pairs(db_airbases) do
+		if name ~= exceptKey and type(b) == "table" then
+			markAny(b.ATC_frequency)
+		end
+	end
+
+	local function scan(coal)
+		if type(coal) ~= "table" then return end
+		for _, side in pairs(coal) do
+			if type(side) == "table" then
+				local countries = side.country or side
+				for _, country in pairs(countries) do
+					if type(country) == "table" then
+						for _, class in pairs(country) do
+							if type(class) == "table" and class.group then
+								for _, group in pairs(class.group) do
+									for _, unit in pairs(group.units or {}) do
+										if unit.category == "Heliports" and unit.name ~= exceptKey then
+											markAny(unit.heliport_frequency)
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	scan(mission and mission.coalition)
+	scan(oob_ground)
+
+	return used
+end
+
+--garantit une frequence propre a ce FARP (differente de toutes les autres), ecrite a 2 endroits :
+--  db_airbases.ATC_frequency (chaine "129.800", comme les autres entrees) et heliport_frequency de l'unite.
+--Ordre de preference : la frequence deja portee par l'entree, puis celle du template, puis la premiere libre 128.000-131.900
+local function wfEnsureFrequency(key, base, unit)
+	local used = wfUsedFrequencies(key)
+	local candidates = { base.ATC_frequency, unit and unit.heliport_frequency }
+	local chosen
+
+	for i = 1, 2 do
+		local k = wfFreqKey(candidates[i])
+		if k and not used[k] then
+			chosen = k
+			break
+		end
+	end
+
+	if not chosen then
+		for k = 128000, 131900, 100 do
+			if not used[k] then
+				chosen = k
+				break
+			end
+		end
+	end
+
+	if not chosen then
+		wfLog("DcCT WargameFarp ERREUR: plus de frequence libre pour "..tostring(key))
+		return
+	end
+
+	local freqStr = string.format("%.3f", chosen / 1000)
+
+	if type(base.ATC_frequency) == "string" and wfFreqKey(base.ATC_frequency) == chosen
+		and (not unit or wfFreqKey(unit.heliport_frequency) == chosen) then
+		return			--deja coherent, on ne touche a rien
+	end
+
+	wfLog("DcCT WargameFarp frequence "..tostring(key).." : "..tostring(wfFreqKey(base.ATC_frequency) and base.ATC_frequency or "-").." -> "..freqStr)
+	base.ATC_frequency = freqStr
+	if unit then unit.heliport_frequency = freqStr end
+end
+
+--complete l'entree db_airbases d'un FARP actif a partir de son heliport reel (oob_ground)
+--airdromeId = helipadId = unitId de l'heliport = cle du warehouse
+local function wfCompleteBase(key, base, heliUnit, heliGroup)
+	base.airdromeId = heliUnit.unitId
+	base.helipadId = heliUnit.unitId
+	if base.name == nil then base.name = key end
+	if base.LimitedParkNb == nil then base.LimitedParkNb = 4 end
+	if base.divert == nil then base.divert = false end
+	if base.baseAlive == nil then base.baseAlive = 100 end
+	if base.runwayAlive == nil then base.runwayAlive = 100 end
+	if base.elevation == nil and heliGroup and heliGroup.route and heliGroup.route.points and heliGroup.route.points[1] then
+		base.elevation = heliGroup.route.points[1].alt
+	end
+	wfEnsureFrequency(key, base, heliUnit)
+end
+
+--pose le template farp de ce camp sur l'entree db_airbases[key]; retourne true, ou false + raison
+local function wfInstallFarp(key, base)
+	local side = base.side
+
+	if type(base.x) ~= "number" or type(base.y) ~= "number" then
+		return false, "x, y absents dans db_airbases"
+	end
+
+	--1) le template du camp, via le catalogue
+	local loaded, fileUsed
+	local found = false
+	for _, item in ipairs(wfFarpCatalog()) do
+		if item.side == side then
+			found = true
+			for _, fileName in ipairs(wfTemplateCandidates(item)) do
+				loaded = wfLoadTemplate(side, fileName)
+				if loaded and loaded.coalition and loaded.coalition[side] and loaded.coalition[side].country then
+					fileUsed = fileName
+					break
+				end
+				loaded = nil
+			end
+			if loaded then break end
+		end
+	end
+
+	if not found then
+		return false, "aucune entree type = farp pour le camp "..tostring(side).." dans le catalogue"
+	end
+	if not loaded then
+		return false, "template farp illisible (Init/Wargame/Templates_"..tostring(side).."/)"
+	end
+
+	--2) copie de travail + premier heliport du template = point de reference
+	local tmp = DeepCopy(loaded.coalition[side].country)
+	local refUnit, refGroup
+
+	for _, country in pairs(tmp) do
+		if type(country) == "table" then
+			for category, class in pairs(country) do
+				if type(class) == "table" and class.group then
+					for _, group in ipairs(class.group) do
+						for _, unit in ipairs(group.units or {}) do
+							if not refUnit and unit.category == "Heliports" then
+								refUnit = unit
+								refGroup = group
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if not refUnit then
+		return false, "le template "..tostring(fileUsed).." ne contient aucun heliport (category = Heliports)"
+	end
+
+	local dx = base.x - refUnit.x
+	local dy = base.y - refUnit.y
+	local usedIds = wfUsedUnitIds(key)							--ids deja pris dans toute la mission
+	local suffix = string.gsub(tostring(base.wargameBeach or key), "[^%w]", "_")
+
+	--3) noms uniques par FARP, decalage, ids, puis insertion dans oob_ground
+	for _, country in pairs(tmp) do
+		if type(country) == "table" then
+			for category, class in pairs(country) do
+				if type(class) == "table" and class.group then
+					local groupList = wfGroupList(side, country, category)
+
+					for _, group in ipairs(class.group) do
+						if group == refGroup then
+							group.name = key						--le groupe heliport porte le nom de l'entree db_airbases
+						else
+							group.name = group.name.."-"..suffix
+						end
+
+						wfShiftGroup(group, dx, dy)
+
+						for _, unit in ipairs(group.units or {}) do
+							if unit == refUnit then
+								unit.name = key
+							else
+								unit.name = unit.name.."-"..suffix
+							end
+							unit.unitId = wfPickUnitId(usedIds, unit.name, unit.type)	--unique dans toute la mission (l'id de l'heliport = cle du warehouse)
+						end
+
+						group.groupId = GenerateIDGroup(group.name)
+						group.taskSelected = true					--convention reprise de Action.TemplateActive
+						group.wargameFarp = key
+						table.insert(groupList, group)
+					end
+				end
+			end
+		end
+	end
+
+	--4) db_airbases : on complete l'entree du Manager (ids, valeurs manquantes, frequence propre), on n'ecrase rien
+	wfCompleteBase(key, base, refUnit, refGroup)
+
+	wfLog("DcCT WargameFarp pose "..key.." ("..tostring(side)..") template "..tostring(fileUsed).." airdromeId "..tostring(base.airdromeId))
+	return true
+end
+
+local function WargameFarpSync()
+	if type(db_airbases) ~= "table" or type(oob_ground) ~= "table" then
+		return
+	end
+
+	--ordre alphabetique : attribution des frequences reproductible d'une mission a l'autre
+	local keys = {}
+	for key, base in pairs(db_airbases) do
+		if type(base) == "table" and base.wargameFarp then table.insert(keys, key) end
+	end
+	table.sort(keys)
+
+	for _, key in ipairs(keys) do
+		local base = db_airbases[key]
+
+		if base.side ~= "blue" and base.side ~= "red" then
+			wfLog("DcCT WargameFarp ERREUR: "..tostring(key).." n'a pas de side blue/red, ignore")
+
+		else
+			--combien de groupes de ce FARP sont deja dans oob_ground, et ou est son heliport
+			local nGroups = 0
+			local heliUnit, heliGroup
+			wfEachFarpGroup(key, function(sideName, country, category, groupList, i, group)
+				nGroups = nGroups + 1
+				for _, unit in ipairs(group.units or {}) do
+					if unit.category == "Heliports" then
+						heliUnit = unit
+						heliGroup = group
+					end
+				end
+			end)
+
+			if base.inactive == false then
+				--le FARP doit exister
+				if nGroups == 0 then
+					local ok, reason = wfInstallFarp(key, base)
+					if not ok then
+						--echec : on ne laisse jamais un FARP actif sans groupes (les helicos iraient s'y poser)
+						base.inactive = true
+						base.airdromeId = nil
+						base.helipadId = nil
+						wfLog("DcCT WargameFarp ERREUR: pose impossible de "..key.." : "..tostring(reason))
+					end
+
+				elseif heliUnit and (math.abs(heliUnit.x - base.x) > 1 or math.abs(heliUnit.y - base.y) > 1) then
+					--le point a ete deplace dans le Manager : on decale le FARP, les ids (donc le warehouse) restent
+					local dx = base.x - heliUnit.x
+					local dy = base.y - heliUnit.y
+					wfEachFarpGroup(key, function(sideName, country, category, groupList, i, group)
+						wfShiftGroup(group, dx, dy)
+					end)
+					wfLog("DcCT WargameFarp deplace "..key.." de "..math.floor(dx)..", "..math.floor(dy))
+				end
+
+				--FARP deja pose : db_airbases suit toujours l'heliport reel (le Manager reecrit l'entree a chaque tour)
+				if heliUnit then
+					wfCompleteBase(key, base, heliUnit, heliGroup)
+				end
+
+			else
+				--le FARP ne doit pas exister
+				if nGroups > 0 then
+					wfEachFarpGroup(key, function(sideName, country, category, groupList, i, group)
+						table.remove(groupList, i)
+					end)
+					wfLog("DcCT WargameFarp retrait "..key.." ("..nGroups.." groupe(s))")
+				end
+				base.airdromeId = nil
+				base.helipadId = nil
+			end
+		end
+	end
+end
+
+--CONTROLE FINAL des ids (appele par MAIN_NextMission apres la renumerotation des doublons, avant l'ecriture de
+--Active/db_airbases.lua) : pour chaque entree db_airbases dont une piste (Heliports) existe dans la mission,
+--airdromeId (et helipadId s'il existe, toujours pour un FARP du wargame) = unitId reel de l'heliport.
+--Verifie aussi que le warehouse de cet id existe. Ne renumerote JAMAIS rien : il corrige db_airbases, pas la mission.
+function WargameFarpCheckIds()
+	if type(db_airbases) ~= "table" or type(mission) ~= "table" or type(mission.coalition) ~= "table" then
+		return
+	end
+
+	--heliports de la mission, trouves par nom de groupe ou nom d'unite
+	local heli = {}
+	for _, side in pairs(mission.coalition) do
+		for _, country in pairs(side.country or {}) do
+			if type(country) == "table" then
+				for _, class in pairs(country) do
+					if type(class) == "table" and class.group then
+						for _, group in pairs(class.group) do
+							for _, unit in pairs(group.units or {}) do
+								if unit.category == "Heliports" and type(unit.unitId) == "number" then
+									if heli[group.name] == nil then heli[group.name] = unit end
+									if heli[unit.name] == nil then heli[unit.name] = unit end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	for key, base in pairs(db_airbases) do
+		local unit = type(base) == "table" and heli[key]
+
+		if unit then
+			if base.airdromeId ~= unit.unitId then
+				wfLog("DcCT WargameFarp CheckIds "..tostring(key).." airdromeId "..tostring(base.airdromeId).." -> "..tostring(unit.unitId))
+				base.airdromeId = unit.unitId
+			end
+
+			if (base.helipadId ~= nil or base.wargameFarp) and base.helipadId ~= unit.unitId then
+				wfLog("DcCT WargameFarp CheckIds "..tostring(key).." helipadId "..tostring(base.helipadId).." -> "..tostring(unit.unitId))
+				base.helipadId = unit.unitId
+			end
+
+			--le warehouse de la piste est indexe par ce meme id
+			if type(warehouses) == "table" and type(warehouses.warehouses) == "table" and warehouses.warehouses[unit.unitId] == nil then
+				if type(Data_warehouses) == "table" then
+					warehouses.warehouses[unit.unitId] = DeepCopy(Data_warehouses)
+					wfLog("DcCT WargameFarp CheckIds warehouse cree pour "..tostring(key).." ("..tostring(unit.unitId)..")")
+				else
+					wfLog("DcCT WargameFarp CheckIds ATTENTION: pas de warehouse pour "..tostring(key).." ("..tostring(unit.unitId)..")")
+				end
+			end
+		end
+	end
+end
+
+WargameFarpSync()		--pose / retire les FARP du wargame AVANT les triggers de campagne
 
 --go through campaign triggers
 for triggerName, trigger in pairs(camp_triggers) do								--iterate through triggers
@@ -2740,7 +3368,7 @@ for baseName, base in pairs(db_airbases) do
 
 	--base détruite
 
-	if base.side then
+	if base.side and not base.wargameFarp then
 
 		local baseDeathPoint = campMod.RepairOption[base.side]["airbase"][1]
 		local runwayDeathPoint = campMod.RepairOption[base.side]["runway"][2]

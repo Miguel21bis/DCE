@@ -33,6 +33,8 @@ local SPEED_OFFROAD = 0.5   -- part de la vitesse nominale hors route
 local SPEED_DEFAULT = 18    -- m/s : vitesse nominale si DCS ne la donne pas (environ 65 km/h)
 local SPEED_MIN     = 5     -- m/s : vitesse nominale minimale acceptée (en dessous, elle est corrigée)
 local SPEED_MAX     = 30    -- m/s : vitesse nominale maximale acceptée (au dessus, elle est corrigée)
+local HIDE_CONVOYS  = true   -- true  = convois cachés sur la carte F10 (hidden = true), SAUF si campL.debug est vrai
+                            -- false = convois toujours visibles (hidden = false)
 local MAX_CONVOYS   = 20    -- nombre maximum de convois traités (protection contre une table aberrante)
 local MAX_VEHICLES  = 40    -- nombre maximum de véhicules par convoi
 local MAX_ROUTE     = 100   -- nombre maximum de points de route lus par convoi
@@ -377,6 +379,12 @@ local function buildPlan(convoy)
 	}
 end
 
+-- true si campL.debug est vrai (jamais d'erreur, même si campL n'existe pas)
+local function isDebug()
+	local ok, v = pcall(function() return campL and campL.debug end)
+	return (ok and v) and true or false
+end
+
 -- Transforme le plan en table acceptée par coalition.addGroup
 local function buildGroupData(plan)
 	local units = {}
@@ -398,7 +406,7 @@ local function buildGroupData(plan)
 		["taskSelected"] = true,
 		["tasks"] = {},
 		["start_time"] = 0,
-		["hidden"] = false,
+		["hidden"] = HIDE_CONVOYS and not isDebug(),
 		["uncontrollable"] = false,
 		["x"] = plan.start.x,
 		["y"] = plan.start.y,
@@ -477,6 +485,11 @@ local function processConvoy(arg)
 
 	local groupData = buildGroupData(plan)
 	dumpGroupData(plan.name, groupData)
+	if groupData.hidden then
+		log(label .. " : convoi caché sur la carte (hidden = true)")
+	else
+		log(label .. " : convoi visible sur la carte (hidden = false)")
+	end
 
 	-- un groupe de ce nom existe déjà : on ne crée rien
 	if Group.getByName(plan.name) then

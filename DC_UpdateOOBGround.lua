@@ -363,6 +363,31 @@ local dbgDupName = 0
 local dbgDupGroupId = 0
 local dbgDupUnitId = 0
 
+--pistes (FARP, heliports) d'abord : leur unitId est aussi la cle de leur warehouse.
+--En cas de doublon ce sont donc les AUTRES unites qui sont renumerotees, jamais la piste.
+local function IsPisteUnit(unit)
+	return unit.category == "Heliports" or string.find(tostring(unit.type), "FARP", 1, true) ~= nil
+end
+
+local unitId_piste = {}							--[unitId] = unite piste qui possede cet id
+for side_name, side in pairs(oob_ground) do
+	for country_n, country_ in pairs(side) do
+		for categorie, categorie_ in pairs(country_) do
+			if type(categorie_) == "table" and categorie_.group then
+				for groupN, group_ in ipairs(categorie_.group) do
+					for unitN, unit in ipairs(group_.units) do
+						if IsPisteUnit(unit) and not unitId_2[unit.unitId] then
+							unitId_2[unit.unitId] = unit.unitId
+							unitId_owner[unit.unitId] = unit.name
+							unitId_piste[unit.unitId] = unit
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 for side_name, side in pairs(oob_ground) do														--iterate through countries
 	for country_n, country_ in pairs(side) do
 		for categorie, categorie_ in pairs(country_) do
@@ -397,7 +422,7 @@ for side_name, side in pairs(oob_ground) do														--iterate through count
 						end
 
 						for unitN, unit in ipairs(group_.units) do
-							if not  unitId_2[unit.unitId] then
+							if not  unitId_2[unit.unitId] or unitId_piste[unit.unitId] == unit then
 								unitId_2[unit.unitId] = unit.unitId
 								unitId_owner[unit.unitId] = unit.name
 							else

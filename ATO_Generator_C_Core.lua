@@ -41,22 +41,122 @@ local targetAssignedFirepower = {}
 --parse la table targetList, ignore les tasks Intercept, CAP, Refueling
 -- et recupere la valeur maximal de priority
 for sideName, targets in pairs(targetlist) do
-	-- print("create priorityMaxValue for "..sideName)
 	priorityMaxValue[sideName] = 0
 	for targetN, target in pairs(targets) do
-		-- print("check target "..target.name.." with task "..target.task.." and priority "..tostring(target.priority))
-		if not target.inactive and target.task ~= "Intercept" and target.task ~= "CAP" and target.task ~= "Refueling" and target.task ~= "SAR" and target.task ~= "CSAR" then
-			-- print("create priorityMaxValue for "..sideName.." with target "..target.name.." and priority "..tostring(target.priority))
+		if not target.inactive and not target.wargameLogistic and target.task ~= "Intercept" and target.task ~= "CAP" and target.task ~= "Refueling" and target.task ~= "SAR" and target.task ~= "CSAR" then
 			if target.priority and target.priority > priorityMaxValue[sideName] then
-				-- print("create priorityMaxValue for "..sideName.." with target "..target.name.." and priority "..tostring(target.priority))
 				priorityMaxValue[sideName] = target.priority
 			end
 		end
 	end
 end
 
--- _affiche(priorityMaxValue, "priorityMaxValue: ")
--- os.execute 'pause'
+-- ============================================================================
+-- WARGAME : ravitaillement aérien (airlift) - ETAPE 1 : lecture + log, RIEN n'est fabriqué
+-- ============================================================================
+--Pourquoi: DCE_Manager écrit dans la targetlist des entrées task="Transport" + wargameLogistic="airlift"
+--(destination = un point WG_POINT_..., pas un aérodrome). Le générateur natif ne sait pas les traiter
+--(Transport natif = target.base == unit.base + destination dans db_airbases).
+--Étape 1 : on les sort de tgtList_Gen (donc aucune sortie générée, comportement inchangé) et on écrit dans le log
+--ce qui SERAIT possible : quels squads d'hélicos peuvent faire le vol (Transport actif, charge, portée).
+--Étape 2 (plus tard) : ces entrées seront réinjectées dans la génération.
+--
+--Règle de portée utilisée ici (estimation en ligne droite, comme le test natif route.lenght <= range*2) :
+--  base -> entrepôt (wargameLoadX/Y, si présent) -> point -> base  <=  portée du loadout Transport x 2
+WargameAirliftList = {}
+
+local function wargameAirliftDiagnostic(sideName, target)
+
+	local cargoKg = tonumber(target.wargameCargoKg) or 0
+	local head = "AtoG WARGAME airlift "..tostring(target.name).." ("..tostring(sideName)..") cargo "..cargoKg.." kg -> "..tostring(target.destination)
+
+	if not target.x or not target.y then
+		AddLog(head.." | REFUSE: pas de position x/y dans l'entrée de la targetlist")
+		return
+	end
+
+	local loadPoint = nil
+	if target.wargameLoadX and target.wargameLoadY then
+		loadPoint = { x = target.wargameLoadX, y = target.wargameLoadY }
+	end
+
+	local nbEligible = 0
+	local report = {}
+
+	for _, unit in pairs(oob_air[sideName] or {}) do
+
+		if not unit.inactive and IsHelicopter[unit.type] and unit.tasks and unit.tasks["Transport"] then
+
+			local reason = nil
+			local base = db_airbases[unit.base]
+			local ready = (unit.roster and unit.roster.ready) or 0
+			local capacity = PayloadType and PayloadType[unit.type]
+
+			--plus grande portée parmi les loadouts Transport de ce type
+			local rangeMax = 0
+			local loadoutsTransport = LoadoutsList[unit.type] and LoadoutsList[unit.type]["Transport"]
+			for _, ltable in pairs(loadoutsTransport or {}) do
+				if type(ltable) == "table" and tonumber(ltable.range) and ltable.range > rangeMax then
+					rangeMax = ltable.range
+				end
+			end
+
+			local trip = 0
+			if not base or base.inactive == true or not base.x or not base.y then
+				reason = "base '"..tostring(unit.base).."' invalide ou inactive"
+			elseif ready <= 0 then
+				reason = "aucun appareil prêt"
+			elseif not capacity then
+				reason = "capacité inconnue (PayloadType["..tostring(unit.type).."] absent)"
+			elseif capacity < cargoKg then
+				reason = "capacité "..capacity.." kg < "..cargoKg.." kg"
+			elseif rangeMax <= 0 then
+				reason = "pas de loadout Transport avec une portée pour ce type"
+			else
+				if loadPoint then
+					trip = GetDistance(base, loadPoint) + GetDistance(loadPoint, target) + GetDistance(target, base)
+				else
+					trip = GetDistance(base, target) * 2
+				end
+				if trip > rangeMax * 2 then
+					reason = "trajet "..math.floor(trip/1000).." km > portée x2 ("..math.floor(rangeMax*2/1000).." km)"
+				end
+			end
+
+			if reason then
+				report[#report + 1] = "    - "..tostring(unit.name).." ("..tostring(unit.type)..") NON: "..reason
+			else
+				nbEligible = nbEligible + 1
+				report[#report + 1] = "    - "..tostring(unit.name).." ("..tostring(unit.type)..") OK: base "..tostring(unit.base)
+					..", prêts "..ready..", capacité "..capacity.." kg, trajet "..math.floor(trip/1000).." km (portée x2 "..math.floor(rangeMax*2/1000).." km)"
+			end
+		end
+	end
+
+	local txt = head.." | squads possibles: "..nbEligible
+	if #report > 0 then
+		txt = txt.."\n"..table.concat(report, "\n")
+	else
+		txt = txt.."\n    - aucun squad d'hélicoptères avec la tâche Transport active"
+	end
+
+	AddLog(txt)
+	if Debug.debug then print(txt) end
+end
+
+--repertorie les entrees wargame de tgtList_Gen dans WargameAirliftList (elles RESTENT dans tgtList_Gen : l'etape 2 les traite)
+for sideName, targets in pairs(tgtList_Gen) do
+	for i = #targets, 1, -1 do
+		local target = targets[i]
+		if type(target) == "table" and target.wargameLogistic == "airlift" then
+			WargameAirliftList[#WargameAirliftList + 1] = { side = sideName, target = target }
+		end
+	end
+end
+
+for _, entry in ipairs(WargameAirliftList) do
+	wargameAirliftDiagnostic(entry.side, entry.target)
+end
 
 --Vérifie si le loadout est compatible avec la météo actuelle
 --Pourquoi: sortir la logique météo du pipeline principal pour simplifier le draft
@@ -1062,8 +1162,8 @@ local function buildDraftSorties(
 			)
 		end
 
-		--firepower apportée par cette sortie
-		--Pourquoi: cumuler plusieurs squads sur une même cible
+		--firepower apportee par cette sortie
+		--Pourquoi: cumuler plusieurs squads sur une meme cible
 		local firepowerContribution = draftContext.state.futureAircraftAssign * currentLoadout.firepower
 
 		if not pendingPackages[target.titleName] then
@@ -1170,7 +1270,7 @@ local function buildDraftSorties(
 				local maxVal = priorityMaxValue[draftSortiesEntry.side]
 				local coef = (maxVal / target.priority) + 0.1
                 
-                -- Si la priorité était déjà supérieure ou égale au max, on s'assure que le coef soit au moins > 1
+                -- Si la priorite etait deja superieure ou egale au max, on s'assure que le coef soit au moins > 1
                 if coef <= 1 then coef = 1.1 end
                 
                 -- Application du coefficient
@@ -1187,8 +1287,24 @@ local function buildDraftSorties(
 		draftSortiesEntry.baseScore = draftSortiesEntry.score
 		draftSortiesEntry.finalScore = draftSortiesEntry.score
 
+		--Pourquoi (v1.21.138): draftContext.rejectReasons grandit a chaque rejet du squad (tous ses couples
+		--cible/loadout/variante) ; le DeepCopy en entier a CHAQUE draft donnait un cout qui grossit au carre
+		--(~420 Ko par draft, ~600 Mo en tout, memoire ET temps). Plus rien ne lit ce champ en dehors du debug :
+		--on ne garde que le nombre total et les 10 derniers rejets, SANS copie (references partagees).
+		local rejectList = draftContext.rejectReasons or {}
+		local rejectRecent = {}
+		for i = math.max(1, #rejectList - 9), #rejectList do
+			rejectRecent[#rejectRecent + 1] = rejectList[i]
+		end
+		for rejectKey, rejectValue in pairs(rejectList) do
+			if type(rejectKey) == "string" then
+				rejectRecent[rejectKey] = rejectValue
+			end
+		end
+
 		draftSortiesEntry.debugContext = {
-			rejectReasons = DeepCopy(draftContext.rejectReasons),
+			rejectReasons = rejectRecent,
+			rejectReasonsTotal = #rejectList,
 			overideMP_A = draftContext.overideMP_A,
 			passPackmax = draftContext.passPackmax,
 		}
@@ -1198,6 +1314,7 @@ local function buildDraftSorties(
 		end
 
 		draftSorties[sideName][#draftSorties[sideName] + 1] = draftSortiesEntry
+		if MemTick then MemTick("A draft") end
 
 		table.insert(
 			pendingPackages[target.titleName].sorties,
@@ -1822,6 +1939,1117 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 	end
 end
 
+-- ============================================================================
+-- WARGAME : ravitaillement aerien par helicoptere  (sous-etape 2a)
+-- ============================================================================
+--Pourquoi: les cibles "WG_AIRLIFT_..." ecrites par DCE_Manager (task Transport, wargameLogistic = "airlift")
+--n'ont pas de base : le test natif "target.base == unit.base" les ignorait en silence.
+--Ici on les traite a part : on calcule combien de rotations (N) un helico de l'escadrille peut faire
+--(portee du loadout, aller-retour, marge de securite), on LOG la decision, et on rejette proprement
+--si aucun N >= 1 n'est possible.
+--
+--SOUS-ETAPE 2a = CALCUL + LOG SEULEMENT : tant que WG_AIRLIFT_GENERATE = false, aucun vol n'est cree.
+--(la creation du plan de vol complet arrive en 2b)
+--
+--REGLAGES (a ajuster ici, sans toucher au reste du fichier)
+WG_AIRLIFT_GENERATE        = true		--false = calcul + log seulement ; true = creation des vols (2b, pas encore codee)
+WG_AIRLIFT_MARGIN          = 0.25		--marge de securite sur le rayon d'action aller-retour (0.25 = on n'utilise que 75%)
+WG_AIRLIFT_DETOUR          = 1.15		--coef de detour applique aux distances a vol d'oiseau (en attendant la vraie route en 2b)
+WG_AIRLIFT_MAX_N           = 4			--nb maximum de rotations par vol
+WG_AIRLIFT_STOP_S          = 300		--secondes perdues par rotation (chargement + depose)
+WG_AIRLIFT_V_DEFAULT       = 50			--m/s, vitesse de croisiere si le loadout n'en donne pas
+WG_AIRLIFT_PAYLOAD_DEFAULT = 1000		--kg, si l'helico n'est ni dans PayloadType ni donne par wargameCargoKg
+WG_AIRLIFT_RESET_ATO       = false		--true = remet ATO=false sur les cibles qu'aucun helico ne peut servir ; false = ATO reste true (la note est ecrite quand meme)
+WG_AIRLIFT_AUDIT           = true		--true = ecrit dans le log l'etat de chaque cible airlift et de chaque squad helico (diagnostic)
+WG_AIRLIFT_NOTE            = "(no helicopter squad close enough)"
+WG_AIRLIFT_NOTE_FLEET      = "(no helicopter available)"
+WG_AIRLIFT_IGNORE_MINSCORE = true		--true = les vols airlift ignorent le minscore du loadout (un ravitaillement n'a pas a "meriter" un score de menace)
+WG_AIRLIFT_IGNORE_SUPPORT  = true		--true = les vols airlift ne demandent pas d'escorte obligatoire (support du loadout vide)
+WG_AIRLIFT_LOG             = true		--ecrit Debug/WG_Airlift.log (ecrase a chaque generation)
+WG_AIRLIFT_RANDOM          = true		--true = tirage au sort entre escadrilles a egalite d'utilisation ; false = toujours la premiere dans l'ordre alphabetique (tests reproductibles)
+WG_AIRLIFT_LOG_DIR         = "Debug/Wargame/ScriptsModPart"		--dossier des logs wargame de scriptsMod (cree automatiquement)
+WG_AIRLIFT_LOG_FILE        = WG_AIRLIFT_LOG_DIR.."/WG_Airlift.log"
+
+--etat de la generation en cours (remis a zero a chaque execution du fichier)
+WG_AirliftBest   = {}		--par nom de cible : meilleur plan trouve
+WG_AirliftSeen   = {}		--dedoublonnage du log (cible|escadrille|loadout)
+WG_AirliftPick   = {}		--par nom de cible : escadrille + loadout choisis pour la generation (false = aucun)
+WG_AirliftUsed   = {}		--par nom d'escadrille : nb de vols airlift deja attribues dans cette generation (pluralite)
+WG_AirliftDone   = {}		--par nom de cible : true quand un vol a deja ete cree
+WG_AirliftLogBuf = {}
+
+function WG_Log(msg)
+	if WG_AIRLIFT_LOG then
+		WG_AirliftLogBuf[#WG_AirliftLogBuf + 1] = tostring(msg)
+	end
+end
+
+--cree le dossier du log si besoin (Windows ; ne fait rien s'il existe deja)
+function WG_EnsureLogDir()
+	local dir = string.gsub(WG_AIRLIFT_LOG_DIR, "/", "\\")
+	os.execute('if not exist "'..dir..'" mkdir "'..dir..'"')
+end
+
+--append = true : complete le fichier existant (bilan apres creation de l'ATO) au lieu de l'ecraser
+function WG_FlushLog(append)
+	if not WG_AIRLIFT_LOG then
+		return
+	end
+
+	local mode = append and "a" or "w"
+
+	local file = io.open(WG_AIRLIFT_LOG_FILE, mode)
+	if not file and WG_EnsureLogDir then
+		WG_EnsureLogDir()
+		file = io.open(WG_AIRLIFT_LOG_FILE, mode)
+	end
+
+	if file then
+		if not append then
+			file:write("==== WG_Airlift 2b | MissionInstance: "..tostring(MissionInstance)
+				.." | GeneratorPass: "..tostring(GeneratorPass)
+				.." | CampTotalTimeH: "..tostring(CampTotalTimeH)
+				.." | GENERATE: "..tostring(WG_AIRLIFT_GENERATE).." ====\n")
+		end
+		if #WG_AirliftLogBuf > 0 then
+			file:write(table.concat(WG_AirliftLogBuf, "\n").."\n")
+		end
+		file:close()
+	else
+		print("WG_Airlift : impossible d'ouvrir "..tostring(WG_AIRLIFT_LOG_FILE))
+	end
+
+	WG_AirliftLogBuf = {}
+end
+
+--trace de la boucle Part A pour les helicos Transport (1 ligne par squad/etape, dedoublonne)
+--ecrit dans le log WG_Airlift (lignes "TRACE_A")
+function WG_AirliftTrace(unit, task, stage, txt)
+	if not WG_AIRLIFT_LOG or not WG_AIRLIFT_AUDIT then return end
+	if not unit or not IsHelicopter[unit.type] then return end
+	local key = "TRACE|"..tostring(unit.name).."|"..tostring(task).."|"..tostring(stage)
+	if WG_AirliftSeen[key] then return end
+	WG_AirliftSeen[key] = true
+	WG_Log("TRACE_A squad: "..tostring(unit.name).." | "..tostring(unit.type).." | etape: "..tostring(stage).." | "..tostring(txt))
+end
+
+--trace de la boucle Part A pour les helicos Transport (1 ligne par squad/etape, dedoublonne)
+--ecrit dans Debug/WG_Airlift.log (lignes "TRACE_A")
+function WG_AirliftTrace(unit, task, stage, txt)
+	if not WG_AIRLIFT_LOG or not WG_AIRLIFT_AUDIT then return end
+	if not unit or not IsHelicopter[unit.type] then return end
+	local key = "TRACE|"..tostring(unit.name).."|"..tostring(task).."|"..tostring(stage)
+	if WG_AirliftSeen[key] then return end
+	WG_AirliftSeen[key] = true
+	WG_Log("TRACE_A squad: "..tostring(unit.name).." | "..tostring(unit.type).." | etape: "..tostring(stage).." | "..tostring(txt))
+end
+
+--trace : que contient la copie tgtList_Gen (celle que lit la boucle Part A) comparee a la targetlist vivante ?
+function WG_AirliftTraceTargets(copyList, sideName, unit)
+	if not WG_AIRLIFT_LOG or not WG_AIRLIFT_AUDIT then return end
+	if not unit or not IsHelicopter[unit.type] then return end
+	local key = "TGTLIST|"..tostring(sideName)
+	if WG_AirliftSeen[key] then return end
+	WG_AirliftSeen[key] = true
+
+	local function count(list)
+		local n, nTransport, nAirlift, nAirliftATO = 0, 0, 0, 0
+		local noms = ""
+		for _, t in pairs(list or {}) do
+			n = n + 1
+			if t.task == "Transport" then nTransport = nTransport + 1 end
+			if t.wargameLogistic == "airlift" then
+				nAirlift = nAirlift + 1
+				if t.ATO and not t.inactive then nAirliftATO = nAirliftATO + 1 end
+				noms = noms.." ["..tostring(t.name).." titleName="..tostring(t.titleName).." ATO="..tostring(t.ATO).." inactive="..tostring(t.inactive).." task="..tostring(t.task).."]"
+			end
+		end
+		return n, nTransport, nAirlift, nAirliftATO, noms
+	end
+
+	local n1, t1, a1, k1, noms1 = count(copyList and copyList[sideName])
+	local n2, t2, a2, k2, noms2 = count(targetlist and targetlist[sideName])
+	WG_Log("TRACE_A TGTLIST side: "..tostring(sideName)
+		.." | tgtList_Gen (copie): cibles="..n1.." Transport="..t1.." airlift="..a1.." airlift_actifs_ATO="..k1..noms1
+		.." | targetlist (vivante): cibles="..n2.." Transport="..t2.." airlift="..a2.." airlift_actifs_ATO="..k2)
+end
+
+--plafond de rotations donne par le Manager (limite de flotte), s'il existe
+--ordre de lecture : target.air.heli.sorties (bloc air), puis target.wargameSorties
+function WG_AirliftGetCap(target)
+
+	local cap = nil
+
+	if type(target.air) == "table" and type(target.air.heli) == "table" then
+		cap = tonumber(target.air.heli.sorties)
+		if cap then
+			return cap, "air.heli.sorties"
+		end
+	end
+
+	cap = tonumber(target.wargameSorties)
+	if cap then
+		return cap, "wargameSorties"
+	end
+
+	return nil, "aucun"
+end
+
+--Calcule le plan de rotations d'un helico pour une cible airlift.
+--Trajet pour N rotations : base -> chargement (Dbe), puis N x (chargement -> depose) et (N-1) x (depose -> chargement)
+--soit (2N-1) x Ded, puis depose -> base (Dpb).  Distance totale = Dbe + (2N-1) x Ded + Dpb.
+--Budget = portee x 2 x (1 - marge).   =>   N <= ( (budget - Dbe - Dpb) / Ded + 1 ) / 2
+--Retourne une table : feasible (portee ok pour au moins 1 rotation), N, limitedBy, distances, charge, etc.
+function WG_AirliftComputePlan(target, unit, currentLoadout, airbasePoint)
+
+	local plan = { N = 0, nRange = 0, feasible = false, limitedBy = "none" }
+
+	if not target.wargameLoadX or not target.wargameLoadY or not target.x or not target.y then
+		plan.reason = "point de chargement ou de depose manquant"
+		return plan
+	end
+
+	local range = tonumber(currentLoadout.range) or 0
+	if range <= 0 then
+		plan.reason = "pas de range dans le loadout"
+		return plan
+	end
+
+	local loadPoint = { x = target.wargameLoadX, y = target.wargameLoadY }
+	local dropPoint = { x = target.x, y = target.y }
+	local k = WG_AIRLIFT_DETOUR
+
+	local Dbe = GetDistance(airbasePoint, loadPoint) * k		--base -> chargement
+	local Ded = GetDistance(loadPoint, dropPoint) * k			--chargement -> depose
+	local Dpb = GetDistance(dropPoint, airbasePoint) * k		--depose -> base
+
+	plan.Dbe = Dbe
+	plan.Ded = Ded
+	plan.Dpb = Dpb
+	plan.dist1 = Dbe + Ded + Dpb								--distance totale pour 1 seule rotation
+	plan.range = range
+
+	--charge utile d'UN helico : PayloadType en priorite, puis wargameCargoKg (indicatif), puis valeur par defaut
+	local payload = PayloadType and PayloadType[unit.type]
+	plan.payloadSource = "PayloadType"
+	if not payload or payload <= 0 then
+		payload = tonumber(target.wargameCargoKg)
+		plan.payloadSource = "wargameCargoKg"
+	end
+	if not payload or payload <= 0 then
+		payload = WG_AIRLIFT_PAYLOAD_DEFAULT
+		plan.payloadSource = "defaut"
+	end
+	plan.payload = payload
+
+	--1) limite de portee
+	local budget = range * 2 * (1 - WG_AIRLIFT_MARGIN)
+	local avail = budget - Dbe - Dpb
+	local DedSafe = math.max(Ded, 500)							--evite une division par ~0 quand chargement et depose sont tres proches
+
+	local nRange = 0
+	if avail > 0 then
+		nRange = math.floor((avail / DedSafe + 1) / 2)
+	end
+	plan.budget = budget
+	plan.nRange = nRange
+
+	plan.feasible = (nRange >= 1)
+
+	--3) limites de besoin et de flotte : ne concernent que l'IA (le joueur peut en faire plus)
+	local N = nRange
+	local limitedBy = "range"
+
+	local human = unit.player or unit.client
+	plan.human = human and true or false
+
+	local need = tonumber(target.wargameNeedKg)
+	plan.need = need
+
+	local cap, capSource = WG_AirliftGetCap(target)
+	plan.cap = cap
+	plan.capSource = capSource
+
+	if not human then
+		if need ~= nil then
+			local nNeed = math.ceil(need / payload)
+			plan.nNeed = nNeed
+			if nNeed < N then
+				N = nNeed
+				limitedBy = "need"
+			end
+		end
+
+		if cap ~= nil and cap < N then
+			N = cap
+			limitedBy = "cap"
+		end
+	end
+
+	if N > WG_AIRLIFT_MAX_N then
+		N = WG_AIRLIFT_MAX_N
+		limitedBy = "max"
+	end
+
+	if N < 0 then N = 0 end
+
+	plan.N = N
+	plan.limitedBy = limitedBy
+	plan.totalDist = (N >= 1) and (Dbe + (2 * N - 1) * Ded + Dpb) or plan.dist1
+	plan.kgPlanned = N * payload
+
+	return plan
+end
+
+--Choisit, pour une cible airlift, une escadrille helico + un loadout, avec PLURALITE entre les escadrilles :
+--on prefere les escadrilles les moins utilisees dans cette generation (cible 1 : une escadrille, cible 2 : une autre,
+--puis tirage au sort quand elles ont toutes servi autant). Ni la charge ni la distance ne donnent l'exclusivite a un type.
+--Compte l'utilisation dans WG_AirliftUsed (a appeler UNE fois par cible, le resultat est memorise par l'appelant).
+--Retourne { unit = nom du squad, loadout = nom du loadout, plan = plan } ou nil
+function WG_AirliftPickBest(sideName, target)
+
+	local cands = {}
+
+	for _, unit in pairs(oob_air[sideName] or {}) do
+
+		local isHeli = IsHelicopter and IsHelicopter[unit.type]
+		local base = db_airbases[unit.base]
+		local av = AcftAvail and AcftAvail[unit.name]
+		local list = LoadoutsList and LoadoutsList[unit.type] and LoadoutsList[unit.type]["Transport"]
+		local used = WG_AirliftUsed[unit.name] or 0
+
+		if isHeli and not unit.inactive and not unit.player and not unit.client
+			and base and base.x and base.y and base.inactive ~= true
+			and unit.tasks and unit.tasks["Transport"] and list
+			and not (av and (av.available or 0) - used <= 0) then
+
+			for lname, l in pairs(list) do
+				if type(l) == "table" and WG_CountryOk(l, unit.country) and WG_AttrOk(target, l) then
+
+					local plan = WG_AirliftComputePlan(target, unit, l, { x = base.x, y = base.y })
+
+					if plan.N >= 1 then
+						table.insert(cands, { unit = unit.name, loadout = lname, loadoutName = l.loadoutName, loadoutName2 = l.name, plan = plan, used = used })
+					end
+				end
+			end
+		end
+	end
+
+	if #cands == 0 then return nil end
+
+	--ordre stable (pour que WG_AIRLIFT_RANDOM = false donne toujours le meme resultat)
+	table.sort(cands, function(a, b)
+		if a.unit ~= b.unit then return a.unit < b.unit end
+		return tostring(a.loadout) < tostring(b.loadout)
+	end)
+
+	--on ne garde que les escadrilles les moins utilisees
+	local minUsed = cands[1].used
+	for _, c in ipairs(cands) do
+		if c.used < minUsed then minUsed = c.used end
+	end
+	local pool = {}
+	for _, c in ipairs(cands) do
+		if c.used == minUsed then table.insert(pool, c) end
+	end
+
+	local chosen = pool[1]
+	if WG_AIRLIFT_RANDOM and #pool > 1 then
+		chosen = pool[math.random(1, #pool)]
+	end
+
+	--log : tous les candidats, pour voir pourquoi celui-ci
+	local txt = {}
+	for _, c in ipairs(cands) do
+		table.insert(txt, c.unit.."/"..tostring(c.loadout).." (deja utilisee: "..c.used.." | N="..c.plan.N.." | kg="..math.floor(c.plan.kgPlanned).." | dist="..math.floor(c.plan.totalDist)..")")
+	end
+	WG_Log("AIRLIFT_CANDIDATS target: "..tostring(target.name).." | "..table.concat(txt, " ; ").." | pool="..#pool.." random="..tostring(WG_AIRLIFT_RANDOM))
+
+	WG_AirliftUsed[chosen.unit] = (WG_AirliftUsed[chosen.unit] or 0) + 1
+
+	return chosen
+end
+
+--Remplace la fin de la route creee par le generateur (Assemble / Join / Split / Land sur la cible) par
+--base -> chargement -> depose (x N) -> retour base.  On garde le debut (Taxi / Spawn / Departure).
+--Retourne true si la route a ete reecrite.
+function WG_AirliftRewriteRoute(entry, tgt, plan, airbasePoint)
+
+	local route = entry.route
+
+	if type(route) ~= "table" or #route < 2 then
+		WG_Log("AIRLIFT_GEN ERREUR route du draft absente ou trop courte pour "..tostring(tgt.name))
+		return false
+	end
+
+	local idsAvant = {}
+	for i = 1, #route do idsAvant[#idsAvant + 1] = tostring(route[i].id) end
+
+	--debut de route : jusqu'a Departure compris (sinon, juste le 1er point)
+	local new = {}
+	local iDep = nil
+	for i = 1, #route do
+		if route[i].id == "Departure" then iDep = i break end
+	end
+	if not iDep then iDep = 1 end
+	for i = 1, iDep do
+		new[#new + 1] = route[i]
+	end
+
+	--altitude de croisiere : celle du point qui suit Departure dans la route d'origine
+	local cruise = 150
+	if route[iDep + 1] and tonumber(route[iDep + 1].alt) then
+		cruise = route[iDep + 1].alt
+	end
+
+	for k = 1, plan.N do
+		new[#new + 1] = { x = tgt.wargameLoadX, y = tgt.wargameLoadY, id = "Load", alt = cruise }
+		new[#new + 1] = { x = tgt.x, y = tgt.y, id = "Drop", alt = cruise }
+	end
+	new[#new + 1] = { x = airbasePoint.x, y = airbasePoint.y, id = "Land", alt = airbasePoint.h or 0 }
+
+	--garde les champs non numeriques de la route (lenght...), puis recalcule la longueur
+	for k, v in pairs(route) do
+		if type(k) ~= "number" then new[k] = v end
+	end
+
+	local lenght = 0
+	for i = 1, #new - 1 do
+		lenght = lenght + GetDistance(new[i], new[i + 1])
+	end
+	new.lenght = lenght
+
+	entry.route = new
+
+	local idsApres = {}
+	for i = 1, #new do idsApres[#idsApres + 1] = tostring(new[i].id) end
+
+	WG_Log("AIRLIFT_ROUTE target: "..tostring(tgt.name).." avant: ["..table.concat(idsAvant, ",").."] apres: ["
+		..table.concat(idsApres, ",").."] longueur="..math.floor(lenght).."m")
+
+	return true
+end
+
+--Point d'entree appele a la place de processEligibleLoadout pour les cibles airlift du wargame.
+--Helicopteres uniquement pour l'instant (les avions de transport viendront plus tard).
+function WG_AirliftProcess(draftContext, sideName, task, target, target_name, unit, currentLoadout, airbasePoint, draftId, isDebugModeA3, nativeProcess, draftSortiesRef, Daytime, i_timmer01)
+
+	if not IsHelicopter[unit.type] then
+		return
+	end
+
+	local plan = WG_AirliftComputePlan(target, unit, currentLoadout, airbasePoint)
+
+	--meilleur plan par cible (sert a decider si la cible reste ou non dans l'ATO)
+	local best = WG_AirliftBest[target.name]
+	if not best then
+		best = { evaluated = 0, bestN = 0, feasibleAny = false }
+		WG_AirliftBest[target.name] = best
+	end
+	best.evaluated = best.evaluated + 1
+	if plan.feasible then best.feasibleAny = true end
+	if plan.N > best.bestN then
+		best.bestN = plan.N
+		best.bestSquad = unit.name
+		best.bestLoadout = currentLoadout.loadoutName or currentLoadout.name
+	end
+
+	--log (une ligne par cible / escadrille / loadout)
+	local seenKey = tostring(target.name).."|"..tostring(unit.name).."|"..tostring(currentLoadout.loadoutName or currentLoadout.name)
+	if not WG_AirliftSeen[seenKey] then
+		WG_AirliftSeen[seenKey] = true
+
+		local function m(v) return v and math.floor(v) or "nil" end
+
+		WG_Log("AIRLIFT_PLAN target: "..tostring(target.name)
+			.." squad: "..tostring(unit.name).." ("..tostring(unit.type)..(plan.human and ", joueur" or "")..")"
+			.." base: "..tostring(unit.base)
+			.." loadout: "..tostring(currentLoadout.loadoutName or currentLoadout.name)
+			.." | N="..tostring(plan.N).." (limite: "..tostring(plan.limitedBy)
+			..", portee="..tostring(plan.nRange)..")"
+			.." | Dbe="..m(plan.Dbe).." Ded="..m(plan.Ded).." Dpb="..m(plan.Dpb)
+			.." total="..m(plan.totalDist).." budget="..m(plan.budget).." range="..m(plan.range)
+			.." | charge="..m(plan.payload).."kg ("..tostring(plan.payloadSource)..")"
+			.." besoin="..tostring(plan.need).."kg cap="..tostring(plan.cap).." ("..tostring(plan.capSource)..")"
+			..(plan.reason and (" | "..plan.reason) or ""))
+	end
+
+	if not plan.feasible then
+		rejectStep( draftContext, "range", "range_too_short",
+			{
+				toTarget = math.floor(plan.dist1 or 0),
+				range = math.floor(currentLoadout.range or 0),
+				target = target.titleName,
+				loadout = currentLoadout.name,
+				unit = unit.name,
+			},
+			"BLOCK_A",
+			SafeGetLine()
+		)
+		return
+	end
+
+	validateStep(draftContext, "range")
+
+	if plan.N < 1 then
+		--faisable mais rien a livrer (stock suffisant) ou flotte a 0 : pas d'erreur, juste pas de vol IA
+		return
+	end
+
+	if not WG_AIRLIFT_GENERATE then
+		return
+	end
+
+	--2b : creation du vol, une seule fois par cible, par l'escadrille choisie
+	local loadoutName = currentLoadout.loadoutName or currentLoadout.name
+
+	if WG_AirliftPick[target.name] == nil then
+		WG_AirliftPick[target.name] = WG_AirliftPickBest(sideName, target) or false
+		local p = WG_AirliftPick[target.name]
+		if p then
+			WG_Log("AIRLIFT_CHOIX target: "..tostring(target.name).." -> squad: "..p.unit.." loadout: "..tostring(p.loadout)
+				.." N="..p.plan.N.." kg prevus: "..math.floor(p.plan.kgPlanned))
+		else
+			WG_Log("AIRLIFT_CHOIX target: "..tostring(target.name).." -> aucune escadrille (N>=1) disponible")
+		end
+	end
+
+	local pick = WG_AirliftPick[target.name]
+
+	local sameLoadout = false
+	if pick then
+		for _, k in ipairs({ currentLoadout.loadoutName, currentLoadout.name }) do
+			if k ~= nil and (k == pick.loadout or k == pick.loadoutName or k == pick.loadoutName2) then sameLoadout = true end
+		end
+	end
+
+	if not pick or pick.unit ~= unit.name or not sameLoadout then
+		return
+	end
+
+	if WG_AirliftDone[target.name] then
+		return
+	end
+
+	if type(nativeProcess) ~= "function" or type(draftSortiesRef) ~= "table" then
+		WG_Log("AIRLIFT_GEN ERREUR target: "..tostring(target.name).." fonction native ou draftSortiesRef non transmis par le point d'appel")
+		return
+	end
+
+	--copie de la cible pour le generateur : il croit a un transport "normal" (cible rattachee a la base du squad)
+	--la vraie cible (targetlist) n'est pas touchee
+	local tgt = DeepCopy(target)
+	tgt.base = unit.base
+	tgt.destination = unit.base
+	tgt.wargameN = plan.N
+	tgt.wargameKgPlanned = plan.kgPlanned
+	tgt.wargameSquad = unit.name
+
+	local nBefore = #(draftSortiesRef[sideName] or {})
+
+	nativeProcess( draftContext, sideName, task, tgt, target_name,
+		unit, currentLoadout, Daytime, airbasePoint, draftId, isDebugModeA3, i_timmer01 )
+
+	local list = draftSortiesRef[sideName] or {}
+
+	if #list <= nBefore then
+		WG_Log("AIRLIFT_GEN ECHEC target: "..tostring(target.name).." squad: "..unit.name.." : le generateur n'a cree aucun draft (voir les rejets natifs)")
+		return
+	end
+
+	for i = nBefore + 1, #list do
+		WG_AirliftRewriteRoute(list[i], tgt, plan, airbasePoint)
+
+		--un ravitaillement ne doit pas etre refuse pour un score de menace trop bas ni pour une escorte absente
+		--(sinon createATO_table l'ecarte en silence : "MENACE TROP IMPORTANTE" / "any_SUPPORT")
+		local lo = list[i].loadout
+		if lo then
+			local supTxt = ""
+			if type(lo.support) == "table" then
+				for k, v in pairs(lo.support) do
+					if v then supTxt = supTxt..tostring(k).." " end
+				end
+			end
+
+			WG_Log("AIRLIFT_LOADOUT draft: "..tostring(list[i].id).." minscore="..tostring(lo.minscore)
+				.." support=["..supTxt.."] score="..tostring(list[i].score))
+
+			if WG_AIRLIFT_IGNORE_MINSCORE then
+				lo.minscore = nil
+			end
+			if WG_AIRLIFT_IGNORE_SUPPORT then
+				lo.support = { Escort = false, SEAD = false }
+			end
+		end
+	end
+
+	WG_AirliftDone[target.name] = true
+	WG_Log("AIRLIFT_GEN OK target: "..tostring(target.name).." squad: "..unit.name.." loadout: "..tostring(loadoutName)
+		.." drafts crees: "..(#list - nBefore).." N="..plan.N)
+end
+
+--liste les cles a true d'une table (taches du squad...)
+function WG_TrueKeys(tbl)
+	local list = {}
+	if type(tbl) == "table" then
+		for k, v in pairs(tbl) do
+			if v then list[#list + 1] = tostring(k) end
+		end
+		table.sort(list)
+	end
+	return table.concat(list, ",")
+end
+
+--liste les valeurs d'un tableau d'attributs
+function WG_AttrList(tbl)
+	local list = {}
+	if type(tbl) == "table" then
+		for _, v in pairs(tbl) do list[#list + 1] = tostring(v) end
+	end
+	return table.concat(list, ",")
+end
+
+--le loadout est-il autorise pour ce pays ? (meme regle que la generation)
+function WG_CountryOk(ltable, country)
+	if ltable.country == nil then return true end
+	local c = string.lower(tostring(country or ""))
+	if type(ltable.country) == "string" then
+		return string.lower(ltable.country) == c or string.lower(ltable.country) == "all"
+	elseif type(ltable.country) == "table" then
+		for _, label in pairs(ltable.country) do
+			if string.lower(tostring(label)) == c or string.lower(tostring(label)) == "all" then return true end
+		end
+	end
+	return false
+end
+
+--tous les attributs de la cible sont-ils dans le loadout ? (meme regle que checkAttributeEligibility)
+function WG_AttrOk(target, ltable)
+	if target.attributes and target.attributes[1] and target.attributes[1] ~= "" then
+		for _, ta in ipairs(target.attributes) do
+			local found = false
+			for _, la in ipairs(ltable.attributes or {}) do
+				if la == ta then found = true break end
+			end
+			if not found then return false end
+		end
+	end
+	return true
+end
+
+--DIAGNOSTIC : pour chaque cible airlift puis chaque squad helico, ecrit dans le log l'etat complet et
+--la PREMIERE porte qui bloque le squad (dans l'ordre de la generation). Aucun effet sur la generation.
+function WG_AirliftAudit()
+
+	WG_Log("---- AIRLIFT_AUDIT cibles ----")
+
+	local airlifts = {}
+
+	for sideName, targets in pairs(targetlist) do
+		for _, t in pairs(targets) do
+			if type(t) == "table" and t.wargameLogistic == "airlift" then
+				airlifts[#airlifts + 1] = { side = sideName, t = t }
+				WG_Log("AIRLIFT_AUDIT_TARGET side: "..sideName.." name: "..tostring(t.name).." titleName: "..tostring(t.titleName)
+					.." task: "..tostring(t.task).." ATO: "..tostring(t.ATO).." inactive: "..tostring(t.inactive)
+					.." x,y: "..tostring(t.x)..","..tostring(t.y)
+					.." load: "..tostring(t.wargameLoadX)..","..tostring(t.wargameLoadY)
+					.." need: "..tostring(t.wargameNeedKg).." cargo: "..tostring(t.wargameCargoKg).." sorties: "..tostring(t.wargameSorties)
+					.." destination: "..tostring(t.destination).." base: "..tostring(t.base)
+					.." attributes: ["..WG_AttrList(t.attributes).."] attributesCond: "..tostring(t.attributesCond ~= nil)
+					.." firepower: "..tostring(t.firepower and t.firepower.min)..".."..tostring(t.firepower and t.firepower.max)
+					.." priority: "..tostring(t.priority))
+			end
+		end
+	end
+
+	WG_Log("---- AIRLIFT_AUDIT squads helico (oob_air) ----")
+
+	local nHeli = 0
+
+	for sideName, units in pairs(oob_air or {}) do
+		for _, unit in pairs(units) do
+
+			local isHeli = (IsHelicopter and IsHelicopter[unit.type]) or unit.helicopter
+
+			if isHeli then
+				nHeli = nHeli + 1
+
+				local base = db_airbases[unit.base]
+				local av = AcftAvail and AcftAvail[unit.name]
+				local transportList = LoadoutsList and LoadoutsList[unit.type] and LoadoutsList[unit.type]["Transport"]
+
+				local verdict = nil
+				local nLoad, nLoadCountry = 0, 0
+
+				if unit.inactive then
+					verdict = "BLOQUE: squad inactif"
+				elseif not base then
+					verdict = "BLOQUE: base '"..tostring(unit.base).."' introuvable dans db_airbases"
+				elseif base.inactive == true then
+					verdict = "BLOQUE: base '"..tostring(unit.base).."' inactive"
+				elseif not base.x or not base.y then
+					verdict = "BLOQUE: base '"..tostring(unit.base).."' sans coordonnees"
+				elseif not (unit.roster and (unit.roster.ready or 0) > 0) then
+					verdict = "BLOQUE: roster.ready = 0 (aucun appareil)"
+				elseif av and (av.available or 0) <= 0 then
+					verdict = "BLOQUE: aucun appareil disponible (available: "..tostring(av.available)..")"
+				elseif not (unit.tasks and unit.tasks["Transport"]) then
+					verdict = "BLOQUE: tache Transport non activee sur ce squad (taches: "..WG_TrueKeys(unit.tasks)..")"
+				elseif not (LoadoutsList and LoadoutsList[unit.type]) then
+					verdict = "BLOQUE: type '"..tostring(unit.type).."' absent de LoadoutsList"
+				elseif not transportList then
+					verdict = "BLOQUE: aucun loadout Transport pour le type '"..tostring(unit.type).."'"
+				end
+
+				local loadTxt = ""
+				if transportList then
+					for lname, l in pairs(transportList) do
+						if type(l) == "table" then
+							nLoad = nLoad + 1
+							local cOk = WG_CountryOk(l, unit.country)
+							if cOk then nLoadCountry = nLoadCountry + 1 end
+							loadTxt = loadTxt.."\n      loadout '"..tostring(lname).."' range: "..tostring(l.range).." vCruise: "..tostring(l.vCruise)
+								.." day: "..tostring(l.day).." night: "..tostring(l.night)
+								.." pays_ok: "..tostring(cOk).." (pays squad: "..tostring(unit.country)..") attributs: ["..WG_AttrList(l.attributes).."]"
+						end
+					end
+				end
+
+				if not verdict and nLoadCountry == 0 then
+					verdict = "BLOQUE: "..nLoad.." loadout(s) Transport mais AUCUN autorise pour le pays '"..tostring(unit.country).."'"
+				end
+
+				--portes cible par cible : attributs puis distance brute
+				local targetTxt = ""
+				for _, a in ipairs(airlifts) do
+					if a.side == sideName and transportList then
+						local nAttrOk = 0
+						for _, l in pairs(transportList) do
+							if type(l) == "table" and WG_CountryOk(l, unit.country) and WG_AttrOk(a.t, l) then nAttrOk = nAttrOk + 1 end
+						end
+						local dist = -1
+						if base and base.x and a.t.x then
+							dist = math.floor(GetDistance({x = base.x, y = base.y}, {x = a.t.x, y = a.t.y}))
+						end
+						targetTxt = targetTxt.."\n      vs "..tostring(a.t.name)..": loadouts_attributs_ok: "..nAttrOk.."/"..nLoadCountry
+							.." distance_base_livraison: "..dist.." m"
+						if not verdict and nAttrOk == 0 then
+							verdict = "BLOQUE: attributs de la cible ["..WG_AttrList(a.t.attributes).."] absents de tous les loadouts Transport (cible "..tostring(a.t.name)..")"
+						end
+					end
+				end
+
+				if not verdict then
+					verdict = "PASSE toutes les portes de base : devrait etre evalue (si AUCUNE escadrille evaluee dans AIRLIFT_RESULT, voir SquadGenerationStatus ci-dessous)"
+				end
+
+				local sgs = SquadGenerationStatus and SquadGenerationStatus[unit.name]
+				local sgsTxt = ""
+				if sgs then
+					sgsTxt = " | SquadGenerationStatus mainGenerated: "..tostring(sgs.mainGenerated)
+					if sgs.bestReject then
+						sgsTxt = sgsTxt.." dominantReason: "..tostring(sgs.bestReject.dominantReason)
+						if sgs.bestReject.finalReject then
+							sgsTxt = sgsTxt.." finalReject: etape '"..tostring(sgs.bestReject.finalReject.step).."' raison '"..tostring(sgs.bestReject.finalReject.reason).."'"
+						end
+					end
+				end
+
+				WG_Log("AIRLIFT_AUDIT_SQUAD side: "..sideName.." name: "..tostring(unit.name).." type: "..tostring(unit.type)
+					.." base: "..tostring(unit.base).." inactive: "..tostring(unit.inactive)
+					.." ready: "..tostring(unit.roster and unit.roster.ready)
+					.." available: "..tostring(av and av.available).." unassigned: "..tostring(av and av.unassigned)
+					.." taches: ["..WG_TrueKeys(unit.tasks).."] loadouts_Transport: "..nLoad.." (pays ok: "..nLoadCountry..")"
+					..sgsTxt
+					.."\n    VERDICT: "..verdict
+					..loadTxt..targetTxt)
+			end
+		end
+	end
+
+	if nHeli == 0 then
+		WG_Log("AIRLIFT_AUDIT_SQUAD AUCUN squad helicoptere dans oob_air (IsHelicopter/unit.helicopter) : rien ne peut servir l'airlift")
+	end
+
+	--squads non-helico ayant la tache Transport (info : ils sont ignores par l'airlift wargame)
+	for sideName, units in pairs(oob_air or {}) do
+		for _, unit in pairs(units) do
+			local isHeli = (IsHelicopter and IsHelicopter[unit.type]) or unit.helicopter
+			if not isHeli and unit.tasks and unit.tasks["Transport"] and not unit.inactive then
+				WG_Log("AIRLIFT_AUDIT_NONHELI side: "..sideName.." name: "..tostring(unit.name).." type: "..tostring(unit.type).." (tache Transport, ignore par l'airlift wargame)")
+			end
+		end
+	end
+end
+
+--liste les cles a true d'une table (taches du squad...)
+function WG_TrueKeys(tbl)
+	local list = {}
+	if type(tbl) == "table" then
+		for k, v in pairs(tbl) do
+			if v then list[#list + 1] = tostring(k) end
+		end
+		table.sort(list)
+	end
+	return table.concat(list, ",")
+end
+
+--liste les valeurs d'un tableau d'attributs
+function WG_AttrList(tbl)
+	local list = {}
+	if type(tbl) == "table" then
+		for _, v in pairs(tbl) do list[#list + 1] = tostring(v) end
+	end
+	return table.concat(list, ",")
+end
+
+--le loadout est-il autorise pour ce pays ? (meme regle que la generation)
+function WG_CountryOk(ltable, country)
+	if ltable.country == nil then return true end
+	local c = string.lower(tostring(country or ""))
+	if type(ltable.country) == "string" then
+		return string.lower(ltable.country) == c or string.lower(ltable.country) == "all"
+	elseif type(ltable.country) == "table" then
+		for _, label in pairs(ltable.country) do
+			if string.lower(tostring(label)) == c or string.lower(tostring(label)) == "all" then return true end
+		end
+	end
+	return false
+end
+
+--tous les attributs de la cible sont-ils dans le loadout ? (meme regle que checkAttributeEligibility)
+function WG_AttrOk(target, ltable)
+	if target.attributes and target.attributes[1] and target.attributes[1] ~= "" then
+		for _, ta in ipairs(target.attributes) do
+			local found = false
+			for _, la in ipairs(ltable.attributes or {}) do
+				if la == ta then found = true break end
+			end
+			if not found then return false end
+		end
+	end
+	return true
+end
+
+--DIAGNOSTIC : pour chaque cible airlift puis chaque squad helico, ecrit dans le log l'etat complet et
+--la PREMIERE porte qui bloque le squad (dans l'ordre de la generation). Aucun effet sur la generation.
+function WG_AirliftAudit()
+
+	WG_Log("---- AIRLIFT_AUDIT cibles ----")
+
+	local airlifts = {}
+
+	for sideName, targets in pairs(targetlist) do
+		for _, t in pairs(targets) do
+			if type(t) == "table" and t.wargameLogistic == "airlift" then
+				airlifts[#airlifts + 1] = { side = sideName, t = t }
+				WG_Log("AIRLIFT_AUDIT_TARGET side: "..sideName.." name: "..tostring(t.name).." titleName: "..tostring(t.titleName)
+					.." task: "..tostring(t.task).." ATO: "..tostring(t.ATO).." inactive: "..tostring(t.inactive)
+					.." x,y: "..tostring(t.x)..","..tostring(t.y)
+					.." load: "..tostring(t.wargameLoadX)..","..tostring(t.wargameLoadY)
+					.." need: "..tostring(t.wargameNeedKg).." cargo: "..tostring(t.wargameCargoKg).." sorties: "..tostring(t.wargameSorties)
+					.." destination: "..tostring(t.destination).." base: "..tostring(t.base)
+					.." attributes: ["..WG_AttrList(t.attributes).."] attributesCond: "..tostring(t.attributesCond ~= nil)
+					.." firepower: "..tostring(t.firepower and t.firepower.min)..".."..tostring(t.firepower and t.firepower.max)
+					.." priority: "..tostring(t.priority))
+			end
+		end
+	end
+
+	WG_Log("---- AIRLIFT_AUDIT squads helico (oob_air) ----")
+
+	local nHeli = 0
+
+	for sideName, units in pairs(oob_air or {}) do
+		for _, unit in pairs(units) do
+
+			local isHeli = (IsHelicopter and IsHelicopter[unit.type]) or unit.helicopter
+
+			if isHeli then
+				nHeli = nHeli + 1
+
+				local base = db_airbases[unit.base]
+				local av = AcftAvail and AcftAvail[unit.name]
+				local transportList = LoadoutsList and LoadoutsList[unit.type] and LoadoutsList[unit.type]["Transport"]
+
+				local verdict = nil
+				local nLoad, nLoadCountry = 0, 0
+
+				if unit.inactive then
+					verdict = "BLOQUE: squad inactif"
+				elseif not base then
+					verdict = "BLOQUE: base '"..tostring(unit.base).."' introuvable dans db_airbases"
+				elseif base.inactive == true then
+					verdict = "BLOQUE: base '"..tostring(unit.base).."' inactive"
+				elseif not base.x or not base.y then
+					verdict = "BLOQUE: base '"..tostring(unit.base).."' sans coordonnees"
+				elseif not (unit.roster and (unit.roster.ready or 0) > 0) then
+					verdict = "BLOQUE: roster.ready = 0 (aucun appareil)"
+				elseif av and (av.available or 0) <= 0 then
+					verdict = "BLOQUE: aucun appareil disponible (available: "..tostring(av.available)..")"
+				elseif not (unit.tasks and unit.tasks["Transport"]) then
+					verdict = "BLOQUE: tache Transport non activee sur ce squad (taches: "..WG_TrueKeys(unit.tasks)..")"
+				elseif not (LoadoutsList and LoadoutsList[unit.type]) then
+					verdict = "BLOQUE: type '"..tostring(unit.type).."' absent de LoadoutsList"
+				elseif not transportList then
+					verdict = "BLOQUE: aucun loadout Transport pour le type '"..tostring(unit.type).."'"
+				end
+
+				local loadTxt = ""
+				if transportList then
+					for lname, l in pairs(transportList) do
+						if type(l) == "table" then
+							nLoad = nLoad + 1
+							local cOk = WG_CountryOk(l, unit.country)
+							if cOk then nLoadCountry = nLoadCountry + 1 end
+							loadTxt = loadTxt.."\n      loadout '"..tostring(lname).."' range: "..tostring(l.range).." vCruise: "..tostring(l.vCruise)
+								.." day: "..tostring(l.day).." night: "..tostring(l.night)
+								.." pays_ok: "..tostring(cOk).." (pays squad: "..tostring(unit.country)..") attributs: ["..WG_AttrList(l.attributes).."]"
+						end
+					end
+				end
+
+				if not verdict and nLoadCountry == 0 then
+					verdict = "BLOQUE: "..nLoad.." loadout(s) Transport mais AUCUN autorise pour le pays '"..tostring(unit.country).."'"
+				end
+
+				--portes cible par cible : attributs puis distance brute
+				local targetTxt = ""
+				for _, a in ipairs(airlifts) do
+					if a.side == sideName and transportList then
+						local nAttrOk = 0
+						for _, l in pairs(transportList) do
+							if type(l) == "table" and WG_CountryOk(l, unit.country) and WG_AttrOk(a.t, l) then nAttrOk = nAttrOk + 1 end
+						end
+						local dist = -1
+						if base and base.x and a.t.x then
+							dist = math.floor(GetDistance({x = base.x, y = base.y}, {x = a.t.x, y = a.t.y}))
+						end
+						targetTxt = targetTxt.."\n      vs "..tostring(a.t.name)..": loadouts_attributs_ok: "..nAttrOk.."/"..nLoadCountry
+							.." distance_base_livraison: "..dist.." m"
+						if not verdict and nAttrOk == 0 then
+							verdict = "BLOQUE: attributs de la cible ["..WG_AttrList(a.t.attributes).."] absents de tous les loadouts Transport (cible "..tostring(a.t.name)..")"
+						end
+					end
+				end
+
+				if not verdict then
+					verdict = "PASSE toutes les portes de base : devrait etre evalue (si AUCUNE escadrille evaluee dans AIRLIFT_RESULT, voir SquadGenerationStatus ci-dessous)"
+				end
+
+				local sgs = SquadGenerationStatus and SquadGenerationStatus[unit.name]
+				local sgsTxt = ""
+				if sgs then
+					sgsTxt = " | SquadGenerationStatus mainGenerated: "..tostring(sgs.mainGenerated)
+					if sgs.bestReject then
+						sgsTxt = sgsTxt.." dominantReason: "..tostring(sgs.bestReject.dominantReason)
+						if sgs.bestReject.finalReject then
+							sgsTxt = sgsTxt.." finalReject: etape '"..tostring(sgs.bestReject.finalReject.step).."' raison '"..tostring(sgs.bestReject.finalReject.reason).."'"
+						end
+					end
+				end
+
+				WG_Log("AIRLIFT_AUDIT_SQUAD side: "..sideName.." name: "..tostring(unit.name).." type: "..tostring(unit.type)
+					.." base: "..tostring(unit.base).." inactive: "..tostring(unit.inactive)
+					.." ready: "..tostring(unit.roster and unit.roster.ready)
+					.." available: "..tostring(av and av.available).." unassigned: "..tostring(av and av.unassigned)
+					.." taches: ["..WG_TrueKeys(unit.tasks).."] loadouts_Transport: "..nLoad.." (pays ok: "..nLoadCountry..")"
+					..sgsTxt
+					.."\n    VERDICT: "..verdict
+					..loadTxt..targetTxt)
+			end
+		end
+	end
+
+	if nHeli == 0 then
+		WG_Log("AIRLIFT_AUDIT_SQUAD AUCUN squad helicoptere dans oob_air (IsHelicopter/unit.helicopter) : rien ne peut servir l'airlift")
+	end
+
+	--squads non-helico ayant la tache Transport (info : ils sont ignores par l'airlift wargame)
+	for sideName, units in pairs(oob_air or {}) do
+		for _, unit in pairs(units) do
+			local isHeli = (IsHelicopter and IsHelicopter[unit.type]) or unit.helicopter
+			if not isHeli and unit.tasks and unit.tasks["Transport"] and not unit.inactive then
+				WG_Log("AIRLIFT_AUDIT_NONHELI side: "..sideName.." name: "..tostring(unit.name).." type: "..tostring(unit.type).." (tache Transport, ignore par l'airlift wargame)")
+			end
+		end
+	end
+end
+
+--Bilan apres createATO_table : que sont devenus les drafts airlift ? (lecture seule)
+--Appel unique, apres la creation de l'ATO. Complete le log (mode append).
+--  dans l'ATO       : le vol existe, FlightPlan va le traiter
+--  ABSENT           : le draft a ete ecarte ; les causes sont celles enregistrees par rejectDraft / rejectStep
+function WG_AirliftAfterATO(draftSortiesRef, atoRef, multipackRef)
+
+	if not WG_AIRLIFT_LOG then
+		return
+	end
+
+	--index des vols presents dans l'ATO, par id de draft
+	local inAto = {}
+	for sideName, packages in pairs(atoRef or {}) do
+		for packN, pack in pairs(packages) do
+			for role, flights in pairs(pack) do
+				if type(flights) == "table" then
+					for _, flight in ipairs(flights) do
+						if type(flight) == "table" and flight.id then
+							inAto[tostring(flight.id)] = "pack "..tostring(packN).." role "..tostring(role).." nb="..tostring(flight.number)
+						end
+					end
+				end
+			end
+		end
+	end
+
+	local function causeTxt(cause)
+		if type(cause) ~= "table" then
+			return tostring(cause)
+		end
+		local t = {}
+		for _, v in ipairs(cause) do t[#t + 1] = tostring(v) end
+		return table.concat(t, " ")
+	end
+
+	local nDraft, nInAto = 0, 0
+
+	for sideName, drafts in pairs(draftSortiesRef or {}) do
+		for _, draft in ipairs(drafts) do
+
+			if type(draft.target) == "table" and draft.target.wargameLogistic == "airlift" then
+
+				nDraft = nDraft + 1
+				local place = inAto[tostring(draft.id)]
+				if place then nInAto = nInAto + 1 end
+
+				local lo = draft.loadout or {}
+				local fp = (draft.target and draft.target.firepower) or {}
+				local av = AcftAvail and AcftAvail[draft.name] or {}
+				local nbPack = multipackRef and multipackRef[draft.target_name] and multipackRef[draft.target_name]["nbPack"]
+
+				local supTxt = ""
+				if type(lo.support) == "table" then
+					for k, v in pairs(lo.support) do
+						if v then supTxt = supTxt..tostring(k).." " end
+					end
+				end
+
+				local escortNb = 0
+				if draft.support and draft.support["Escort"] then
+					escortNb = draft.support["Escort"]["NbTotalSupport"] or 0
+				end
+
+				WG_Log("AIRLIFT_ATO "..(place and "DANS L'ATO" or "ABSENT").." draft: "..tostring(draft.id)
+					.." squad: "..tostring(draft.name).." ("..tostring(draft.type)..")"
+					.." target: "..tostring(draft.target_name)
+					..(place and (" | "..place) or "")
+					.." | score="..tostring(draft.score).." minscore="..tostring(lo.minscore)
+					.." | number="..tostring(draft.number).." loadout.firepower="..tostring(lo.firepower)
+					.." target.firepower min/max="..tostring(fp.min).."/"..tostring(fp.max)
+					.." | nbPack="..tostring(nbPack)
+					.." | unassigned="..tostring(av.unassigned).." available="..tostring(av.available)
+					.." taskCap.Transport="..tostring(av.taskCap and av.taskCap["Transport"])
+					.." taskUsed.Transport="..tostring(av.taskUsed and av.taskUsed["Transport"])
+					.." | support loadout=["..supTxt.."] escortes="..tostring(escortNb)
+					.." strikeOnlyWithEscorte="..tostring(mission_ini and mission_ini.strikeOnlyWithEscorte))
+
+				if draft.finalReject then
+					WG_Log("    finalReject: step="..tostring(draft.finalReject.step)
+						.." reason="..tostring(draft.finalReject.reason)
+						.." bloc="..tostring(draft.finalReject.bloc))
+				end
+
+				if draft.rejected then
+					for _, r in ipairs(draft.rejected) do
+						WG_Log("    rejet: "..string.sub(tostring(r.sujet), 1, 200)
+							.." | cause: "..causeTxt(r.cause)
+							.." | ligne: "..tostring(r.ligne))
+					end
+				end
+			end
+		end
+	end
+
+	WG_Log("AIRLIFT_ATO_BILAN drafts airlift: "..nDraft.." | presents dans l'ATO: "..nInAto)
+
+	WG_FlushLog(true)
+end
+
+--A appeler UNE fois, apres la generation des draft sorties (fin de la partie A).
+--Compte les cibles airlift, ecrit le resultat par cible (+ note d'affichage), remet ATO=false seulement
+--si WG_AIRLIFT_RESET_ATO = true, ecrit l'audit (WG_AIRLIFT_AUDIT) puis le log.
+function WG_AirliftFinalize()
+
+	local nTotal, nInactive, nNoATO, nActive = 0, 0, 0, 0
+
+	for sideName, targets in pairs(targetlist) do
+		for _, t in pairs(targets) do
+
+			if type(t) == "table" and t.wargameLogistic == "airlift" then
+				nTotal = nTotal + 1
+				if t.inactive then
+					nInactive = nInactive + 1
+				elseif not t.ATO then
+					nNoATO = nNoATO + 1
+				else
+					nActive = nActive + 1
+				end
+			end
+		end
+	end
+
+	WG_Log("AIRLIFT_BILAN cibles airlift dans targetlist: "..nTotal
+		.." (actives avec ATO: "..nActive..", inactive: "..nInactive..", ATO=false: "..nNoATO..")")
+
+	for sideName, targets in pairs(targetlist) do
+		for _, t in pairs(targets) do
+
+			if type(t) == "table" and t.wargameLogistic == "airlift" and not t.inactive and t.ATO then
+
+				local best = WG_AirliftBest[t.name]
+				local needZero = (tonumber(t.wargameNeedKg) == 0)
+
+				if best then
+					WG_Log("AIRLIFT_RESULT target: "..tostring(t.name).." escadrilles evaluees: "..best.evaluated
+						.." meilleur N: "..best.bestN
+						..(best.bestSquad and (" ("..best.bestSquad.." / "..tostring(best.bestLoadout)..")") or "")
+						.." faisable: "..tostring(best.feasibleAny))
+				else
+					WG_Log("AIRLIFT_RESULT target: "..tostring(t.name).." AUCUNE escadrille helico evaluee"
+						.." (voir AIRLIFT_AUDIT_SQUAD plus bas : VERDICT par squad)")
+				end
+
+				if not needZero and (not best or best.bestN < 1) then
+
+					if best and best.feasibleAny then
+						t.wargameNote = WG_AIRLIFT_NOTE_FLEET
+					else
+						t.wargameNote = WG_AIRLIFT_NOTE
+					end
+
+					if WG_AIRLIFT_RESET_ATO then
+						t.ATO = false
+						WG_Log("AIRLIFT_RESET_ATO target: "..tostring(t.name).." -> ATO=false, note: "..t.wargameNote)
+					else
+						WG_Log("AIRLIFT_NOTE target: "..tostring(t.name).." ATO reste true, note: "..t.wargameNote)
+					end
+				end
+			end
+		end
+	end
+
+	if WG_AIRLIFT_AUDIT then
+		local ok, err = pcall(WG_AirliftAudit)
+		if not ok then
+			WG_Log("AIRLIFT_AUDIT ERREUR: "..tostring(err))
+		end
+	end
+
+	WG_FlushLog()
+end
+
+
 if Multi and Multi.Group then
 	for k = 1, Multi.NbGroup do
 
@@ -1982,6 +3210,10 @@ for sideName, units in pairs(oob_air) do
 			--tâches actives du squad, comme avant tasksCoef.
 			local mainTasksToTry = unit.tasks
 
+			if unit.tasks and unit.tasks["Transport"] then WG_AirliftTrace(unit, "Transport", "1_UNIT_ATTEINT", "Daytime="..tostring(Daytime).." available="..tostring(AcftAvail[unit.name].available).." ready="..tostring(unit.roster and unit.roster.ready).." base="..tostring(unit.base).." country="..tostring(unit.country)) end
+	
+			if unit.tasks and unit.tasks["Transport"] then WG_AirliftTraceTargets(tgtList_Gen, sideName, unit) end
+
 			for task, task_bool in pairs(mainTasksToTry) do																		--iterate through all tasks of unit		
 				if isDebugModeA1 then
 					debugLog("draftId"..draftId.." AtoG passe A_03b task: "..tostring(task).." task_bool: "..tostring(task_bool).."  available: "..tostring(AcftAvail[unit.name].available).." = ready:  "..tostring(unit.roster.ready) .." - unavailable: ".. tostring(#AcftAvail[unit.name].unavailable))
@@ -2113,6 +3345,9 @@ for sideName, units in pairs(oob_air) do
 						unit_loadouts[i], unit_loadouts[j] = unit_loadouts[j], unit_loadouts[i]
 					end
 
+					if task == "Transport" then WG_AirliftTrace(unit, task, "2_LOADOUTS", "nb loadouts retenus (pays ok)="..#unit_loadouts.." Daytime="..tostring(Daytime).." LoadoutsList="..tostring(LoadoutsList[unit.type] ~= nil and LoadoutsList[unit.type][task] ~= nil)) end
+
+
 					for l = 1, #unit_loadouts do																				--iterate through all available loadouts				
 
 						if isDebugModeA2 then
@@ -2201,6 +3436,7 @@ for sideName, units in pairs(oob_air) do
 										end
 										
 										local target_name = target.titleName
+										if task == "Transport" and target.wargameLogistic == "airlift" then WG_AirliftTrace(unit, task, "4_CIBLE_"..tostring(target_name), "inactive="..tostring(target.inactive).." ATO="..tostring(target.ATO).." target.task="..tostring(target.task).." titleName="..tostring(target.titleName)) end
 
 										if not target.inactive and target.ATO then											--if target is active and should be added to ATO
 											
@@ -2248,6 +3484,9 @@ for sideName, units in pairs(oob_air) do
 												local loadoutEligible = checkAttributeEligibility(draftContext, currentLoadout, target, draftId, unit, isDebugModeA3)
 												--**********************************************
 
+												if task == "Transport" and target.wargameLogistic == "airlift" then WG_AirliftTrace(unit, task, "5_ATTRIBUTS_"..tostring(target_name), "loadoutEligible="..tostring(loadoutEligible).." loadout="..tostring(currentLoadout.loadoutName)) end
+
+
 												if isDebugModeA3 then
 													debugLog("draftId"..draftId.." AtoG passe A_10b Befor Condition loadoutEligible?: "..tostring(loadoutEligible).." |unit.name: "..unit.name.." |target_name: "..target_name.." |target.base: "..tostring(target.base).." |unit.base: "..unit.base)
 												end
@@ -2266,8 +3505,15 @@ for sideName, units in pairs(oob_air) do
 													}
 
 													--**********************************************
-													processEligibleLoadout( draftContext, sideName, task, target, target_name,
-														unit, currentLoadout, Daytime, airbasePoint, draftId, isDebugModeA3, i_timmer01 )
+													if task == "Transport" and target.wargameLogistic == "airlift" then
+														--cibles airlift du wargame (sans base) : traitement dedie, voir WG_AirliftProcess
+														WG_AirliftProcess( draftContext, sideName, task, target, target_name,
+															unit, currentLoadout, airbasePoint, draftId, isDebugModeA3,
+															processEligibleLoadout, draftSorties, Daytime, i_timmer01 )
+													else
+														processEligibleLoadout( draftContext, sideName, task, target, target_name,
+															unit, currentLoadout, Daytime, airbasePoint, draftId, isDebugModeA3, i_timmer01 )
+													end
 													--**********************************************
 
 												else
@@ -2293,6 +3539,8 @@ for sideName, units in pairs(oob_air) do
 							end
 						else
 							-- if draftContext.state.tot_to ~= 0 then
+							if task == "Transport" then WG_AirliftTrace(unit, task, "3_TOT_ZERO", "fenetre TOT vide pour le loadout "..tostring(currentLoadout.loadoutName).." Daytime="..tostring(Daytime).." day="..tostring(currentLoadout.day).." night="..tostring(currentLoadout.night)) end
+
 						end
 
 					end
@@ -2428,6 +3676,13 @@ end
 print("-")
 print("ATO Generating Sortie (" .. status_counter_sorties .. ") - Complete")
 debugLog("\n"..("ATO Generating Sortie (" .. status_counter_sorties .. ") - Complete"))
+
+
+WG_AirliftFinalize()		--wargame airlift 2a : bilan par cible (ATO=false si aucun helico possible) + Debug/WG_Airlift.log
+
+        if MemProbe then MemProbe("fin Part A (drafts)") end
+        if MemFields then MemFields("draftSorties.blue", draftSorties.blue, 150) end
+        if MemFields then MemFields("draftSorties.red", draftSorties.red, 150) end
 
 local shuffled = {}
 for i, v in ipairs(oob_air["blue"]) do
@@ -3737,6 +4992,8 @@ local function createATO_table(draftPriority)
 		if drafts and drafts ~= nil then
 			for draftN, draft in pairs(drafts) do																					--iterate through all draft sorties beginning with the highest scored			
 
+				if MemTick then MemTick("C draft") end
+				
 				local override_MP_C = false
 
 				-- if draft.overideMP_B and draft.main_overideMP then
@@ -5476,7 +6733,10 @@ end
 
 
 --log de controle de la preference light / lourd (lecture seule, actif si Debug.debug)
+
 rangePrefReport(draftSorties, ATO)
+
+WG_AirliftAfterATO(draftSorties, ATO, multipackByTargetName)		--wargame airlift : bilan des drafts airlift apres createATO_table (log append)
 
 if Debug.debug then
 

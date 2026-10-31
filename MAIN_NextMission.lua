@@ -2,6 +2,334 @@
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
 -------------------------------------------------------------------------------------------------------
 
+----- MESURE MEMOIRE (etape 2 : on mesure seulement, rien d'autre ne change) -----
+-- Ecrit des lignes [MEM] dans la console ET dans Debug/Memory.log (ligne par ligne : le fichier survit a un plantage).
+-- Utile a CHAQUE passe, planteuse ou non : on compare les passes entre elles.
+--   MemMark("texte")      une ligne : memoire Lua utilisee, ecart depuis la ligne precedente
+--   MemSnapshot("texte")  nettoyage complet (GC) puis : dechets liberes, memoire de luae.exe, plus gros globaux
+-- Reglages dans MemTrace (actif = false coupe tout).
+if not MemTrace then
+	MemTrace = {
+		actif   = false,					--false = plus aucune ligne [MEM]
+		fichier = "Debug/Memory.log",	--log DEDIE a la memoire (uniquement des lignes [MEM]) ; nil = pas d'ecriture disque
+		console = true,					--false = rien dans la console, tout reste dans le fichier
+		top     = 12,					--nb de gros globaux listes dans un snapshot (0 = pas de liste, plus rapide)
+		systeme = true,					--lit aussi la memoire de luae.exe (commande Windows tasklist)
+		tickEvery = 100,				--MemTick() ecrit une ligne tous les N appels (suivi de la boucle du generateur)
+		limiteObjets = 1500000,			--MemSize/MemProbe : on arrete de compter apres N objets (le comptage lui-meme consomme de la memoire)
+		gcPause = nil,					--nil = reglage Lua par defaut (200). Essai : 100 = le ramasse-miettes se declenche plus tot (voir etape 2)
+		passe   = 0,
+		ticks   = 0,
+		dernierSys = 0,
+		dernier = 0,					--derniere valeur mesuree (Ko), pour l'ecart
+		pic     = 0,					--plus haute valeur vue dans la passe (Ko)
+		picLabel = "",
+	}
+
+	if MemTrace.gcPause then
+		collectgarbage("setpause", MemTrace.gcPause)
+	end
+
+	--vide le fichier au demarrage du process (les passes suivantes completent)
+	if MemTrace.fichier then
+		local f = io.open(MemTrace.fichier, "w")
+		if f then f:close() end
+	end
+end
+
+do
+	local function mo(ko)
+		return string.format("%.1f", ko / 1024)
+	end
+
+	--estimation en octets d'une table et de tout ce qu'elle contient (cycles geres par "vus")
+	local function taille(racine, vus)
+		local total = 0
+		local pile = { racine }
+		local n = 1
+		local nbObjets = 0
+		local tronque = false
+
+		while n > 0 do
+			if nbObjets > MemTrace.limiteObjets then
+				tronque = true
+				break
+			end
+			local t = pile[n]
+			pile[n] = nil
+			n = n - 1
+			total = total + 56								--l'en-tete d'une table
+			nbObjets = nbObjets + 1
+
+			for k, v in pairs(t) do
+				total = total + 40							--une entree
+				for _, x in ipairs({ k, v }) do
+					local tx = type(x)
+					if tx == "table" then
+						if not vus[x] then
+							vus[x] = true
+							n = n + 1
+							pile[n] = x
+						end
+					elseif tx == "string" then
+						if not vus[x] then
+							vus[x] = true
+							total = total + 24 + #x
+							nbObjets = nbObjets + 1
+						end
+					elseif tx == "function" then
+						total = total + 32
+					end
+				end
+			end
+		end
+
+		return total, tronque
+	end
+
+	--liste les plus gros globaux (estimation : un sous-tableau partage n'est compte que pour le 1er global rencontre)
+	local function topGlobaux(nbMax)
+		local vus = {}
+		for _, nom in ipairs({ "_G", "package", "string", "table", "math", "os", "io", "debug", "coroutine", "MemTrace" }) do
+			if type(_G[nom]) == "table" then vus[_G[nom]] = true end
+		end
+
+		local noms = {}
+		for nom, valeur in pairs(_G) do
+			if type(valeur) == "table" and not vus[valeur] then
+				table.insert(noms, nom)
+			end
+		end
+		table.sort(noms, function(a, b) return tostring(a) < tostring(b) end)		--ordre fixe : resultats comparables d'une passe a l'autre
+
+		local liste = {}
+		local somme = 0
+		for _, nom in ipairs(noms) do
+			if not vus[_G[nom]] then
+				vus[_G[nom]] = true
+				local o = taille(_G[nom], vus)
+				somme = somme + o
+				table.insert(liste, { nom = tostring(nom), octets = o })
+			end
+		end
+		table.sort(liste, function(a, b) return a.octets > b.octets end)
+
+		MemLine(string.format("   plus gros globaux (estimation, total des globaux ~ %s Mo) :", mo(somme / 1024)))
+		for i = 1, math.min(nbMax, #liste) do
+			MemLine(string.format("   %2d. %-30s ~ %8s Mo", i, liste[i].nom, mo(liste[i].octets / 1024)))
+		end
+	end
+
+	--memoire de luae.exe vue par Windows (Ko), ou nil. Plusieurs luae : on garde le plus gros.
+	local function memSysteme()
+		if not MemTrace.systeme then return nil end
+		local p = io.popen('tasklist /FI "IMAGENAME eq luae.exe" /FO CSV /NH 2>nul')
+		if not p then return nil end
+
+		local meilleur
+		for ligne in p:lines() do
+			local dernier = string.match(ligne, '"([^"]*)"%s*$')		--derniere colonne : "123 456 Ko"
+			if dernier then
+				local n = tonumber((string.gsub(dernier, "%D", "")))
+				if n and (not meilleur or n > meilleur) then meilleur = n end
+			end
+		end
+		p:close()
+		return meilleur
+	end
+
+	function MemLine(msg)
+		if not MemTrace or not MemTrace.actif then return end
+		local ligne = "[MEM] "..tostring(msg)
+		if MemTrace.console then print(ligne) end
+		if MemTrace.fichier then
+			local f = io.open(MemTrace.fichier, "a")
+			if f then
+				f:write(ligne.."\n")
+				f:close()
+			end
+		end
+	end
+
+	function MemMark(label)
+		if not MemTrace or not MemTrace.actif then return end
+		local ko = collectgarbage("count")
+		if ko > MemTrace.pic then
+			MemTrace.pic = ko
+			MemTrace.picLabel = tostring(label)
+		end
+		MemLine(string.format("passe %d | %-38s | %8s Mo | %+7.1f Mo", MemTrace.passe, tostring(label), mo(ko), (ko - MemTrace.dernier) / 1024))
+		MemTrace.dernier = ko
+
+		--memoire vue par Windows : a chaque nouveau palier de +200 Mo de memoire Lua (pas a chaque ligne : tasklist est lent)
+		if MemTrace.systeme and ko - MemTrace.dernierSys > 200 * 1024 then
+			MemTrace.dernierSys = ko
+			local sys = memSysteme()
+			MemLine(string.format("   luae.exe vu par Windows : %s Mo pour %s Mo de memoire Lua", sys and mo(sys) or "inconnu", mo(ko)))
+		end
+	end
+
+	--une ligne tous les MemTrace.tickEvery appels : a placer DANS une boucle pour voir la courbe de la memoire
+	function MemTick(label)
+		if not MemTrace or not MemTrace.actif then return end
+		MemTrace.ticks = MemTrace.ticks + 1
+		if MemTrace.ticks % MemTrace.tickEvery == 0 then
+			MemMark(tostring(label or "tick").." #"..MemTrace.ticks)
+		end
+	end
+
+	--taille estimee (Mo) d'une table, pour les variables locales que topGlobaux ne voit pas
+	function MemSize(t)
+		if type(t) ~= "table" then return 0 end
+		return (taille(t, {})) / 1024 / 1024
+	end
+
+	--"sonde" : memoire AVANT et APRES nettoyage complet (donc : dechets ou donnees vivantes ?),
+	--puis la taille de chaque table donnee { nom = table, ... }. A placer a un endroit precis du code.
+	function MemProbe(label, tables)
+		if not MemTrace or not MemTrace.actif then return end
+
+		local ok, err = pcall(function()
+			MemMark(tostring(label).." (avant nettoyage)")
+			local avant = collectgarbage("count")
+			collectgarbage("collect")
+			collectgarbage("collect")
+			local apres = collectgarbage("count")
+			MemLine(string.format("   SONDE %s : %s Mo avant nettoyage -> %s Mo VIVANTS apres (%s Mo de dechets)",
+				tostring(label), mo(avant), mo(apres), mo(avant - apres)))
+
+			if tables then
+				local noms = {}
+				for nom in pairs(tables) do table.insert(noms, nom) end
+				table.sort(noms)
+
+				local vus = {}
+				for _, nom in ipairs(noms) do
+					if type(tables[nom]) == "table" then
+						local o, tronque = taille(tables[nom], vus)
+						MemLine(string.format("      %-28s ~ %8s Mo%s", tostring(nom), mo(o / 1024), tronque and " (comptage tronque : au moins)" or ""))
+					end
+				end
+			end
+
+			MemTrace.dernier = collectgarbage("count")
+			MemTrace.dernierSys = MemTrace.dernier
+		end)
+
+		if not ok then
+			MemLine("sonde en erreur : "..tostring(err))
+		end
+	end
+
+	--qui pese quoi DANS les elements d'une liste (ex. draftSorties.blue) : taille estimee par champ, puis par sous-champ,
+	--sur un echantillon de max "echantillon" elements repartis dans la liste, extrapolee a toute la liste.
+	--Un objet partage entre plusieurs elements n'est compte qu'une fois (donc les vraies copies ressortent).
+	function MemFields(label, liste, echantillon)
+		if not MemTrace or not MemTrace.actif then return end
+
+		local ok, err = pcall(function()
+			if type(liste) ~= "table" or #liste == 0 then
+				MemLine("   CHAMPS "..tostring(label).." : liste vide")
+				return
+			end
+
+			local nb = #liste
+			local ech = echantillon or 150
+			if ech > nb then ech = nb end
+			local pas = nb / ech
+
+			local vus = {}
+			local parChamp = {}
+			local tronque = false
+
+			for i = 1, ech do
+				local el = liste[math.floor((i - 1) * pas) + 1]
+				if type(el) == "table" then
+					vus[el] = true
+					for k, v in pairs(el) do
+						if type(v) == "table" then
+							local o, tr = taille(v, vus)
+							if tr then tronque = true end
+							local cle = tostring(k)
+							parChamp[cle] = (parChamp[cle] or 0) + o
+
+							--un niveau de plus pour voir ce qu'il y a dedans
+							for k2, v2 in pairs(v) do
+								if type(v2) == "table" then
+									local o2 = taille(v2, {})
+									local cle2 = cle.."."..tostring(k2)
+									parChamp[cle2] = (parChamp[cle2] or 0) + o2
+								end
+							end
+						end
+					end
+				end
+			end
+
+			local noms = {}
+			for nom in pairs(parChamp) do noms[#noms + 1] = nom end
+			table.sort(noms, function(a, b) return parChamp[a] > parChamp[b] end)
+
+			local coef = nb / ech
+			MemLine(string.format("   CHAMPS %s : %d elements, echantillon %d (extrapole x%.1f)%s",
+				tostring(label), nb, ech, coef, tronque and " [comptage tronque]" or ""))
+			for i = 1, math.min(14, #noms) do
+				local o = parChamp[noms[i]]
+				MemLine(string.format("      %-34s ~ %8s Mo au total  (%6.1f Ko par element)", noms[i], mo(o * coef / 1024), o / ech / 1024))
+			end
+		end)
+
+		if not ok then
+			MemLine("MemFields en erreur : "..tostring(err))
+		end
+	end
+
+	function MemSnapshot(label)
+		if not MemTrace or not MemTrace.actif then return end
+
+		local ok, err = pcall(function()
+			local avant = collectgarbage("count")
+			collectgarbage("collect")
+			collectgarbage("collect")
+			local apres = collectgarbage("count")
+
+			local sys = memSysteme()
+			MemLine(string.format("passe %d | SNAPSHOT %s", MemTrace.passe, tostring(label)))
+			MemLine(string.format("   Lua : %s Mo avant nettoyage, %s Mo apres (donnees vivantes) -> %s Mo de dechets liberes",
+				mo(avant), mo(apres), mo(avant - apres)))
+			MemLine("   luae.exe vu par Windows : "..(sys and (mo(sys).." Mo") or "inconnu"))
+
+			if MemTrace.top > 0 then
+				topGlobaux(MemTrace.top)
+			end
+
+			MemTrace.dernier = collectgarbage("count")
+			MemTrace.dernierSys = MemTrace.dernier
+		end)
+
+		if not ok then
+			MemLine("snapshot en erreur : "..tostring(err))
+		end
+	end
+end
+
+--une ligne apres chaque Include() de cette passe (le wrapper est retire en fin de MAIN_NextMission)
+if not MemOrigInclude and type(Include) == "function" then
+	MemOrigInclude = Include
+end
+if MemOrigInclude and MemTrace.actif then
+	Include = function(fichier, ...)
+		local a, b, c = MemOrigInclude(fichier, ...)
+		MemMark("apres "..tostring(fichier))
+		return a, b, c
+	end
+end
+
+MemTrace.passe = MemTrace.passe + 1
+MemTrace.pic = 0
+MemTrace.ticks = 0
+MemTrace.dernierSys = 0
+MemSnapshot("debut de passe (avant chargement de base_mission)")
 
 local t0 = os.clock()
 local t_miz  = 0
@@ -581,6 +909,7 @@ AssignCallnameSquad()
 -- Appel de la fonction principale
 CheckAndFixAllIds()
 
+MemMark("apres CheckAndFixAllIds")
 
 --ajoute des zones en cours de campagne
 --si le fichier add_zones.lua existe, on l'ouvre et on ajoute ses informations à la table mission.zones déjà existante
@@ -747,6 +1076,12 @@ mission.currentKey = 1500000																--not clear how this works but is re
 --########   1   ##############
 --########   1   ##############
 
+--unite "piste" (FARP, heliport) : son unitId est aussi l'airdromeId de db_airbases et la cle de son warehouse.
+--Il ne doit jamais etre change : en cas de doublon, c'est l'AUTRE unite qui est renumerotee.
+function IsPisteUnit(unit)
+	return unit.category == "Heliports" or string.find(tostring(unit.type), "FARP", 1, true) ~= nil
+end
+
 local groupId = {}
 local uniId = {}
 local name = {}
@@ -796,11 +1131,19 @@ for _, side in pairs(mission.coalition) do
 								minUnitId = unit.unitId
 							end
 
-							if not  uniId[unit.unitId] then
-								uniId[unit.unitId] = unit.unitId
+							local holder = uniId[unit.unitId]			--unite qui porte deja cet id (table), ou nil
+							if not holder then
+								uniId[unit.unitId] = unit
+							elseif IsPisteUnit(unit) and not IsPisteUnit(holder) then
+								--la piste garde son id : c'est l'unite deja enregistree qui sera renumerotee
+								table.insert(unitIdError, holder.name )
+								uniId[unit.unitId] = unit
 							else
-								-- print("MainNM error, duplicate of |"..tostring(categorie).."| OLD uniId |".. tostring(uniId[unit.unitId]) .."|and|"..tostring(unit.name))
+								-- print("MainNM error, duplicate of |"..tostring(categorie)..| OLD uniId ...)
 								table.insert(unitIdError, unit.name )
+								if IsPisteUnit(unit) then
+									print("MainNM ATTENTION: unitId de piste en double |"..tostring(unit.name).."| id "..tostring(unit.unitId).." (deja porte par une autre piste)")
+								end
 							end
 
 						end
@@ -898,6 +1241,8 @@ for _ , refNameB in pairs(unitIdError) do
 		testId =  maxUnitId + 1
 	end
 
+	uniId[testId] = testId			--id pris : le doublon suivant ne doit pas tomber dessus
+
 	if testId > maxUnitId then
 		maxUnitId = testId
 	end
@@ -927,6 +1272,12 @@ for _ , refNameB in pairs(unitIdError) do
 			end
 		end
 	end
+end
+
+--controle final des ids de pistes : db_airbases doit pointer sur les unitId REELS de la mission (a faire avant l'ecriture
+--de Active/db_airbases.lua, plus bas). WargameFarpCheckIds est definie dans DC_CheckTriggers.lua (absente a la 1re mission).
+if WargameFarpCheckIds then
+	WargameFarpCheckIds()
 end
 
 --########   2   ##############
@@ -1238,6 +1589,9 @@ if PlayerFlight then
 
 	local c_miz = os.clock()
 
+	MemMark("avant serialisation mission (.miz)")
+
+
 	----- create temporary content files of new mission file -----
 	misStr = "mission = " .. TableSerialization(mission, 0)
 	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")																	--mission
@@ -1486,6 +1840,8 @@ if PlayerFlight then
 
 	miz:zipClose()
 
+	MemMark("apres creation du .miz")
+
 	t_miz = t_miz + (os.clock() - c_miz)
 
 end -- PlayerFlight onverture/fermeture du fichier .miz
@@ -1572,6 +1928,8 @@ if camp_ZoneSAR then
 end
 
 t_lua2File = t_lua2File + (os.clock() - c_lua2File)
+
+MemMark("apres ecriture Active/*.lua")
 
 --reset TimeJump pour eviter les erreurs de mission suivante
 TimeJump = false
@@ -1717,4 +2075,8 @@ t_backup = t_backup + (os.clock() - c_backup)
 	-- ))
 
 	-- print("MAIN_NM test fin")
+
+	MemSnapshot("fin de passe")
+MemLine(string.format("passe %d | PIC observe : %.1f Mo (%s)", MemTrace.passe, MemTrace.pic / 1024, tostring(MemTrace.picLabel)))
+if MemOrigInclude then Include = MemOrigInclude end		--retire le wrapper de mesure
 

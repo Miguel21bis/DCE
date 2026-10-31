@@ -1,45 +1,11 @@
 --To update the targetlist (target position, alive precentage)
 --Initiated by MAIN_NextMission.lua
-------------------------------------------------------------------------------------------------------- 
--- last modification: cleancode_e
-if not versionDCE then versionDCE = {} end
-versionDCE["DC_UpdateTargetlist.lua"] = "1.12.54"
-------------------------------------------------------------------------------------------------------- 
--- cleancode_e				(d springCleaning)
--- adjustment_a				(a GroundTarget.percent = 100 & Error_05 )
--- debug_f					(f ne detruisait les derniers element dans oob_groud)(e updateAlive)(d updateAlive)(bc InsertBugList)(a -nan(ind))
--- modification M78_a		LatLon positions added and unit display removed on MAP F10 (camp.targetPos)
--- modification M74_a		mix static, vehicle and map elements in a Target.
--- modification M70_a		GroundZoneTarget (adds the possibility of counting unit completeness by zone) 
--- modification M66_e		bombOnRunway (e dead_last)(c runway.true_hdg)
--- modification M61_b		SAR (b: debug xy position moyenne)
--- modification M38_w		Check and Help CampaignMaker (w check error template too long)(g: only firstmission)(f: find in template file)(b: add debug info)
--- modification M26_a		destroys targets if below a certain value
--- modification M19_e		Repair GROUND
--------------------------------------------------------------------------------------------------------
-
--- local t0 = os.clock()
--- local t_strike  = 0
--- local t_oob = 0
--- local t_template = 0
--- local t_elements = 0
--- local t_elementsA = 0
--- local t_elementsB = 0
--- local t_units = 0
--- local t_threats = 0
--- local t_runway = 0
--- local t_alive  = 0
--- local t_additional = 0
--- local t_checkXY_a = 0
--- local t_checkXY_b = 0
 
 if Debug.debug then
-	print("START DC_UpdateTargetlist.lua "..versionDCE["DC_UpdateTargetlist.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+	print("START DC_UpdateTargetlist.lua")
 end
 
--- if not targetlist.blue[1] then
--- 	TargetlistToNum(targetlist)
--- end
+
 
 --rend un côté de targetlist séquentiel (1..n) : supprime les trous, intègre les clés nommées (ex: formations wargame)
 local function CompactTargetlistSide(targets)
@@ -1115,6 +1081,22 @@ for sideName, targets in pairs(targetlist) do													--Iterate through all 
 
 			-- if not target.foundOobGround then checkBug3("DC_UT Anti-ship Strike error Not Found "..target.titleName) end
 			if not target.foundOobGround then checkBug3(" Error_9: this Ship |"..target.name.."| linked to this objective  (targetlist_ini.lua)|"..target.titleName.."| was not found in the file (base_mission.miz or template)") end
+
+		elseif target.task == "Transport" and target.wargameLogistic == "airlift" then		--WARGAME airlift (DCE_Manager) : destination = point WG_POINT_..., PAS un aerodrome
+			--Pourquoi: la branche native Transport/Nothing plus bas lit db_airbases[target.destination].x : ca plante
+			--(nil index) avec un point wargame. On garde donc x/y de l'entree (= position du point de livraison)
+			--et on ne touche a rien d'autre.
+			--ATO=true : le generateur (WG_AirliftProcess / WG_AirliftFinalize, ATO_Generator_C_Core.lua)
+			--decide ensuite : si aucun helico ne peut servir la cible, il remet lui-meme ATO=false + wargameNote.
+			target.ATO = true
+
+			if not target.x or not target.y then
+				AddLog("DcUT Error_wargame_02: l'entree airlift |"..tostring(target.name).."| n'a pas de position x/y (point "..tostring(target.destination)..")")
+			else
+				AddLog("DcUT wargame airlift |"..tostring(target.name).."| ATO=true x="..math.floor(target.x).." y="..math.floor(target.y)
+					.." load="..tostring(target.wargameLoadX)..","..tostring(target.wargameLoadY)
+					.." cargo="..tostring(target.wargameCargoKg).." need="..tostring(target.wargameNeedKg).." inactive="..tostring(target.inactive))
+			end
 
 		elseif target.task == "Transport" or target.task == "Nothing" then					--For transport or ferry tasks
 			if target.destination and not db_airbases[target.destination] then

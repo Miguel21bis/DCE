@@ -269,6 +269,22 @@ for sideName, packs in pairs(ATO) do
 				earliest = earliest + mainFlight.standoff / mainFlight.vAttack		--earliest TOT to make sure that aircraft always spawn 10 minutes ahead of IP at mission start
 			end
 
+						--wargame airlift : pour un vol Transport, le TOT vise l'atterrissage final (derniere WP).
+			--Il doit donc laisser le temps de voler TOUTE la route (base > Load > Drop > base),
+			--sinon le vol devient "air start" en plein milieu de la route (Taxi et Departure supprimes).
+			if mainFlight.task == "Transport" and mainFlight.route then
+				local isAirlift = false
+				local routeLen = 0
+				for w = 1, #mainFlight.route do
+					if mainFlight.route[w].id == "Load" then isAirlift = true end
+					if w > 1 then routeLen = routeLen + GetDistance(mainFlight.route[w - 1], mainFlight.route[w]) end
+				end
+				local vRef = (mainFlight.loadout and mainFlight.loadout.vCruise) or mainFlight.vCruise
+				if isAirlift and vRef and vRef > 0 then
+					earliest = earliest + routeLen / (vRef * 0.9)			--0.9 = meme vitesse mini que le calcul des ETA en amont
+				end
+			end
+			
 			-- local latest = pack[p].main[1].tot_to 
 			local latest = mainFlight.tot_to + mission_ini.startup_time_player 															--latest TOT
 			-- local latest = pack[p].main[1].tot_to + mission_ini.mission_duration
