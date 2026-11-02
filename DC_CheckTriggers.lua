@@ -24,6 +24,7 @@
 -- function Action.GroupHidden(groupname, hidden_bool)
 
 local debugKT = false
+if DbgBaseTrace then DbgBaseTrace("DC_CheckTriggers: DEBUT") end	-- DIAG
 
 ----- campaign flags -----
 if camp.flag == nil then
@@ -2574,6 +2575,25 @@ Action = {}
 			end
 		end
 	end
+
+	-- DIAG landing : enveloppe les fonctions qui peuvent passer une base a inactive (trace + pile d'appel)
+	if DbgBaseTrace then
+		local origActivateUnits = Action.ActivateBaseAndItsUnits
+		Action.ActivateBaseAndItsUnits = function(baseName, activeBase)
+			DbgBaseTrace("AVANT Action.ActivateBaseAndItsUnits("..tostring(baseName)..","..tostring(activeBase)..")", baseName, true)
+			local result = origActivateUnits(baseName, activeBase)
+			DbgBaseTrace("APRES Action.ActivateBaseAndItsUnits", baseName)
+			return result
+		end
+
+		local origActivateTargets = ActivateBaseAndAssociatedTargets
+		ActivateBaseAndAssociatedTargets = function(baseName, active)
+			DbgBaseTrace("AVANT ActivateBaseAndAssociatedTargets("..tostring(baseName)..","..tostring(active)..")", baseName, true)
+			local result = origActivateTargets(baseName, active)
+			DbgBaseTrace("APRES ActivateBaseAndAssociatedTargets", baseName)
+			return result
+		end
+	end
 ----- run campaign triggers -----
 
 --define variables to persist across multiple mission generation attempts
@@ -2692,16 +2712,36 @@ local function wfTemplateCandidates(item)
 end
 
 --charge un .stm; retourne la table staticTemplate ou nil
+--DIAG : logue pourquoi un chargement echoue (fichier absent / erreur de lecture / variable staticTemplate absente)
 local function wfLoadTemplate(side, fileName)
+	local path = "Init/Wargame/Templates_"..side.."/"..fileName
+	local f = io.open(path, "rb")
+	if not f then
+		wfLog("DcCT WargameFarp DIAG fichier absent : "..path)
+		return nil
+	end
+	f:close()
+
 	staticTemplate = nil
-	local ok = pcall(dofile, "Init/Wargame/Templates_"..side.."/"..fileName)
+	local ok, err = pcall(dofile, path)
 	local loaded = staticTemplate
 	staticTemplate = nil
-	if ok and type(loaded) == "table" then
-		return loaded
+
+	if not ok then
+		wfLog("DcCT WargameFarp DIAG erreur a la lecture de "..path.." : "..tostring(err))
+		return nil
 	end
-	return nil
+	if type(loaded) ~= "table" then
+		wfLog("DcCT WargameFarp DIAG "..path.." lu sans erreur mais la variable staticTemplate est de type "..type(loaded))
+		return nil
+	end
+	if type(loaded.coalition) ~= "table" or type(loaded.coalition[side]) ~= "table" or type(loaded.coalition[side].country) ~= "table" then
+		wfLog("DcCT WargameFarp DIAG "..path.." : staticTemplate.coalition."..side..".country absent")
+		return nil
+	end
+	return loaded
 end
+
 
 --parcourt tous les groupes de oob_ground portant le marqueur wargameFarp = key
 --action(sideName, countryTable, category, groupList, index, group)
@@ -3208,6 +3248,8 @@ for triggerName, trigger in pairs(camp_triggers) do								--iterate through tri
 
 	if debugKT then print("DcCT 00 trigger_name: "..tostring(triggerName).." trigger.name: "..tostring(trigger.name)) end
 
+	DbgCurrentTrigger = triggerName	-- DIAG
+
 	if trigger.active then														--trigger is active
 
 		if debugKT then print("DcCT 01 if trigger.active: trigger.condition: "..tostring(trigger.condition)) end
@@ -3257,6 +3299,9 @@ for triggerName, trigger in pairs(camp_triggers) do								--iterate through tri
 		end
 	end
 end
+
+DbgCurrentTrigger = nil	-- DIAG
+if DbgBaseTrace then DbgBaseTrace("DC_CheckTriggers: apres les triggers de campagne") end	-- DIAG
 
 --Compatible avec les sauts temporels
 for side_name, side in pairs(oob_air) do
@@ -3488,6 +3533,8 @@ if camp.endCampaign  then
 	end
 
 end
+
+if DbgBaseTrace then DbgBaseTrace("DC_CheckTriggers: FIN (apres boucle des bases)") end	-- DIAG
 
 --pour que certaines fonctions ne s'active qu'une fois
 CheckTriggersOnce = true

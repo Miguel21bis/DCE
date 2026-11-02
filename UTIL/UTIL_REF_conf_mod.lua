@@ -43,14 +43,14 @@ mission_ini_check = {
 	
 	--***time options***
 	onlyDayMission                = true,    -- @ui checkbox group="Time" label="Daylight missions only" help=Forces all missions to be played in daylight (Mod M25). [default: false]
-	hourlyTolerance               = 6,       -- @ui numeric min=0 max=100 group="Time" label="Hourly tolerance (%)" help=When "Daylight missions only" is on, allows the mission to start a bit before or after daytime, as a percentage. [default: 5]
+	dayMarginMin                  = 30,      -- @ui numeric min=0 max=180 group="Time" label="Dawn/dusk margin (min)" help=When "Daylight missions only" is on, the whole mission (startup + duration) must fit between dawn minus this margin and dusk plus this margin. 0 = strictly between dawn and dusk. [default: 30]
 	startup_time_player           = 1800,    -- @ui numeric min=0 max=7200 group="Time" label="Startup/taxi/take-off time (s)" help=Time in seconds allocated for startup, taxi and take-off for the player flight. [default: 600]
 	mission_duration              = 6600,    -- @ui numeric min=0 max=36000 group="Time" label="Mission duration (s)" help=Duration of a mission in seconds. [default: 5400]
 	idle_time_min                 = 10800,   -- @ui numeric min=0 max=100000 group="Time" label="Min time between missions (s)" help=Minimum time between missions, in seconds. [default: 10800]
 	idle_time_max                 = 14400,   -- @ui numeric min=0 max=100000 group="Time" label="Max time between missions (s)" help=Maximum time between missions, in seconds. [default: 14400]
-	dawn                          = 21600,   -- @ui numeric min=0 max=86400 group="Time" label="Dawn (s since midnight)" help=Time of dawn, in seconds since midnight. [default: 21600]
-	dusk                          = 65700,   -- @ui numeric min=0 max=86400 group="Time" label="Dusk (s since midnight)" help=Time of dusk, in seconds since midnight. [default: 65700]
-		
+	dawnDuskAuto                  = true,    -- @ui checkbox group="Time" label="Dawn/dusk updated automatically" help=When checked, DCE_Manager updates Dawn and Dusk almost every day from the current date and the position of the player's base. Uncheck to enter them by hand. [default: true]
+	dawn                          = 21600,   -- @ui numeric min=0 max=86400 group="Time" label="Dawn (s since midnight)" help=Time of dawn, in seconds since midnight. Overwritten by DCE_Manager when "Dawn/dusk updated automatically" is checked. [default: 21600]
+	dusk                          = 65700,   -- @ui numeric min=0 max=86400 group="Time" label="Dusk (s since midnight)" help=Time of dusk, in seconds since midnight. Overwritten by DCE_Manager when "Dawn/dusk updated automatically" is checked. [default: 65700]	
 	--***weather options***
 	weather_playerBias    = 0,      -- @ui slider min=-50 max=50 group="Weather U" label="Player bias" help=Shifts the trend imposed by campaign events toward good (+) or bad (-) weather. 0 = fully respects the campaignMaker's intent. [default: 0]
 

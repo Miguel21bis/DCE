@@ -11,6 +11,30 @@ function FileExists(path)
 	end
 end
 
+function DbgBaseTrace(tag, onlyName, withStack)
+	-- DIAG landing : trace dans Debug/Landing_inactive.log l'etat inactive des bases wargame (FARP de debarquement)
+	local f = io.open("Debug/Landing_inactive.log", "a")
+	if not f then return end
+	local function isLanding(name, base)
+		if type(base) ~= "table" then return false end
+		if base.wargameFarp or base.wargamePlan then return true end
+		if type(name) == "string" and (string.find(name, "LANDING") or string.find(name, "FARP%-Secteur")) then return true end
+		return false
+	end
+	local hour = os.date("%H:%M:%S")
+	for name, base in pairs(db_airbases) do
+		if (onlyName == nil and isLanding(name, base)) or (onlyName ~= nil and name == onlyName) then
+			f:write(hour.." | "..tostring(tag).." | "..tostring(name)
+				.." | inactive="..tostring(base.inactive).." baseAlive="..tostring(base.baseAlive)
+				.." side="..tostring(base.side).." trigger="..tostring(DbgCurrentTrigger).."\n")
+			if withStack and type(debug) == "table" and type(debug.traceback) == "function" then
+				f:write(debug.traceback("   pile:", 2).."\n")
+			end
+		end
+	end
+	f:close()
+end
+
 
 function Try_dofile(path)
 	local f3 = io.open(path, "r")
@@ -723,6 +747,8 @@ function LoadFileAndUpdate(from)
 	local db_airbases_init = db_airbases
 
 	dofile("Active/db_airbases.lua")
+
+	if DbgBaseTrace then DbgBaseTrace("LoadFileAndUpdate: apres dofile Active/db_airbases") end	-- DIAG
 
 	-- Comparer les deux tables
 	changes = CompareTableAlphaNumeric(db_airbases_init, db_airbases)

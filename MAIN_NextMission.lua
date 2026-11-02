@@ -786,6 +786,7 @@ end
 addFileTrigger("DCE_Util_Common.lua")																-- Chantier A DCE InGame : utilitaires génériques (avant tout le reste)
 addFileTrigger("DCE_Convoys.lua")       -- Logistics wargame : spawn convois depuis campL.wargame_convoys
 addFileTrigger("camp_status.lua")
+addFileTrigger("DCE_Airlift.lua")       -- Logistics wargame : logistique aerienne (zones, stationnaire IA, menu F10 joueur)
 addFileTrigger("DCE_RadioF10.lua")																-- Renomme depuis AddCommandRadioF10.lua
 addFileTrigger("DCE_Background.lua")																-- Chantier B2 DCE InGame : sous-systèmes tâche de fond (avoidArea, EWR, CarrierDeckMonitor...)
 addFileTrigger("DCE_EventsTracker.lua")
@@ -1503,6 +1504,33 @@ if aaaBlue or aaaRed then
     AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 end
 
+--wargame airlift : donnees pour la mission (zones, vols IA, charges) -> campL.wargame_airlift
+WG_AirliftData = nil
+if WG_AirliftBuildData then
+	local okWG, errWG = pcall(WG_AirliftBuildData)
+	if not okWG then
+		AddLog("WG_AirliftBuildData ERREUR: "..tostring(errWG))
+		WG_AirliftData = nil
+	end
+end
+
+--wargame airlift : les zones Load / Drop sont ecrites dans le .miz (trigger zones visibles dans l'editeur)
+--DCE_Airlift.lua les relit par leur nom avec trigger.misc.getZone
+if WG_AirliftData and mission.triggers and mission.triggers.zones then
+	for _, z in ipairs(WG_AirliftData.zones) do
+		z.zoneName = "WG_"..string.upper(z.kind).."_"..z.slot
+		table.insert(mission.triggers.zones, {
+			["x"] = z.x,
+			["y"] = z.y,
+			["radius"] = z.radius,
+			["zoneId"] = GetFreeZoneId(),
+			["color"] = (z.kind == "load") and { [1] = 0, [2] = 0.6, [3] = 1, [4] = 0.2 } or { [1] = 1, [2] = 0.5, [3] = 0, [4] = 0.2 },
+			["hidden"] = false,
+			["name"] = z.zoneName,
+		})
+	end
+end
+
 --création d'un camp pour camp_status InGame nettement plus leger
 local campL = {
 
@@ -1557,7 +1585,7 @@ local campL = {
 	AAA_Barrage = AAA_Barrage,
 	MsgForPlayerInMsn = MsgForPlayerInMsn,
 	wargame_convoys = WG_ConvoysData or nil,	--convois logistiques wargame pour cette mission (nil si absent/non activé)
-
+	wargame_airlift = WG_AirliftData or nil,	--logistique aerienne wargame (zones, vols IA, charges) pour cette mission
 
 	-- if not camp.missionHistory then camp.missionHistory = {} end
 	-- camp.missionHistory[camp.mission] = camp.date
@@ -1720,6 +1748,7 @@ if PlayerFlight then
 	miz:zipAddFile("l10n/DEFAULT/DCE_CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_CarrierIntoWindScript.lua")
 	miz:zipAddFile("l10n/DEFAULT/DCE_Util_Common.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Util_Common.lua")					-- Chantier A DCE InGame
 	miz:zipAddFile("l10n/DEFAULT/DCE_Convoys.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Convoys.lua")
+		miz:zipAddFile("l10n/DEFAULT/DCE_Airlift.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Airlift.lua")
 	miz:zipAddFile("l10n/DEFAULT/DCE_RadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_RadioF10.lua")					-- Renomme depuis AddCommandRadioF10.lua (Modification M29)
 	miz:zipAddFile("l10n/DEFAULT/DCE_Background.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Background.lua")					-- Chantier B2 DCE InGame
 	miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
@@ -1914,6 +1943,8 @@ local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)
 local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
 loadoutFile:write(loadout_str)																									--save new data
 loadoutFile:close()
+
+if DbgBaseTrace then DbgBaseTrace("MAIN_NextMission: avant ecriture Active/db_airbases") end	-- DIAG
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")

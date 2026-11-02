@@ -4,8 +4,9 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.209"
+versionDCE["db_loadouts/db_loadouts_Plane.lua"] = "1.3.210"
 
+-- V210 - add HWITC runway attack for MiG-21 and Su-25
 -- V209 - add Fuel tank to MiG-21Bis and extend range for NAM - Sweep to MiG-19P
 -- V208 - add Fuel tanks to Mig-15bis for NAM
 -- V207 - add F-100D for NAM
@@ -2608,6 +2609,71 @@ db_loadouts = {
 						[6] = {
 							CLSID = "{ASO-2}",
 						},
+					},
+					fuel = 2280,
+					flare = 40,
+					chaff = 18,
+					gun = 100,
+				},
+			},
+		},
+		["Runway attack"] = {
+			["Runway attack  AG - HD bomb *2"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "Runway" },
+				code_loadout =  { "HWITC" },
+				weaponType = "Bombs",
+				expend = "All",
+				night = true,
+				adverseWeather = true,
+				range = 200000,
+				firepower = 1,
+				vCruise = 230,
+				vAttack = 277.5,
+				hCruise = 9100,
+				hAttack = 100,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+					[1] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 1,
+				},
+				[2] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 2,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[3] = {
+					["CLSID"] = "{PTB_800_MIG21}",
+					["num"] = 3,
+				},
+				[4] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 4,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[5] = {
+					["CLSID"] = "{R-3S}",
+					["num"] = 5,
+				},
 					},
 					fuel = 2280,
 					flare = 40,
@@ -5606,7 +5672,7 @@ db_loadouts = {
 					[1] = "Turkey",
 				},
 				attributes =  { "Runway" },
-				code_loadout =  { "Cyprus" },
+				code_loadout =  { "HWITC", "Cyprus" },
 				weaponType = "Bombs",
 				expend = "All",
 				night = true,
@@ -10998,6 +11064,133 @@ db_loadouts = {
 		},
 	},
 	["Su-25"] = {
+		["Runway Attack"] = {
+			["Runway attack - HD bomb*8"] = {
+				minscore = 0.3,
+				support = {
+					Escort = true,
+					SEAD = true,
+				},
+				attributes =  { "Runway" },
+				code_loadout =  { "HWITC" },
+				weaponType = "Bombs",
+				expend = "All",
+				night = true,
+				adverseWeather = true,
+				range = 1000000,
+				firepower = 1,
+				vCruise = 225,
+				vAttack = 277.5,
+				hCruise = 9100,
+				hAttack = 100,
+				LDSD = true,
+				sortie_rate = 6,
+				stores = {
+					pylons = {
+						[1] = {
+					["CLSID"] = "{R_60}",
+					["num"] = 1,
+				},
+				[2] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 2,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[3] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 3,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[4] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 4,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[5] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 5,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[6] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 6,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[7] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 7,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[8] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 8,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[9] = {
+					["CLSID"] = "{BD289E34-DF84-4C5E-9220-4B14C346E79D}",
+					["num"] = 9,
+					["settings"] = {
+						["NFP_PRESID"] = "MDRN_B_USSR_BetABShP",
+						["NFP_PRESVER"] = 1,
+						["NFP_fuze_type"] = 1,
+						["arm_delay_ctrl_AVU589"] = 4.5,
+						["function_delay_ctrl_AVU589"] = 26,
+					},
+				},
+				[10] = {
+					["CLSID"] = "{R_60}",
+					["num"] = 10,
+				},
+					},
+					fuel = 2835,
+					flare = 128,
+					chaff = 128,
+					gun = 100,
+				},
+			},
+		},	
 		Strike = {
 			["GTA strike1 S-25L*6,R-60M*2"] = {
 				minscore = 0.3,

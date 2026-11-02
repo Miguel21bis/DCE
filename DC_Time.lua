@@ -1,18 +1,19 @@
 --To advance the campaign time for next mission
 --Initiated by MAIN_NextMission.lua
-------------------------------------------------------------------------------------------------------- 
-------------------------------------------------------------------------------------------------------- 
+-------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------
 -- last modification:  M85_a
 if not versionDCE then versionDCE = {} end
 versionDCE["DC_Time.lua"] = "1.6.18"
-------------------------------------------------------------------------------------------------------- 
+-------------------------------------------------------------------------------------------------------
+-- debug_h					(h onlyDayMission: dayMarginMin remplace hourlyTolerance, fenetre de jour reelle, Daytime recalcule debut+fin)
 -- debug_g 					(fg wrong time jump between missions)(e aliasYear)(d advances 2 times)(c hourlyTolerance work)(b: bug idle_time fin de mission)(a n'avance pas le temps entre accept mission et next)
--- adjustment_f				(f hoursFrom)(d: CampTotalTimeS)((c_Skipmission_flag)b diminue time entre tentative pour avoir le lev� de soleil)(a CampTotalTimeS)
+-- adjustment_f				(f hoursFrom)(d: CampTotalTimeS)((c_Skipmission_flag)b diminue time entre tentative pour avoir le leve de soleil)(a CampTotalTimeS)
 -- cleancode_a				(a springCleaning)
 -- modification M85_a		new variables added to conf_mod (RepairOption, current_date, weather, etc.)
 -- modification M53_b		automatic update of the conf_mod file (b conf_mod reconfiguration)
 -- modification M25_b 		onlyDayMission.
-------------------------------------------------------------------------------------------------------- 
+-------------------------------------------------------------------------------------------------------
 
 if Debug.debug then
 	print("START DC_Time.lua "..versionDCE["DC_Time.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
@@ -26,11 +27,28 @@ Daytime	= ""																					--variable what Daytime the is covered in the d
 local idle_time = 0
 local overnightTime = 0
 
--- print("DcIme 0a Current date : " ..FormatTime(camp.time, "hh:mm") .. ", " .. camp.date.day .. "." .. camp.date.month .. "." .. camp.date.year )
-
 --campaign day counter
 if camp.day == nil then
 	camp.day = 1
+end
+
+-------------------------------------------------------------------------------------------------------
+-- Fenetre de jour (onlyDayMission)
+-- Regle unique : TOUTE la mission (demarrage joueur + duree) doit tenir entre
+--   aube - marge   et   crepuscule + marge
+-- dayMarginMin = marge en MINUTES (0 = strictement entre aube et crepuscule)
+-- Depart au plus tot  = aube - marge
+-- Depart au plus tard = crepuscule + marge - (startup_time_player + mission_duration)
+-------------------------------------------------------------------------------------------------------
+local missionSpan = (mission_ini.startup_time_player or 0) + mission_ini.mission_duration	--duree totale de la mission, demarrage inclus
+local dayMargin = (mission_ini.dayMarginMin or 30) * 60										--marge en secondes
+local startEarliest = math.max(0, mission_ini.dawn - dayMargin)								--depart au plus tot
+local startLatest = math.min(86100, mission_ini.dusk + dayMargin - missionSpan)				--depart au plus tard (86100 = 23h55, evite de passer minuit)
+
+if mission_ini.onlyDayMission and startLatest < startEarliest then
+	--jour trop court pour la duree de mission : on part au plus tot, et on le dit
+	AddLog("DcTime WARNING: daylight window too short for mission duration (earliest "..FormatTime(startEarliest, "hh:mm").." latest "..FormatTime(startLatest, "hh:mm")..")")
+	startLatest = startEarliest
 end
 
 -- print("DcIme 0b TimeJump:? ".. tostring(TimeJump).." Mission.MissionInstance: "..camp.mission..".".. tostring(MissionInstance))
@@ -38,12 +56,8 @@ end
 if TimeJump and (MissionInstance and MissionInstance <= 1) then
 	camp.time = 0
 	if mission_ini.onlyDayMission then
-		-- Définir les heures de tolérance pour les missions de jour
-		local ht_dawn = math.max(0, mission_ini.dawn - (mission_ini.hourlyTolerance * 3600))
-		local ht_dusk = math.min(86400, mission_ini.dusk + (mission_ini.hourlyTolerance * 3600))
-		idle_time = math.random(ht_dawn, ht_dusk)
-		-- Arrondir idle_time à 5 minutes près (300 secondes)
-		idle_time = math.floor(idle_time / 300 + 0.5) * 300
+		--heure de depart tiree au hasard dans la fenetre de jour reelle, arrondie a 5 minutes
+		idle_time = math.random(math.floor(startEarliest / 300), math.floor(startLatest / 300)) * 300
 	else
 		idle_time = math.random(0,23) * 3600
 	end
@@ -70,47 +84,29 @@ camp.time = camp.time + idle_time
 -- print("DcIme B1 camp.time: ".. tostring(camp.time))
 
 -- Modification M25.b OnlyDayMission
-local tempTime = DeepCopy(camp.time)
-
--- print("DcIme B2 tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
-
 if mission_ini.onlyDayMission then
-	-- Définir les heures de tolérance pour les missions de jour
-	local ht_dawn = math.max(0, mission_ini.dawn - (mission_ini.hourlyTolerance * 3600))
-	local ht_dusk = math.min(86400, mission_ini.dusk + (mission_ini.hourlyTolerance * 3600))
 
-	-- print("DcIme C1 onlyDayMission ht_dawn: ".. tostring(ht_dawn) .." ht_dusk: ".. tostring(ht_dusk) .. "\n")
-	-- print("DcIme C1 onlyDayMission ht_dawn: ".. FormatTime(ht_dawn, "hh:mm") .." ht_dusk: ".. FormatTime(ht_dusk, "hh:mm") .. "\n")
+	local t = camp.time % 86400																--heure de depart actuelle dans la journee
 
-	-- Ajuster le temps jusqu'à la prochaine plage de jour
-	while (tempTime % 86400 < ht_dawn or tempTime % 86400 > ht_dusk) or (tempTime % 86400 + (mission_ini.mission_duration) < ht_dawn or ((tempTime % 86400) + mission_ini.mission_duration > ht_dusk)) do
-		overnightTime = overnightTime + 300
-		tempTime = tempTime + 300
-		-- print("DcIme C2 tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
-	end
+	if t < startEarliest or t > startLatest then											--hors de la fenetre : on attend la prochaine ouverture
+		local target = startEarliest
+		if t > startEarliest then																--on a depasse la fenetre aujourd'hui, ce sera demain
+			target = startEarliest + 86400
+		end
+		overnightTime = target - t
 
-	-- print("DcIme C3 onlyDayMission FIN tempTime: ".. tostring(tempTime) .." "..FormatTime(tempTime, "hh:mm").."\n")
-	-- print("DcIme C4 onlyDayMission FIN overnightTime: ".. tostring(overnightTime) .." "..FormatTime(overnightTime, "hh:mm").."\n")
-
-	--ajoute un random de temps pour eviter de toujours commencer au petit matin:
-	if overnightTime > 0 and mission_ini.idle_time_max > 7200 then
-		if mission_ini.idle_time_max > 7200 then
-			local nbHour = math.floor(mission_ini.idle_time_max/3600)
-			overnightTime = overnightTime + (math.random(0, nbHour)*3600)
-			-- print("DcIme C5a onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
-		else
-			overnightTime = overnightTime + math.random(0, mission_ini.idle_time_max)
-			-- print("DcIme C5b onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
+		--aleatoire ajoute DANS la fenetre (jamais au-dela de startLatest), pour ne pas toujours partir a l'aube
+		local spread = math.min(mission_ini.idle_time_max, startLatest - startEarliest)
+		if spread > 0 then
+			overnightTime = overnightTime + math.random(0, math.floor(spread / 300)) * 300
 		end
 
-		overnightTime = math.floor(overnightTime / 300 + 0.5) * 300
-		-- print("DcIme C5c onlyDayMission overnightTime: ".. tostring(overnightTime) .. "\n")
-
+		-- print("DcIme C1 onlyDayMission overnightTime: ".. tostring(overnightTime) .. " (" .. FormatTime(overnightTime, "hh:mm") .. ")")
 	end
 
 end
 
--- Ajouter addTime à camp.time après tous les ajustements
+-- Ajouter overnightTime a camp.time apres tous les ajustements
 idle_time = idle_time + overnightTime
 camp.time = camp.time + overnightTime
 
@@ -171,31 +167,30 @@ mission["date"]["Day"] = camp.date.day															--set mission day
 mission["date"]["Year"] = camp.date.year														--set mission year
 mission["date"]["Month"] = camp.date.month														--set mission month
 
--- local targetTime =  camp.time + mission_ini.startup_time_player
-local targetTime =  camp.time + mission_ini.mission_duration
+-------------------------------------------------------------------------------------------------------
+-- Daytime : ce que couvre la mission, du depart a la fin (demarrage joueur inclus)
+--   "day"        debut et fin de jour
+--   "day-night"  debut de jour, fin de nuit (crepuscule pendant la mission)
+--   "night-day"  debut de nuit, fin de jour (aube pendant la mission)
+--   "night"      debut et fin de nuit
+-- dawn == aube, dusk == crepuscule
+-------------------------------------------------------------------------------------------------------
+local function isDayTime(t)
+	t = t % 86400
+	return t >= mission_ini.dawn and t <= mission_ini.dusk
+end
 
---dawn == aube
---dusk == crépuscule
-if targetTime >= mission_ini.dawn and targetTime <= mission_ini.dusk then		--current time is between dawn and dusk
-	if targetTime  <= mission_ini.dusk then										--mission duration ends before dusk
-		Daytime = "day"
-	else																		--mission duration ends after dusk
-		Daytime = "day-night"
-	end
-else																			--current time is between dusk and dawn
-	if targetTime < mission_ini.dawn then										--mission starts before dawn
-		if targetTime < mission_ini.dawn then									--mission duration ends before dawn
-			Daytime = "night"
-		else
-			Daytime = "night-day"
-		end
-	else																		--mission starts after dusk
-		if targetTime < mission_ini.dawn + 86400 then							--mission duration ends before dawn of next day
-			Daytime = "night"
-		else
-			Daytime = "night-day"
-		end
-	end
+local startIsDay = isDayTime(camp.time)
+local endIsDay = isDayTime(camp.time + missionSpan)
+
+if startIsDay and endIsDay then
+	Daytime = "day"
+elseif startIsDay then
+	Daytime = "day-night"
+elseif endIsDay then
+	Daytime = "night-day"
+else
+	Daytime = "night"
 end
 
 print(FormatTime(idle_time, "dd:hh:mm") .. " passed. Next mission scheduled at: " .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year) .. ".\n")
@@ -206,7 +201,7 @@ print(FormatTime(idle_time, "dd:hh:mm") .. " passed. Next mission scheduled at: 
 
 TimeAlreadyAdded = true
 
---mise à jour de date dans confMod
+--mise a jour de date dans confMod
 --TODO UpdateConfMod
 -- UpdateConfModSuite(nil, camp.date, "DC_Time " .. debug.getinfo(1).currentline)
 UpdateConfMod(nil, camp.date, "DC_Time " .. debug.getinfo(1).currentline)

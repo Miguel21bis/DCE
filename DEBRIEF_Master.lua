@@ -335,6 +335,44 @@ end
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
 IncludeOnce("UTIL_Functions.lua")
+--wargame airlift : livraisons de la mission -> Active/wargame_logistics_result.lua (lu par DCE_Manager)
+--Le fichier wargame_airlift_deliveries.lua est ecrit par DCE_Airlift.lua (mission). Pas de fichier = 0 kg partout.
+do
+	local wgAir = campL and campL.wargame_airlift
+	if wgAir then
+		local result = { mission = campL.mission, deliveries = {}, air = {} }
+
+		for _, z in ipairs(wgAir.zones or {}) do
+			result.air[z.slot] = 0
+		end
+
+		local fnDeliv = loadfile("wargame_airlift_deliveries.lua")
+		if fnDeliv then
+			wargame_airlift_deliveries = nil
+			local okD = pcall(fnDeliv)
+			local d = wargame_airlift_deliveries
+			if okD and type(d) == "table" and d.mission == campL.mission then
+				result.deliveries = d.deliveries or {}
+				for _, x in ipairs(result.deliveries) do
+					result.air[x.slot] = (result.air[x.slot] or 0) + (x.kg or 0)
+				end
+			else
+				print("DEBRIEF wargame airlift: fichier de livraisons ignore (absent de cette mission ou illisible)")
+			end
+			wargame_airlift_deliveries = nil
+			os.remove("wargame_airlift_deliveries.lua")
+		end
+
+		local wgOut = io.open("Active/wargame_logistics_result.lua", "w")
+		if wgOut then
+			wgOut:write("wargame_logistics_result = " .. TableSerialization(result, 0))
+			wgOut:close()
+		else
+			print("DEBRIEF wargame airlift: ecriture impossible de Active/wargame_logistics_result.lua")
+		end
+	end
+end
+
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 --TODO ceci ne fonctionne pas
