@@ -2,8 +2,9 @@
 -- Donnees : campL.wargame_airlift (flights, zones, cargos, payload) ecrites par MAIN_NextMission.lua
 -- IA : stationnaire (Orbit vitesse 1) au point Load puis au point Drop, validation vivant + vitesse faible
 --      a moins de radius du point pendant holdS secondes.
--- Joueur : menu F10 "Airlift" (construit une fois par unite, jamais modifie ensuite) : charger (pose dans la zone Load),
---          decharger (pose dans la zone Drop), etat du chargement, marquer les zones (fumigene de jour / fusee de nuit).
+-- Joueur : crochet et cargo interne natifs de DCS. Menu F10 "Airlift" (construit une fois par unite, jamais modifie ensuite) :
+--          pour tous : marquer les zones (fumigene de jour / fusee de nuit) ;
+--          en plus, pour les types listes dans simTypes : charger (pose dans la zone Load), decharger (pose dans la zone Drop), etat.
 --          Marquage auto : zone Load a l'approche (une fois par vie), zone Drop a 4 km puis rallumage a 500 m.
 --          Les charges elinguees (static cargo) sont creditees quand elles restent holdS secondes dans la zone Drop.
 -- Sortie : wargame_airlift_deliveries.lua (dans PathDCE), lu par DEBRIEF_Master.lua
@@ -28,6 +29,7 @@ local SCAN_S = 6		--s, periode du balayage de securite des joueurs
 local REBUILD_ON_BIRTH = false	--true : a chaque respawn, le sous-menu de l'unite est supprime puis recree (a n'activer que si le menu disparait apres un respawn)
 local SMOKE_S = 300		--s, duree d'un fumigene (jour)
 local LIGHT_S = 60		--s, duree supposee d'une fusee (nuit) : au dela, la zone est consideree eteinte
+local LOST_S = 60		--s, une charge introuvable depuis ce delai est consideree perdue (accrochee = parfois non interrogeable)
 local SMOKE_CHECK = 4	--s, periode de controle des marquages
 local LOAD_NEAR = 3000	--m, zone de chargement : marquage (une fois par vie) quand le joueur s'approche a moins de ca
 local DROP_FAR, DROP_NEAR = 4000, 500	--m, zone de depose : marquage a 4 km, rallumage a 500 m si eteint
@@ -251,34 +253,53 @@ local function drawZones(cfg)
 	end
 end
 
--- charges elinguees : creditees si elles restent holdS secondes immobiles dans une zone Drop du meme slot
+-- charges elinguees (crochet DCS natif) : creditees si elles restent holdS secondes immobiles dans une zone Drop du camp,
+-- apres avoir ete deplacees de plus de 50 m. La charge livree RESTE sur place (c.delivered empeche le double comptage).
+-- Les logs "charge accrochee/deplacee", "entree en zone DROP" et "LIVRAISON" servent a valider le crochet natif en jeu.
 local function tickCargos(cfg, now)
+	local zones = cfg.zones or {}
 	for _, c in ipairs(M.cargos) do
 		if not c.taken and not c.delivered then
 			local so = StaticObject.getByName(c.name)
 			if so and so:isExist() then
+				c.gone = nil
 				local p = so:getPoint()
 				local pos = { x = p.x, y = p.z }
 				local moved = dist2(pos, c)
 				local still = c.last and dist2(pos, c.last) < 1
 				c.last = pos
+				if moved > 2 and not c.movedLogged then
+					c.movedLogged = true
+					log("charge accrochee/deplacee "..c.name.." ("..math.floor(moved).." m de son point de depart)")
+				end
 				local zone
-				for _, z in ipairs(cfg.zones) do
+				for _, z in ipairs(zones) do
 					if z.kind == "drop" and z.side == c.side and dist2(pos, z) <= z.radius then zone = z end
+				end
+				if zone and not c.zoneLogged then
+					c.zoneLogged = true
+					log("charge "..c.name.." entree en zone DROP "..tostring(zone.slot).." (deplacee de "..math.floor(moved).." m)")
+				elseif not zone then
+					c.zoneLogged = nil
 				end
 				if zone and moved > 50 and still then
 					c.inT = c.inT or now
-					if now - c.inT >= cfg.holdS then
+					if now - c.inT >= (cfg.holdS or 30) then
 						c.delivered = true
-						pcall(function() so:destroy() end)
 						addDelivery(zone.slot, c.side, c.kg, "sling", c.name)
 					end
 				else
 					c.inT = nil
 				end
 			elseif c.last then
-				c.taken = true		--detruite en vol : perdue
-				log("charge perdue: "..c.name)
+				--introuvable : peut-etre accrochee et non interrogeable, on ne conclut qu'apres LOST_S
+				if not c.gone then
+					c.gone = now
+					log("charge introuvable "..c.name.." (accrochee ?)")
+				elseif now - c.gone >= LOST_S then
+					c.taken = true
+					log("charge perdue: "..c.name)
+				end
 			end
 		end
 	end
@@ -309,6 +330,17 @@ local function nearestZone(cfg, kind, side, pos)
 	for _, z in ipairs(cfg.zones or {}) do
 		if z.kind == kind and z.side == side and dist2(pos, z) <= z.radius then return z end
 	end
+end
+
+-- vrai si ce type d'helico garde le chargement simule par menu F10 (campL.wargame_airlift.simTypes) ;
+-- les autres utilisent le crochet et le cargo interne natifs de DCS
+local function isSim(u)
+	local cfg = campL and campL.wargame_airlift
+	local st = cfg and cfg.simTypes
+	if type(st) ~= "table" then return false end
+	local ok, t = pcall(function() return u:getTypeName() end)
+	if not ok or t == nil then return false end
+	return st[t] and true or false
 end
 
 local function sideOf(u)
@@ -601,6 +633,9 @@ local function handleCommand(arg)
 	if not cfg then return end
 	local u = Unit.getByName(arg.u)
 	if not u or not u:isExist() then return end
+	if arg.a == "status" or arg.a == "all" or arg.a == "one" or arg.a == "unload" then
+		if not isSim(u) then return end		--type natif DCS : pas de chargement simule
+	end
 	if arg.a == "status" then
 		cmdStatus(u)
 		return
@@ -640,6 +675,7 @@ local function buildMenu(name)
 		return "skip"
 	end
 
+	local sim = isSim(u)
 	local gid = g:getID()
 	local rec = M.grp[gid]
 	if not rec then
@@ -669,10 +705,12 @@ local function buildMenu(name)
 			parent = missionCommands.addSubMenuForGroup(gid, label, rec.root)
 		end
 		mine.path = parent
-		missionCommands.addCommandForGroup(gid, "Charger au maximum", parent, onCommand, { u = name, a = "all" })
-		missionCommands.addCommandForGroup(gid, "Charger 1 charge", parent, onCommand, { u = name, a = "one" })
-		missionCommands.addCommandForGroup(gid, "Decharger", parent, onCommand, { u = name, a = "unload" })
-		missionCommands.addCommandForGroup(gid, "Etat du chargement", parent, onCommand, { u = name, a = "status" })
+		if sim then		--chargement simule : seulement pour les types listes dans simTypes
+			missionCommands.addCommandForGroup(gid, "Charger au maximum", parent, onCommand, { u = name, a = "all" })
+			missionCommands.addCommandForGroup(gid, "Charger 1 charge", parent, onCommand, { u = name, a = "one" })
+			missionCommands.addCommandForGroup(gid, "Decharger", parent, onCommand, { u = name, a = "unload" })
+			missionCommands.addCommandForGroup(gid, "Etat du chargement", parent, onCommand, { u = name, a = "status" })
+		end
 		missionCommands.addCommandForGroup(gid, "Marquer zone de chargement", parent, onCommand, { u = name, a = "mkload" })
 		missionCommands.addCommandForGroup(gid, "Marquer zone de depose", parent, onCommand, { u = name, a = "mkdrop" })
 	end)
@@ -684,7 +722,7 @@ local function buildMenu(name)
 		M.menus[name] = nil
 		return "retry"
 	end
-	log("menu F10 cree pour "..name.." (groupe "..gid..(rec.single and ", unite seule)" or ", sous-menu par unite)"))
+	log("menu F10 cree pour "..name.." ("..(sim and "chargement simule" or "marquage seul, cargo DCS natif")..", groupe "..gid..(rec.single and ", unite seule)" or ", sous-menu par unite)"))
 	return "done"
 end
 
@@ -701,8 +739,72 @@ local function wantMenu(name, now)
 	M.want[name] = { tries = 0, due = now + BUILD_DELAY }
 end
 
+-- Etape 3 : observation du cargo interne natif (F8). On ECRIT dans le journal, on ne credite RIEN.
+local CARGO_EV = {}		--id d'evenement -> nom
+local function initCargoEvents()
+	for _, n in ipairs({ "S_EVENT_NEW_DYNAMIC_CARGO", "S_EVENT_DYNAMIC_CARGO_LOADED",
+			"S_EVENT_DYNAMIC_CARGO_UNLOADED", "S_EVENT_DYNAMIC_CARGO_REMOVED" }) do
+		local id = world and world.event and world.event[n]
+		if id ~= nil then
+			CARGO_EV[id] = n
+			log("evenement cargo ecoute: "..n.." ("..tostring(id)..")")
+		else
+			log("evenement cargo ABSENT de cette version de DCS: "..n)
+		end
+	end
+end
+
+local function callIf(o, fn)		--o:fn() sous pcall ; nil si la methode n'existe pas
+	local okF, f = pcall(function() return o[fn] end)
+	if not okF or type(f) ~= "function" then return nil end
+	local ok, r = pcall(f, o)
+	if ok then return r end
+	return nil
+end
+
+local function describeObj(o)
+	local parts = {}
+	local n = callIf(o, "getName")
+	if n ~= nil then parts[#parts + 1] = "nom="..tostring(n) end
+	local t = callIf(o, "getTypeName")
+	if t ~= nil then parts[#parts + 1] = "type="..tostring(t) end
+	local dn = callIf(o, "getCargoDisplayName")
+	if dn ~= nil then parts[#parts + 1] = "affiche="..tostring(dn) end
+	local w = callIf(o, "getCargoWeight")
+	if w == nil then w = callIf(o, "getMass") end
+	if w ~= nil then parts[#parts + 1] = "poids="..tostring(w) end
+	local pl = callIf(o, "getPlayerName")
+	if pl ~= nil then parts[#parts + 1] = "joueur="..tostring(pl) end
+	local p = callIf(o, "getPoint")
+	if type(p) == "table" and p.x and p.z then
+		parts[#parts + 1] = string.format("pos=%d,%d", math.floor(p.x), math.floor(p.z))
+	end
+	if #parts == 0 then return "?" end
+	return table.concat(parts, " ")
+end
+
+local function logCargoEvent(e)
+	local keys = {}
+	for k in pairs(e) do keys[#keys + 1] = k end
+	table.sort(keys, function(a, b) return tostring(a) < tostring(b) end)
+	local out = {}
+	for _, k in ipairs(keys) do
+		local v = e[k]
+		if type(v) == "string" or type(v) == "number" or type(v) == "boolean" then
+			out[#out + 1] = tostring(k).."="..tostring(v)
+		elseif v ~= nil then
+			out[#out + 1] = tostring(k).."=<"..describeObj(v)..">"
+		end
+	end
+	log("CARGO-EVT "..CARGO_EV[e.id].." t="..math.floor(timer.getTime()).." "..table.concat(out, " ; "))
+end
+
 local function onWorldEvent(e)
 	if type(e) ~= "table" then return end
+	if e.id ~= nil and CARGO_EV[e.id] then
+		logCargoEvent(e)
+		return
+	end
 	if e.id ~= EV_BIRTH and e.id ~= EV_ENTER then return end
 	if not (campL and campL.wargame_airlift) then return end
 	local u = e.initiator
@@ -791,6 +893,7 @@ local function start(_, now)
 		end
 	end
 	log("demarrage : vols="..#(cfg.flights or {}).." zones="..#(cfg.zones or {}).." charges="..#(cfg.cargos or {}))
+	initCargoEvents()
 	M.handler = { onEvent = function(self, e)
 		local ok, err = pcall(onWorldEvent, e)
 		if not ok then log("ERREUR evenement: "..tostring(err)) end

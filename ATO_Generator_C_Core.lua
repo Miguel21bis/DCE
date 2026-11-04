@@ -2229,7 +2229,7 @@ function WG_AirliftPickBest(sideName, target)
 					local plan = WG_AirliftComputePlan(target, unit, l, { x = base.x, y = base.y })
 
 					if plan.N >= 1 then
-						table.insert(cands, { unit = unit.name, loadout = lname, loadoutName = l.loadoutName, loadoutName2 = l.name, plan = plan, used = used, human = human })
+						table.insert(cands, { unit = unit.name, unitType = unit.type, unitBase = unit.base, loadout = lname, loadoutName = l.loadoutName, loadoutName2 = l.name, plan = plan, used = used, human = human })
 					end
 				end
 			end
@@ -3076,6 +3076,8 @@ WG_AIRLIFT_AI_HOVER_S   = 45			--s, duree du stationnaire IA a chaque point
 WG_AIRLIFT_CARGO_KG     = { 1500, 1000, 750, 500, 500, 300, 250, 200, 150, 100 }	--poids des charges au point Load
 WG_AIRLIFT_CARGO_MAX    = 10			--nb maximum de charges par point Load (entrepot principal), camp du joueur seulement
 WG_AIRLIFT_CARGO_TYPE   = "ammo_cargo"	--type DCS de la charge (static cargo)
+WG_AIRLIFT_CARGO_FARP_DIST = 600		--m, distance des charges a la FARP du joueur, sur le segment FARP -> entrepot (rayon du cercle de charges = 40 m : mini reel 560 m, donc > 500 m)
+WG_AIRLIFT_SIM_TYPES    = {}			--types d'helico dont le joueur utilise le menu F10 SIMULE (sans crochet ni cargo interne DCS). Ex: { "SA342M" }. Vide = tous en cargo DCS natif.
 
 function WG_AirliftBuildData()
 
@@ -3093,7 +3095,11 @@ function WG_AirliftBuildData()
 		zones = {},
 		cargos = {},
 		payload = {},
+		simTypes = {},		--types d'helico dont le joueur utilise le menu F10 simule (pas de crochet / cargo interne DCS)
 	}
+	for _, typeName in ipairs(WG_AIRLIFT_SIM_TYPES) do
+		data.simTypes[typeName] = true
+	end
 
 	local loadPoints = {}
 	local playerSide = (camp and camp.player and camp.player.side) or "blue"
@@ -3133,8 +3139,23 @@ function WG_AirliftBuildData()
 					table.insert(data.flights, {
 						slot = slot, target = t.name, side = side, squad = pick.unit,
 						kgPlanned = math.floor(pick.plan.kgPlanned or 0), N = pick.plan.N or 1,
-						load = load, drop = drop, human = human,
+						load = load, drop = drop, human = human, type = pick.unitType,
 					})
+
+					--vol joueur : la base de depart (FARP) sert a eloigner les charges (voir plus bas)
+					if human and pick.unitBase and db_airbases[pick.unitBase] and db_airbases[pick.unitBase].x then
+						loadPoints[key].fx = db_airbases[pick.unitBase].x
+						loadPoints[key].fy = db_airbases[pick.unitBase].y
+						loadPoints[key].fname = pick.unitBase
+					end
+
+					--vol joueur : le plafond des charges du point Load est la charge utile de son helicoptere
+					if human and pick.unitType and type(PayloadType) == "table" and tonumber(PayloadType[pick.unitType]) then
+						local cap = tonumber(PayloadType[pick.unitType])
+						if not loadPoints[key].capKg or cap < loadPoints[key].capKg then
+							loadPoints[key].capKg = cap
+						end
+					end
 
 					--vol joueur sur une cible sans besoin : on force quand meme des charges (a retirer plus tard)
 					if human and WG_AIRLIFT_FORCE_PLAYER_CARGO then
@@ -3154,16 +3175,36 @@ function WG_AirliftBuildData()
 
 		if lp.side == playerSide and needEff > 0 then
 			local sum, n = 0, 0
+
+			--centre des charges : par defaut le point Load. Si on connait la FARP du joueur, on les place sur le segment
+			--FARP -> entrepot, a WG_AIRLIFT_CARGO_FARP_DIST de la FARP (jamais plus pres), donc entre les deux.
+			local cx, cy = lp.x, lp.y
+			if lp.fx and lp.fy then
+				local dx, dy = lp.x - lp.fx, lp.y - lp.fy
+				local D = math.sqrt(dx * dx + dy * dy)
+				if D > 1 then
+					local d = WG_AIRLIFT_CARGO_FARP_DIST
+					if D < d then
+						d = D
+						WG_Log("AIRLIFT_DATA ATTENTION entrepot ("..math.floor(D).." m) plus pres de "..tostring(lp.fname).." que "..WG_AIRLIFT_CARGO_FARP_DIST.." m : charges poses sur l'entrepot")
+					end
+					cx = lp.fx + dx / D * d
+					cy = lp.fy + dy / D * d
+					WG_Log("AIRLIFT_DATA charges "..tostring(lp.slot).." : "..math.floor(d).." m de "..tostring(lp.fname).." (entrepot a "..math.floor(D).." m)")
+				end
+			end
 			for _, kg in ipairs(WG_AIRLIFT_CARGO_KG) do
 				if n >= WG_AIRLIFT_CARGO_MAX or (sum >= needEff and n >= 1) then break end
-				n = n + 1
-				sum = sum + kg
-				local a = (n - 1) * (2 * math.pi / WG_AIRLIFT_CARGO_MAX)
-				table.insert(data.cargos, {
-					slot = lp.slot, side = lp.side, name = "WG_CARGO_"..lp.slot.."_"..n, kg = kg,
-					x = lp.x + 40 * math.cos(a), y = lp.y + 40 * math.sin(a),
-					heading = 0, typeName = WG_AIRLIFT_CARGO_TYPE,
-				})
+				if not lp.capKg or kg <= lp.capKg then		--sinon: trop lourde pour l'helicoptere du joueur (crochet / soute), on passe a la suivante
+					n = n + 1
+					sum = sum + kg
+					local a = (n - 1) * (2 * math.pi / WG_AIRLIFT_CARGO_MAX)
+					table.insert(data.cargos, {
+						slot = lp.slot, side = lp.side, name = "WG_CARGO_"..lp.slot.."_"..n, kg = kg,
+						x = cx + 40 * math.cos(a), y = cy + 40 * math.sin(a),
+						heading = 0, typeName = WG_AIRLIFT_CARGO_TYPE,
+					})
+				end
 			end
 		end
 	end
@@ -3184,6 +3225,7 @@ function WG_AirliftBuildData()
 	WG_Log("AIRLIFT_DATA vols: "..#data.flights.." zones: "..#data.zones.." charges: "..#data.cargos)
 	WG_FlushLog(true)
 end
+
 
 
 if Multi and Multi.Group then
