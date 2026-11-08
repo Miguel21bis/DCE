@@ -259,8 +259,9 @@ Return = {}
 		end
 	end
 
-	--return number of ready + damaged + reserve aircraft by side
+		--return number of ready + damaged + reserve aircraft by side
 	--@doc    Total aircraft alive for one side: ready + damaged + reserve of all active air units.
+	--@doc    Negative values in oob_air are counted as 0 (and reported in the log).
 	--@doc    Returns 9999 when the side has no aircraft yet at mission 1 or before.
 	--@param  sideTest    | source=blue/red | Side: "blue" or "red"
 	--@returns number | Aircraft alive
@@ -271,14 +272,22 @@ Return = {}
 		for side_name, side in pairs(oob_air) do									--iterate through sides in oob_air
 			if side_name == sideTest then
 				for unit_n,unit in pairs(side) do									--iterate through units in side
-					if not unit.inactive then										--unit found
-						sum = sum + unit.roster.ready
-						if unit.roster.reserve then
-							sum = sum + unit.roster.reserve
+					if not unit.inactive and unit.roster then
+						local ready    = unit.roster.ready    or 0
+						local reserve  = unit.roster.reserve  or 0
+						local damaged  = unit.roster.damaged  or 0
+
+						--valeur negative = incoherence dans oob_air : on la signale et on la compte pour 0
+						if ready < 0 or reserve < 0 or damaged < 0 then
+							AddLog("DcCT ATTENTION effectif negatif, unite "..tostring(unit.name)
+								.." ("..tostring(side_name)..") ready="..tostring(ready)
+								.." reserve="..tostring(reserve).." damaged="..tostring(damaged))
+							print("DcCT ATTENTION effectif negatif, unite "..tostring(unit.name)
+								.." ("..tostring(side_name)..") ready="..tostring(ready)
+								.." reserve="..tostring(reserve).." damaged="..tostring(damaged))
 						end
-						if unit.roster.damaged then
-							sum = sum + unit.roster.damaged
-						end
+
+						sum = sum + math.max(0, ready) + math.max(0, reserve) + math.max(0, damaged)
 					end
 				end
 			end
@@ -788,13 +797,47 @@ Action = {}
 	function Action.CampaignEnd(arg)
 		EndCampaign = arg
 		camp.endCampaign = arg
-		if debugKT then print(" 	Action.CampaignEnd(arg)---> : "..tostring(arg)) end
+
+		--quel trigger provoque la fin ? la boucle des triggers memorise sa cle dans DbgCurrentTrigger
+		local trig = camp_triggers[DbgCurrentTrigger]
+		local trigName = "inconnu (appel hors de la boucle des triggers)"
+		local trigCond = "inconnue"
+		if trig then
+			trigName = tostring(trig.name or DbgCurrentTrigger)
+			trigCond = tostring(trig.condition)
+		end
+		camp.endTrigger = trigName
+
+		--les chiffres qui servent aux conditions de victoire/defaite, tels qu'ils sont a cet instant
+		local lines = {}
+		table.insert(lines, "FIN DE CAMPAGNE : "..tostring(arg))
+		table.insert(lines, "Trigger a l origine de la fin : "..trigName)
+		table.insert(lines, "Condition (vraie) : "..trigCond)
+		table.insert(lines, "Date "..tostring(camp.date.day).."."..tostring(camp.date.month).."."..tostring(camp.date.year)..", mission "..tostring(camp.mission)..", passe de generation "..tostring(MissionInstance))
+
+		for _, side in ipairs({"blue", "red"}) do
+			local g = GroundTarget and GroundTarget[side]
+			if g then
+				table.insert(lines, "GroundTarget["..side.."] : "..tostring(g.percent).."% ("..tostring(g.alive).." cibles vivantes sur "..tostring(g.total)..")")
+			end
+		end
+
+		if GroundZoneTarget then
+			for side, zones in pairs(GroundZoneTarget) do
+				for zoneName, z in pairs(zones) do
+					table.insert(lines, "GroundZoneTarget["..side.."]["..tostring(zoneName).."] : "..tostring(z.percent).."% ("..tostring(z.alive).." / "..tostring(z.total)..")")
+				end
+			end
+		end
+
+		table.insert(lines, "Avions en vie : blue "..tostring(Return.totalAirUnitAliveBySide("blue")).." / red "..tostring(Return.totalAirUnitAliveBySide("red")))
 
 		print()
 		print("********************ATTENTION******************")
-		print(" 	Action.CampaignEnd(arg)---> : "..tostring(arg))
-		print(" 	Action.CampaignEnd(arg)---> : "..tostring(Briefing_text))
-		print("********************ATTENTION******************")
+		for _, line in ipairs(lines) do
+			print(" "..line)
+			AddLog(line)
+		end
 		print("*************** Attention, take into account that the campaign is over, press to see the rest..****************")
 		print("********************ATTENTION******************") os.execute 'pause'
 	end

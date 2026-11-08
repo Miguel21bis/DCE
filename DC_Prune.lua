@@ -203,6 +203,11 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 		-- print("DC_P_T  Pack keep plane and helicopter: "..unit.name )
 		return true -- keep plane and helicopte
 
+	-- Wargame : caisses de fret posées par scriptsMod (WG_CARGO_SCPT_<slot>_<n>) entre la FARP et l'entrepôt.
+	-- "cargo" est un mot à pruner : cette branche doit rester AVANT isPruneKeyword.
+	elseif string.find(lowCaseName, "wg_cargo", 1, true) then
+		return true -- keep wargame cargo crates
+
 	-- puis dans keepGroundUnit :
 	elseif isPruneKeyword(lowCaseName) then
 

@@ -3484,6 +3484,7 @@ Data_warehouses =
 	},
 	["speed"] = 16.666666,
 	["dynamicSpawn"] = false,
+	["dynamicCargo"] = true,
 	["unlimitedAircrafts"] = true,
 	["unlimitedFuel"] = true,
 	["size"] = 100,
@@ -3495,7 +3496,6 @@ Data_warehouses =
 		["InitFuel"] = 100,
 	},
 	["coalition"] = "blue",
-	["dynamicCargo"] = false,
 	["OperatingLevel_Eqp"] = 10,
 	["gasoline"] = 
 	{

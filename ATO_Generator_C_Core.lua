@@ -23,6 +23,167 @@ end
 --A ajuster ici, avec l'expérience, sans toucher au reste du fichier.
 ESCORT_MINSCORE_DISCOUNT = 0
 
+-- ============================================================================
+-- humainOnly : reserve a un joueur humain (Player ou Client)
+-- ============================================================================
+--Vrai si l'escadrille est humainOnly, OU si sa base / son FARP (db_airbases) est humainOnly.
+--Un squad dont la base est humainOnly ne doit servir que pour un humain, comme un squad humainOnly.
+function HumainOnlyUnit(unit)
+	if not unit then return false end
+	if unit.humainOnly then return true end
+	local base = unit.base and db_airbases and db_airbases[unit.base]
+	if base and base.humainOnly then return true end
+	return false
+end
+
+-- ============================================================================
+-- TRACE humainOnly : un fichier de log rien que pour comprendre pourquoi des vols IA
+-- utilisent des appareils d'un squad humainOnly (airlift Solo, mais aussi le reste).
+-- Fichier : Campaigns\<campagne>\Debug\Wargame\ScriptsModPart\HumainOnly_Trace.log
+-- Ecrase au 1er passage du process, complete aux passes suivantes (tentatives de generation).
+-- HO_TRACE = false : plus rien n'est ecrit.
+-- ============================================================================
+HO_TRACE = true
+HO_TRACE_DIR = "Debug/Wargame/ScriptsModPart"
+HO_TRACE_FILE = HO_TRACE_DIR.."/HumainOnly_Trace.log"
+HO_TraceStarted = HO_TraceStarted or false
+
+--ecrit une ligne (ouvre / ferme a chaque fois : le fichier survit a un plantage)
+function HoLog(msg)
+	if not HO_TRACE then return end
+
+	local mode = "a"
+	if not HO_TraceStarted then
+		mode = "w"
+		local dir = string.gsub(HO_TRACE_DIR, "/", "\\")
+		os.execute('if not exist "'..dir..'" mkdir "'..dir..'"')
+	end
+
+	local f = io.open(HO_TRACE_FILE, mode)
+	if f then
+		HO_TraceStarted = true
+		f:write(tostring(msg).."\n")
+		f:close()
+	end
+end
+
+--squad (table oob_air) a partir de son nom, nil si introuvable
+function HoUnit(name)
+	if not name then return nil end
+	for _, squads in pairs(oob_air) do
+		for _, sq in pairs(squads) do
+			if sq.name == name then return sq end
+		end
+	end
+	return nil
+end
+
+--etat des compteurs d'avions d'un squad (pour les lignes de log)
+function HoAcft(name)
+	local a = AcftAvail and AcftAvail[name]
+	if not a then return "AcftAvail=nil" end
+	return "AcftAvail available="..tostring(a.available).." assigned="..tostring(a.assigned).." unassigned="..tostring(a.unassigned)
+end
+
+--entete d'une passe : reglages + squads humainOnly (a appeler une fois par passe)
+function HoHeader()
+	if not HO_TRACE then return end
+
+	HoLog("")
+	HoLog("==================================================================================")
+	HoLog("PASSE GENERATEUR "..tostring(GeneratorPass).." | MissionInstance="..tostring(MissionInstance).." | SinglePlayer="..tostring(SinglePlayer).." | Multi.NbGroup="..tostring(Multi and Multi.NbGroup).." | heure "..os.date("%H:%M:%S"))
+	HoLog("REGLAGES airlift : PLAYER_FIRST="..tostring(WG_AIRLIFT_PLAYER_FIRST).." GENERATE="..tostring(WG_AIRLIFT_GENERATE).." MAX_N="..tostring(WG_AIRLIFT_MAX_N).." RANDOM="..tostring(WG_AIRLIFT_RANDOM).." IGNORE_SUPPORT="..tostring(WG_AIRLIFT_IGNORE_SUPPORT))
+
+	local nb = 0
+	for side, squads in pairs(oob_air) do
+		for _, sq in pairs(squads) do
+			if HumainOnlyUnit(sq) then
+				nb = nb + 1
+				local base = db_airbases and db_airbases[sq.base]
+				local ready = "?"
+				if sq.roster then ready = tostring(sq.roster.ready) end
+				HoLog("SQUAD humainOnly : "..tostring(side).." "..tostring(sq.name).." type="..tostring(sq.type).." base="..tostring(sq.base).." | squad.humainOnly="..tostring(sq.humainOnly).." base.humainOnly="..tostring(base and base.humainOnly).." | player="..tostring(sq.player).." client="..tostring(sq.client).." inactive="..tostring(sq.inactive).." roster.ready="..ready.." | "..HoAcft(sq.name))
+			end
+		end
+	end
+	if nb == 0 then HoLog("(aucun squad humainOnly dans oob_air)") end
+end
+
+--liste les vols de l'ATO qui appartiennent a un squad humainOnly.
+--apresAssign = false : avant ATO_PlayerAssign (les vols sont "candidat", personne n'est encore affecte)
+--apresAssign = true  : apres ATO_PlayerAssign, avec le VERDICT (vol joueur / client / IA)
+function HoDumpATO(titre, apresAssign)
+	if not HO_TRACE then return end
+
+	HoLog("")
+	HoLog("---------- "..tostring(titre).." | passe "..tostring(GeneratorPass).." ----------")
+
+	if apresAssign then
+		local cp = camp and camp.player
+		if cp then
+			HoLog("camp.player : side="..tostring(cp.side).." pack_n="..tostring(cp.pack_n).." role="..tostring(cp.role).." flight="..tostring(cp.flight).." groupName="..tostring(cp.groupName).." squad="..tostring(cp.squadName).." task="..tostring(cp.task))
+		else
+			HoLog("camp.player : aucun (TaskRefused="..tostring(TaskRefused).." PlayerFlight="..tostring(PlayerFlight)..")")
+		end
+		if camp and camp.client then
+			HoLog("camp.client : "..#camp.client.." entree(s)")
+		end
+	end
+
+	for side, squads in pairs(oob_air) do
+		for _, sq in pairs(squads) do
+			if HumainOnlyUnit(sq) then
+				local total, humain, ia, avionsIA = 0, 0, 0, 0
+				local lignes = {}
+
+				for s2, packs in pairs(ATO) do
+					for p = 1, #packs do
+						for role, flights in pairs(packs[p]) do
+							if type(flights) == "table" then
+								for f = 1, #flights do
+									local fl = flights[f]
+									if type(fl) == "table" and fl.name == sq.name then
+										local qui = "candidat"
+										if fl.player then
+											qui = "JOUEUR"
+										elseif fl.client then
+											qui = "CLIENT"
+										elseif apresAssign then
+											qui = "IA"
+										end
+
+										total = total + 1
+										if qui == "JOUEUR" or qui == "CLIENT" then
+											humain = humain + 1
+										end
+										if qui == "IA" then
+											ia = ia + 1
+											avionsIA = avionsIA + (fl.number or 0)
+										end
+
+										lignes[#lignes + 1] = "   "..tostring(s2).." pack"..p.." "..tostring(role).."["..f.."] id="..tostring(fl.id).." groupName="..tostring(fl.groupName).." task="..tostring(fl.task).." cible="..tostring(fl.target_name).." nb="..tostring(fl.number).." playable="..tostring(fl.playable).." tot_from="..tostring(fl.tot_from).." -> "..qui
+									end
+								end
+							end
+						end
+					end
+				end
+
+				HoLog("SQUAD "..tostring(sq.name).." ("..tostring(sq.type)..", base "..tostring(sq.base).."): "..total.." vol(s) dans l'ATO")
+				for _, l in ipairs(lignes) do
+					HoLog(l)
+				end
+				if apresAssign then
+					local alerte = ""
+					if ia > 0 then alerte = "   <== BUG : des vols IA utilisent ce squad humainOnly" end
+					HoLog("VERDICT "..tostring(sq.name).." : "..humain.." vol(s) humain(s), "..ia.." vol(s) IA ("..avionsIA.." avion(s) IA)"..alerte)
+				end
+				HoLog("   compteurs : "..HoAcft(sq.name))
+			end
+		end
+	end
+end
+
 local atoMainTaskFound = false
 
 local multiPlaneSet = {}
@@ -1233,6 +1394,10 @@ local function buildDraftSorties(
 		draftSortiesEntry.scoreAdd = 0.000011
 		draftSortiesEntry.scoreCoef = 1
 
+		if HO_TRACE and HumainOnlyUnit(unit) then
+			HoLog("  DRAFT_CREE id="..tostring(draftSortiesEntry.id).." squad="..tostring(unit.name).." task="..tostring(task).." cible="..tostring(target.titleName).." nb_avions="..tostring(draftSortiesEntry.number).." playable="..tostring(draftSortiesEntry.playable).." multipack="..tostring(multipack).." main_overideMP="..tostring(draftSortiesEntry.main_overideMP).." airlift="..tostring(target.wargameLogistic))
+		end
+
 		local route_threat = draftContext.state.route.threats.ground_total
 			+ draftContext.state.route.threats.air_total
 
@@ -1439,14 +1604,23 @@ local function processEligibleLoadout(draftContext, sideName, task, target, targ
 			)
 		end
 
+		--squad humainOnly OU base/FARP humainOnly (voir HumainOnlyUnit) : ses vols ne doivent exister que pour un humain.
+		--Multi : seul le vol demande par le joueur (draftContext.overideMP_A, pose plus haut) est autorise.
+		--         Avant, le test "unit.player or unit.client" laissait passer TOUS les vols du squad
+		--         des qu'un joueur l'avait choisi, donc des vols IA apparaissaient.
+		--Solo  : on laisse passer le squad du joueur (il doit pouvoir choisir parmi ses vols).
+		--         (pas de retrait automatique des vols IA non choisis : PruneHumainOnlyAI n'existe pas pour l'instant)
 		local passHumain = true
-		if unit.humainOnly then
-			passHumain = false
-			if (unit.player or unit.client) then
-				passHumain = true
+		if HumainOnlyUnit(unit) then
+			if Multi and Multi.NbGroup and Multi.NbGroup >= 1 then
+				passHumain = (draftContext.overideMP_A == true)
 			else
-
+				passHumain = (unit.player or unit.client) and true or false
 			end
+		end
+
+		if HO_TRACE and HumainOnlyUnit(unit) then
+			HoLog("  PASS_HUMAIN squad="..tostring(unit.name).." task="..tostring(task).." cible="..tostring(target_name).." loadout="..tostring(currentLoadout.name).." Multi.NbGroup="..tostring(Multi and Multi.NbGroup).." overideMP_A="..tostring(draftContext.overideMP_A).." unit.player="..tostring(unit.player).." unit.client="..tostring(unit.client).." -> passHumain="..tostring(passHumain).." | "..HoAcft(unit.name))
 		end
 
 		--firepower individuelle apportée par ce squad
@@ -2097,6 +2271,21 @@ end
 --soit (2N-1) x Ded, puis depose -> base (Dpb).  Distance totale = Dbe + (2N-1) x Ded + Dpb.
 --Budget = portee x 2 x (1 - marge).   =>   N <= ( (budget - Dbe - Dpb) / Ded + 1 ) / 2
 --Retourne une table : feasible (portee ok pour au moins 1 rotation), N, limitedBy, distances, charge, etc.
+--Point de depose (Drop) d'une cible airlift : x, y, rayon, source.
+--DCE_Manager peut donner wargameDropX / wargameDropY (centre du largage) et wargameDropRadius (rayon).
+--Champs absents : on garde le point de ravitaillement (target.x / target.y) et le rayon par defaut, comme avant.
+--UN SEUL endroit pour ce choix : calcul de portee, waypoint Drop de la route, zones et vols de la mission.
+function WG_AirliftDropPoint(t)
+	local r = tonumber(t.wargameDropRadius)
+	if not r or r <= 0 then r = WG_AIRLIFT_ZONE_RADIUS or 300 end
+
+	local dx, dy = tonumber(t.wargameDropX), tonumber(t.wargameDropY)
+	if dx and dy then
+		return dx, dy, r, "wargameDrop"
+	end
+	return tonumber(t.x), tonumber(t.y), r, "target"
+end
+
 function WG_AirliftComputePlan(target, unit, currentLoadout, airbasePoint)
 
 	local plan = { N = 0, nRange = 0, feasible = false, limitedBy = "none" }
@@ -2113,7 +2302,8 @@ function WG_AirliftComputePlan(target, unit, currentLoadout, airbasePoint)
 	end
 
 	local loadPoint = { x = target.wargameLoadX, y = target.wargameLoadY }
-	local dropPoint = { x = target.x, y = target.y }
+	local dpx, dpy = WG_AirliftDropPoint(target)
+	local dropPoint = { x = dpx or target.x, y = dpy or target.y }
 	local k = WG_AIRLIFT_DETOUR
 
 	local Dbe = GetDistance(airbasePoint, loadPoint) * k		--base -> chargement
@@ -2216,8 +2406,13 @@ function WG_AirliftPickBest(sideName, target)
 		local used = WG_AirliftUsed[unit.name] or 0
 		local human = (unit.player or unit.client) and true or false
 		local excluded = WG_AirliftExcluded[tostring(target.name).."|"..tostring(unit.name)]
+		local humainOK = human or not HumainOnlyUnit(unit)		--squad ou base/FARP humainOnly : jamais pour l'IA
+		if HO_TRACE and HumainOnlyUnit(unit) then
+			HoLog("  AIRLIFT_CAND target="..tostring(target.name).." squad="..tostring(unit.name).." humain="..tostring(human).." humainOK="..tostring(humainOK).." PLAYER_FIRST="..tostring(WG_AIRLIFT_PLAYER_FIRST).." deja_utilise="..tostring(used).." excluded="..tostring(excluded))
+		end
 
 		if isHeli and not unit.inactive and (WG_AIRLIFT_PLAYER_FIRST or not human)
+			and humainOK
 			and not excluded
 			and base and base.x and base.y and base.inactive ~= true
 			and unit.tasks and unit.tasks["Transport"] and list
@@ -2246,6 +2441,8 @@ function WG_AirliftPickBest(sideName, target)
 
 	--escadrille joueur prioritaire : si l'une peut servir la cible, l'IA ne la prend pas (le joueur doit avoir un vol jouable)
 	--(un vol joueur non choisi au briefing reste un vol IA de la meme escadrille, comportement DCE habituel)
+	local nbCandAvant = #cands		--trace humainOnly : nb de candidats avant le filtre joueur
+
 	if WG_AIRLIFT_PLAYER_FIRST then
 		local humans = {}
 		for _, c in ipairs(cands) do
@@ -2277,6 +2474,10 @@ function WG_AirliftPickBest(sideName, target)
 	WG_Log("AIRLIFT_CANDIDATS target: "..tostring(target.name).." | "..table.concat(txt, " ; ").." | pool="..#pool.." random="..tostring(WG_AIRLIFT_RANDOM))
 
 	WG_AirliftUsed[chosen.unit] = (WG_AirliftUsed[chosen.unit] or 0) + 1
+
+	if HO_TRACE then
+		HoLog("  AIRLIFT_PICK target="..tostring(target.name).." candidats_avant_filtre_joueur="..tostring(nbCandAvant).." apres="..tostring(#cands).." -> retenu="..tostring(chosen.unit).." humain="..tostring(chosen.human).." humainOnly="..tostring(HumainOnlyUnit(HoUnit(chosen.unit))).." N_rotations="..tostring(chosen.plan.N))
+	end
 
 	return chosen
 end
@@ -2462,10 +2663,11 @@ function WG_AirliftRewriteRoute(entry, tgt, plan, airbasePoint, sideName)
 	end
 
 	--partie "mission" : depuis Departure jusqu'a Land
+	local dpx, dpy = WG_AirliftDropPoint(tgt)
 	local tail = { new[#new] }
 	for k = 1, plan.N do
 		tail[#tail + 1] = { x = tgt.wargameLoadX, y = tgt.wargameLoadY, id = "Load", alt = cruise }
-		tail[#tail + 1] = { x = tgt.x, y = tgt.y, id = "Drop", alt = cruise }
+		tail[#tail + 1] = { x = dpx or tgt.x, y = dpy or tgt.y, id = "Drop", alt = cruise }
 	end
 	tail[#tail + 1] = { x = airbasePoint.x, y = airbasePoint.y, id = "Land", alt = airbasePoint.h or 0 }
 
@@ -2691,6 +2893,10 @@ function WG_AirliftProcess(draftContext, sideName, task, target, target_name, un
 	end
 
 	WG_AirliftDone[target.name] = true
+
+	if HO_TRACE then
+		HoLog("  AIRLIFT_DRAFTS_CREES target="..tostring(target.name).." squad="..tostring(unit.name).." humainOnly="..tostring(HumainOnlyUnit(unit)).." drafts="..tostring(#list - nBefore).." N_rotations="..tostring(plan.N).." unit.player="..tostring(unit.player))
+	end
 	WG_Log("AIRLIFT_GEN OK target: "..tostring(target.name).." squad: "..unit.name.." loadout: "..tostring(loadoutName)
 		.." drafts crees: "..(#list - nBefore).." N="..plan.N)
 end
@@ -3077,6 +3283,14 @@ WG_AIRLIFT_CARGO_KG     = { 1500, 1000, 750, 500, 500, 300, 250, 200, 150, 100 }
 WG_AIRLIFT_CARGO_MAX    = 10			--nb maximum de charges par point Load (entrepot principal), camp du joueur seulement
 WG_AIRLIFT_CARGO_TYPE   = "ammo_cargo"	--type DCS de la charge (static cargo)
 WG_AIRLIFT_CARGO_FARP_DIST = 600		--m, distance des charges a la FARP du joueur, sur le segment FARP -> entrepot (rayon du cercle de charges = 40 m : mini reel 560 m, donc > 500 m)
+WG_AIRLIFT_CLEAR        = true			--true = degage les points de chargement / depose (arbres et batiments) au demarrage de la mission
+WG_AIRLIFT_CLEAR_TREES  = true			--arbres : action DCS a_remove_scene_objects (meme action que "Remove trees" d'une mission)
+WG_AIRLIFT_CLEAR_TREES_MASK = 1			--objects_mask de cette action (1 = valeur de la mission de reference "Remove trees Khe San")
+WG_AIRLIFT_CLEAR_BUILDINGS = true		--batiments : action DCS a_scenery_destruction_zone (niveau 100), la meme que celle des decors detruits
+WG_AIRLIFT_CLEAR_DESTROY_S = 5			--s, delai avant la destruction des batiments (les arbres partent au demarrage)
+WG_AIRLIFT_CLEAR_LOAD_R = 70			--m, rayon degage autour du centre des charges (cercle des charges = 40 m)
+WG_AIRLIFT_CLEAR_DROP_R = 80			--m, rayon degage autour du centre du point de depose (jamais plus que le rayon de la zone)
+WG_AIRLIFT_CLEAR_ALL_SIDES = false		--false = camp du joueur seulement
 WG_AIRLIFT_SIM_TYPES    = {}			--types d'helico dont le joueur utilise le menu F10 SIMULE (sans crochet ni cargo interne DCS). Ex: { "SA342M" }. Vide = tous en cargo DCS natif.
 
 function WG_AirliftBuildData()
@@ -3094,6 +3308,7 @@ function WG_AirliftBuildData()
 		flights = {},
 		zones = {},
 		cargos = {},
+		clear = {},		--zones a degager (arbres / batiments) : { kind, slot, side, x, y, radius }
 		payload = {},
 		simTypes = {},		--types d'helico dont le joueur utilise le menu F10 simule (pas de crochet / cargo interne DCS)
 	}
@@ -3117,18 +3332,32 @@ function WG_AirliftBuildData()
 				end
 
 				local load = { x = t.wargameLoadX, y = t.wargameLoadY }
-				local drop = { x = t.x, y = t.y }
+				local dropX, dropY, dropR, dropSrc = WG_AirliftDropPoint(t)
+				local drop = { x = dropX, y = dropY }
+				if dropSrc == "wargameDrop" or dropR ~= data.radius then
+					WG_Log("AIRLIFT_DATA depose "..tostring(slot).." : centre "..math.floor(dropX)..","..math.floor(dropY).." rayon "..math.floor(dropR).." m (source: "..dropSrc..")")
+				end
 
 				--zones : sur tous les points de ravitaillement, meme sans vol IA
 				table.insert(data.zones, { slot = slot, side = side, kind = "load", x = load.x, y = load.y, radius = data.radius })
-				table.insert(data.zones, { slot = slot, side = side, kind = "drop", x = drop.x, y = drop.y, radius = data.radius })
+				table.insert(data.zones, { slot = slot, side = side, kind = "drop", x = drop.x, y = drop.y, radius = dropR })
 
 				--point Load (entrepot principal) : les cibles qui partagent le meme point partagent aussi les charges
 				local key = math.floor(load.x + 0.5).."_"..math.floor(load.y + 0.5)
 				if not loadPoints[key] then
-					loadPoints[key] = { x = load.x, y = load.y, side = side, slot = slot, need = 0, forced = 0 }
+					loadPoints[key] = { x = load.x, y = load.y, side = side, slot = slot, need = 0, forced = 0, slotSet = {} }
 				end
 				loadPoints[key].need = loadPoints[key].need + (tonumber(t.wargameNeedKg) or 0)
+				loadPoints[key].slotSet[slot] = true
+
+				--supply depot de la FARP (DCE_Manager) : present seulement quand le chargement se fait a une FARP
+				--wargameDepotX / wargameDepotY / wargameDepotName. Les charges sont alors posees autour du depot.
+				local depX, depY = tonumber(t.wargameDepotX), tonumber(t.wargameDepotY)
+				if depX and depY and not loadPoints[key].depotX then
+					loadPoints[key].depotX = depX
+					loadPoints[key].depotY = depY
+					loadPoints[key].depotName = t.wargameDepotName
+				end
 
 				--vol : seulement si un vol a ete cree pour cette cible
 				local pick = WG_AirliftPick and WG_AirliftPick[t.name]
@@ -3139,7 +3368,7 @@ function WG_AirliftBuildData()
 					table.insert(data.flights, {
 						slot = slot, target = t.name, side = side, squad = pick.unit,
 						kgPlanned = math.floor(pick.plan.kgPlanned or 0), N = pick.plan.N or 1,
-						load = load, drop = drop, human = human, type = pick.unitType,
+						load = load, drop = drop, dropRadius = dropR, human = human, type = pick.unitType,
 					})
 
 					--vol joueur : la base de depart (FARP) sert a eloigner les charges (voir plus bas)
@@ -3167,6 +3396,7 @@ function WG_AirliftBuildData()
 	end
 
 	--charges a elinguer / charger : seulement dans le camp du joueur, WG_AIRLIFT_CARGO_MAX au plus par point Load
+	local crateCentres = {}		--centre reel de chaque groupe de charges (pour le degagement)
 	for key, lp in pairs(loadPoints) do
 		local needEff = lp.need
 		if needEff <= 0 and lp.forced > 0 then
@@ -3176,10 +3406,20 @@ function WG_AirliftBuildData()
 		if lp.side == playerSide and needEff > 0 then
 			local sum, n = 0, 0
 
-			--centre des charges : par defaut le point Load. Si on connait la FARP du joueur, on les place sur le segment
-			--FARP -> entrepot, a WG_AIRLIFT_CARGO_FARP_DIST de la FARP (jamais plus pres), donc entre les deux.
+			--centre des charges : par defaut le point Load.
+			--1) Si DCE_Manager donne un supply depot de FARP (wargameDepotX/Y) : autour du depot.
+			--2) Sinon, si on connait la FARP du joueur, sur le segment FARP -> entrepot, a WG_AIRLIFT_CARGO_FARP_DIST
+			--   de la FARP (jamais plus pres), donc entre les deux.
 			local cx, cy = lp.x, lp.y
-			if lp.fx and lp.fy then
+			if lp.depotX and lp.depotY then
+				cx, cy = lp.depotX, lp.depotY
+				local dTxt = ""
+				if lp.fx and lp.fy then
+					local ddx, ddy = cx - lp.fx, cy - lp.fy
+					dTxt = " (a "..math.floor(math.sqrt(ddx * ddx + ddy * ddy)).." m de "..tostring(lp.fname)..")"
+				end
+				WG_Log("AIRLIFT_DATA charges "..tostring(lp.slot).." : autour du supply depot "..tostring(lp.depotName or "?")..dTxt)
+			elseif lp.fx and lp.fy then
 				local dx, dy = lp.x - lp.fx, lp.y - lp.fy
 				local D = math.sqrt(dx * dx + dy * dy)
 				if D > 1 then
@@ -3200,11 +3440,26 @@ function WG_AirliftBuildData()
 					sum = sum + kg
 					local a = (n - 1) * (2 * math.pi / WG_AIRLIFT_CARGO_MAX)
 					table.insert(data.cargos, {
-						slot = lp.slot, side = lp.side, name = "WG_CARGO_"..lp.slot.."_"..n, kg = kg,
+						slot = lp.slot, side = lp.side, name = "WG_CARGO_SCPT_"..lp.slot.."_"..n, kg = kg,
 						x = cx + 40 * math.cos(a), y = cy + 40 * math.sin(a),
 						heading = 0, typeName = WG_AIRLIFT_CARGO_TYPE,
 					})
 				end
+			end
+
+			if n >= 1 then
+				table.insert(crateCentres, { slot = lp.slot, side = lp.side, x = cx, y = cy })
+			end
+
+			--la zone Load du joueur (et son marquage) suit les charges, pas l'entrepot principal.
+			--Les vols IA gardent leur point Load (flights[].load) : seule la zone change.
+			if n >= 1 and (cx ~= lp.x or cy ~= lp.y) then
+				for _, z in ipairs(data.zones) do
+					if z.kind == "load" and z.side == lp.side and lp.slotSet[z.slot] then
+						z.x, z.y = cx, cy
+					end
+				end
+				WG_Log("AIRLIFT_DATA zone Load du joueur deplacee sur les charges : "..math.floor(cx)..","..math.floor(cy))
 			end
 		end
 	end
@@ -3212,6 +3467,32 @@ function WG_AirliftBuildData()
 	if #data.zones == 0 then
 		WG_Log("AIRLIFT_DATA aucune cible airlift active : rien transmis a la mission")
 		return
+	end
+
+	--zones a degager (arbres / batiments) : MAIN_NextMission en fait des trigger zones cachees + les actions DCS.
+	--Load : seulement la ou des charges ont ete posees (jamais autour d'un entrepot nu) ; Drop : camp du joueur.
+	if WG_AIRLIFT_CLEAR and (WG_AIRLIFT_CLEAR_TREES or WG_AIRLIFT_CLEAR_BUILDINGS) then
+		local seen = {}
+		local function addClear(kind, slot, side, x, y, radius)
+			local key = kind.."_"..math.floor(x + 0.5).."_"..math.floor(y + 0.5)
+			if seen[key] then return end
+			seen[key] = true
+			table.insert(data.clear, { kind = kind, slot = slot, side = side, x = x, y = y, radius = radius })
+		end
+
+		for _, c in ipairs(crateCentres) do
+			addClear("load", c.slot, c.side, c.x, c.y, WG_AIRLIFT_CLEAR_LOAD_R)
+		end
+
+		for _, z in ipairs(data.zones) do
+			if z.kind == "drop" and (WG_AIRLIFT_CLEAR_ALL_SIDES or z.side == playerSide) then
+				addClear("drop", z.slot, z.side, z.x, z.y, math.min(WG_AIRLIFT_CLEAR_DROP_R, z.radius))
+			end
+		end
+
+		for _, c in ipairs(data.clear) do
+			WG_Log("AIRLIFT_DATA degagement "..c.kind.." "..tostring(c.slot).." : "..math.floor(c.x)..","..math.floor(c.y).." rayon "..c.radius.." m")
+		end
 	end
 
 	--charge utile par type d'helicoptere (pour limiter le chargement du joueur)
@@ -3254,6 +3535,8 @@ end
 --///////////////////////------------MAIN------Bloc A------/////////////////////////////////////
 --///////////////////////------------MAIN------Bloc A------/////////////////////////////////////
 local EMPTY = {} -- Optimisation CPU : évite de recréer une table en mémoire
+
+HoHeader()		--trace humainOnly : entete de passe
 
 --creat draft sorties
 for sideName, units in pairs(oob_air) do
@@ -4932,11 +5215,21 @@ for sideName, draftT in pairs(draftSorties) do
 													end
 
 													-- 2) Cas humainOnly
-													if passIsClientCondition and unitSupport.humainOnly then
-														passIsClientCondition = (unitSupport.player or unitSupport.client)
+													if passIsClientCondition and HumainOnlyUnit(unitSupport) then
+														--Multi : uniquement si ce support est celui demande par le joueur (overideMP_B)
+														--Solo  : squad du joueur, les vols IA non choisis sont retires apres l'assignation
+														if Multi and Multi.NbGroup and Multi.NbGroup >= 1 then
+															passIsClientCondition = (overideMP_B == true)
+														else
+															passIsClientCondition = (unitSupport.player or unitSupport.client) and true or false
+														end
 														-- if isDebugModeB then
 														-- 	debugLog(debuGenTxt1480.."\n"..(tostring(draft.id).." AtoG II pass B_15_g support_requirement passe: humainOnly "..tostring(unitSupport.humainOnly).." passIsClientCondition "..tostring(passIsClientCondition)))
 														-- end
+													end
+
+													if HO_TRACE and HumainOnlyUnit(unitSupport) then
+														HoLog("  SUPPORT_HUMAINONLY draft="..tostring(draft.id).." support_squad="..tostring(unitSupport.name).." reserveClient="..tostring(reserveClient).." overideMP_B="..tostring(overideMP_B).." unit.player="..tostring(unitSupport.player).." unit.client="..tostring(unitSupport.client).." -> passIsClientCondition="..tostring(passIsClientCondition))
 													end
 
 													if isDebugModeB then
@@ -5116,6 +5409,9 @@ local function rejectDraft(draft, sujet, cause, line, reasonCode)
 	tabRejected["ligne"] = line --SafeGetLine()
 
 	table.insert(draft["rejected"], tabRejected)
+	if HO_TRACE and HumainOnlyUnit(HoUnit(draft.name)) then
+		HoLog("  DRAFT_REJETE_C id="..tostring(draft.id).." squad="..tostring(draft.name).." task="..tostring(draft.task).." cible="..tostring(draft.target_name).." code="..tostring(reasonCode).." sujet="..tostring(sujet))
+	end
 
 	--Pourquoi: rejectDraft (ici, dans createATO_table) et rejectStep/bestReject (dans processEligibleLoadout)
 	--sont deux systèmes de suivi séparés qui ne communiquaient pas entre eux : un squad pouvait traverser
@@ -5979,6 +6275,10 @@ local function createATO_table(draftPriority)
 													if ATO[side][pack_n][arg_Role] and ATO[side][pack_n][arg_Role] ~= nil then
 														table.insert(ATO[side][pack_n][arg_Role], flight)
 
+														if HO_TRACE and HumainOnlyUnit(HoUnit(flight.name)) then
+															HoLog("  VOL_CREE side="..tostring(side).." pack="..tostring(pack_n).." role="..tostring(arg_Role).." index="..tostring(#ATO[side][pack_n][arg_Role]).." id="..tostring(flight.id).." squad="..tostring(flight.name).." task="..tostring(flight.task).." cible="..tostring(flight.target_name).." nb_avions="..tostring(flight.number).." playable="..tostring(flight.playable).." tot_from="..tostring(flight.tot_from).." reste_a_assigner="..tostring(arg_Assign))
+														end
+
 														local squadStatus = SquadGenerationStatus[flight.name]
 														-- print("create flight AAA "..flight.name.." for role "..arg_Role.." in package "..pack_n.." with "..assigned.." aircraft, total firepower: "..flight.firepower)
 														if squadStatus then
@@ -6084,6 +6384,10 @@ local function createATO_table(draftPriority)
 													AcftAvail[arg_Entry.name].assigned = AcftAvail[arg_Entry.name].assigned + assigned
 													AcftAvail[arg_Entry.name].unassigned = AcftAvail[arg_Entry.name].unassigned - assigned		--remove assigned aircraft from total number of available aircraft for this unit
 													arg_Assign = arg_Assign - assigned															--continue loop until are aircraft are assigned
+
+													if HO_TRACE and HumainOnlyUnit(HoUnit(arg_Entry.name)) then
+														HoLog("  CONSOMME squad="..tostring(arg_Entry.name).." role="..tostring(arg_Role).." retire="..tostring(assigned).." reste_a_assigner="..tostring(arg_Assign).." | "..HoAcft(arg_Entry.name))
+													end
 
 													if isDebugModeC then
 														debugLog(draft.id.." AtoG passe C_15   assign "..arg_Assign.." type: "..arg_Entry.type.." unassigned: "..AcftAvail[arg_Entry.name].unassigned)
@@ -7155,4 +7459,7 @@ if Debug.debug then
 	campFile:close()
 
 end
+
+--trace humainOnly : etat de l'ATO a la fin du generateur (avant l'affectation du joueur)
+HoDumpATO("FIN generateur (avant ATO_PlayerAssign) : vols candidats", false)
 

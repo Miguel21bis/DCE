@@ -1,7 +1,7 @@
 
 ------------------------------------------------------------------------------------------------------- 
 if not versionDCE then versionDCE = {} end
-versionDCE["DCEM_Function.lua"] = "1.2.8"
+versionDCE["DCEM_Function.lua"] = "1.2.9"
 -------------------------------------------------------------------------------------------------------
 
 
@@ -153,44 +153,33 @@ end
 
 local taskByPlane = {}
 
-for side, squadTL in pairs(oob_air) do
-    for squad_n, squad in pairs(squadTL) do
-        local planeType = squad.type
-        if planeType then
+-- Tâches possibles de TOUS les types d'avion/hélico connus (et plus seulement ceux déjà présents dans oob_air) :
+-- l'éditeur de squad de DCE_Manager en a besoin quand on change le type d'un squad.
+for planeType, _ in pairs(Data_divers) do
+    for task, data in pairs(TaskByPlane) do
+        if data[planeType] and task ~= "Nothing" then
 
-            for task, data in pairs(TaskByPlane) do
-                for dataType, value in pairs(data) do
-
-                    if planeType == dataType and value then
-                        if task ~= "Nothing" then
-
-                            -- Initialise la liste si nécessaire
-                            if not taskByPlane[planeType] then
-                                taskByPlane[planeType] = {}
-                            end
-
-                            -- Normalisation Strike
-                            if task == "CAS" or task == "Ground Attack" or task == "Pinpoint Strike" then
-                                task = "Strike"
-                            end
-
-                            -- Cas spécial Transport hélico → SAR + CSAR
-                            if task == "Transport" and IsHelicopter[planeType] then
-                                local list = taskByPlane[planeType]
-
-                                list[#list+1] = "SAR"
-                                list[#list+1] = "CSAR"
-                                -- On remet task pour l’ajouter ensuite
-                                task = "Transport"
-                            end
-
-                            -- Ajout de la tâche
-                            local list = taskByPlane[planeType]
-                            list[#list+1] = task
-                        end
-                    end
-                end
+            -- Initialise la liste si nécessaire
+            local list = taskByPlane[planeType]
+            if not list then
+                list = {}
+                taskByPlane[planeType] = list
             end
+
+            -- Normalisation Strike
+            local name = task
+            if name == "CAS" or name == "Ground Attack" or name == "Pinpoint Strike" then
+                name = "Strike"
+            end
+
+            -- Cas spécial Transport hélico -> SAR + CSAR
+            if name == "Transport" and IsHelicopter[planeType] then
+                list[#list+1] = "SAR"
+                list[#list+1] = "CSAR"
+            end
+
+            -- Ajout de la tâche
+            list[#list+1] = name
         end
     end
 end

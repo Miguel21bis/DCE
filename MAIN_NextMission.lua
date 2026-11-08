@@ -1014,6 +1014,9 @@ end
 	Include("ATO_Generator_C_Core.lua")
 
 	Include("ATO_PlayerAssign.lua")
+
+	if HoDumpATO then HoDumpATO("APRES ATO_PlayerAssign : VERDICT (IA / joueur / client)", true) end
+	
 	Include("ATO_Timing.lua")
 	Include("ATO_FlightPlan.lua")
 
@@ -1515,10 +1518,12 @@ if WG_AirliftBuildData then
 end
 
 --wargame airlift : les zones Load / Drop sont ecrites dans le .miz (trigger zones visibles dans l'editeur)
+--wargame airlift : les zones Load / Drop sont ecrites dans le .miz (trigger zones visibles dans l'editeur)
 --DCE_Airlift.lua les relit par leur nom avec trigger.misc.getZone
+--Les noms portent SCPT (proprietaire = scriptsMod) : WG_LOAD_SCPT_<slot> / WG_DROP_SCPT_<slot>
 if WG_AirliftData and mission.triggers and mission.triggers.zones then
 	for _, z in ipairs(WG_AirliftData.zones) do
-		z.zoneName = "WG_"..string.upper(z.kind).."_"..z.slot
+		z.zoneName = "WG_"..string.upper(z.kind).."_SCPT_"..z.slot
 		table.insert(mission.triggers.zones, {
 			["x"] = z.x,
 			["y"] = z.y,
@@ -1528,6 +1533,96 @@ if WG_AirliftData and mission.triggers and mission.triggers.zones then
 			["hidden"] = false,
 			["name"] = z.zoneName,
 		})
+	end
+
+	--wargame airlift : degagement des points de chargement / depose (arbres et batiments).
+	--Zones cachees WG_CLEAR_SCPT_<LOAD|DROP>_<slot> + les memes actions DCS que celles d'une mission faite a la main :
+	--  arbres    : a_remove_scene_objects(zone, masque)        -> trigger "triggerStart" (au demarrage)
+	--  batiments : a_scenery_destruction_zone(zone, 100)       -> trigger "triggerOnce" apres WG_AIRLIFT_CLEAR_DESTROY_S secondes
+	--(meme ecriture que le bloc "Scenery Destruction" plus haut dans ce fichier)
+	local clearList = WG_AirliftData.clear
+	if clearList and #clearList > 0 then
+		local clearIds = {}
+		for _, c in ipairs(clearList) do
+			local zoneId = GetFreeZoneId()
+			c.zoneName = "WG_CLEAR_SCPT_"..string.upper(c.kind).."_"..c.slot
+			table.insert(mission.triggers.zones, {
+				["x"] = c.x,
+				["y"] = c.y,
+				["radius"] = c.radius,
+				["zoneId"] = zoneId,
+				["color"] = { [1] = 1, [2] = 0.2, [3] = 0.2, [4] = 0.1 },
+				["hidden"] = true,
+				["name"] = c.zoneName,
+			})
+			clearIds[#clearIds + 1] = zoneId
+		end
+
+		--arbres : au demarrage de la mission
+		if WG_AIRLIFT_CLEAR_TREES then
+			local mask = WG_AIRLIFT_CLEAR_TREES_MASK or 1
+			local trigN = #mission.trigrules + 1
+			local actionsStr = ""
+			local actionsRules = {}
+			for _, zoneId in ipairs(clearIds) do
+				actionsStr = actionsStr.."a_remove_scene_objects("..zoneId..", "..mask..");"
+				actionsRules[#actionsRules + 1] = {
+					["objects_mask"] = mask,
+					["predicate"] = "a_remove_scene_objects",
+					["zone"] = zoneId,
+				}
+			end
+			mission.trig.flag[trigN] = true
+			mission.trig.conditions[trigN] = "return(true)"
+			mission.trig.actions[trigN] = actionsStr
+			mission.trig.funcStartup[trigN] = "if mission.trig.conditions["..trigN.."]() then mission.trig.actions["..trigN.."]() end"
+			mission.trigrules[trigN] = {
+				["rules"] = {},
+				["eventlist"] = "",
+				["actions"] = actionsRules,
+				["predicate"] = "triggerStart",
+				["comment"] = "WG airlift : remove trees",
+			}
+		end
+
+		--batiments : apres un court delai
+		if WG_AIRLIFT_CLEAR_BUILDINGS then
+			local delay = WG_AIRLIFT_CLEAR_DESTROY_S or 5
+			local trigN = #mission.trigrules + 1
+			local actionsStr = ""
+			local actionsRules = {}
+			for _, zoneId in ipairs(clearIds) do
+				actionsStr = actionsStr.."a_scenery_destruction_zone("..zoneId..", 100);"
+				actionsRules[#actionsRules + 1] = {
+					["type"] = 0,
+					["destruction_level"] = 100,
+					["zone"] = zoneId,
+					["predicate"] = "a_scenery_destruction_zone",
+					["ai_task"] = {
+						[1] = "",
+						[2] = "",
+					},
+				}
+			end
+			mission.trig.flag[trigN] = true
+			mission.trig.conditions[trigN] = "return(c_time_after("..delay..") )"
+			mission.trig.actions[trigN] = actionsStr.." mission.trig.func["..trigN.."]=nil;"
+			mission.trig.func[trigN] = "if mission.trig.conditions["..trigN.."]() then mission.trig.actions["..trigN.."]() end"
+			mission.trigrules[trigN] = {
+				["rules"] = {
+					[1] = {
+						["predicate"] = "c_time_after",
+						["seconds"] = delay,
+					},
+				},
+				["eventlist"] = "",
+				["predicate"] = "triggerOnce",
+				["actions"] = actionsRules,
+				["comment"] = "WG airlift : destroy buildings",
+			}
+		end
+
+		AddLog("WG airlift: "..#clearList.." zone(s) de degagement ecrites (arbres="..tostring(WG_AIRLIFT_CLEAR_TREES)..", batiments="..tostring(WG_AIRLIFT_CLEAR_BUILDINGS)..")")
 	end
 end
 

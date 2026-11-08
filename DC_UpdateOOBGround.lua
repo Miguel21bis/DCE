@@ -156,23 +156,9 @@ for missSideName, side in pairs(mission.coalition) do
 
 											if unitId and warehouses.warehouses[unitId] then
 												if oobUnit.unitId ~= unitId then
-													oobTrace("  M64 unitId warehouse remplace : |"..tostring(oobUnit.name).."| "..tostring(oobUnit.unitId).." -> "..tostring(unitId))
+													oobTrace("  M64 unitId warehouse remplace : |"..tostring(oobUnit.name).."| "..tostring(oobUnit.unitId).." -> "..tostring(unitId).." ("..tostring(missCategory).." "..tostring(oobUnit.type)..")", true)
 													oobUnit.unitId = unitId
-
-													print("DcUOOBG miseAJour_ warehouses Id-- -- > C " .. missCategory .. " " .. oobUnit.type.." Id From missGroup.units "..missGroup.units[oobUnitN].unitId)
-													os.execute 'pause'
 												end
-											end
-										end
-									end
-
-									--met à jour les l'Id des CV et CVN de db_airbases si celui ci a changé
-									for missUnitN, missUnit in ipairs(missGroup.units) do
-										if missUnit.name == db_airbases[missUnit.name] and db_airbases[missUnit.name].airdromeId then
-											if db_airbases[missUnit.name].airdromeId ~= missUnit.unitId then
-												db_airbases[missUnit.name].airdromeId = missUnit.unitId
-												print("DcUOOBG miseAJour_Id-- -- > E  " .. missCategory .. ":: new airdromeId: " .. db_airbases[missUnit.name].airdromeId)
-												os.execute 'pause'
 											end
 										end
 									end
@@ -251,58 +237,6 @@ oobTrace("DcUOOBG M64 : "..dbgM64Added.." groupe(s) ajoute(s) depuis base_missio
 	..dbgM64UnitsReplaced.." groupe(s) aux units remplacees, "..dbgM64WargameCollision.." collision(s) de nom avec un groupe wargame", (dbgM64Added + dbgM64WargameCollision) > 0)
 
 
---TODO est ce vraiment utile? a quoi ça servait? de supprimer une FARP qui bouge sur BASE_Mission?
-
--- for side_name, side in pairs(oob_ground) do														--iterate through countries
--- 	for country_n, obCountry in pairs(side) do
--- 		if obCountry.vehicle then																	--country has vehicles
--- 			-- for t = #threat, 1, -1 do
--- 			for o = #obCountry.vehicle.group, 1, -1 do														--iterate through vehicle groups
--- 				if  string.find(string.lower(oobGroup.name),"farp") then
--- 					local foundGroup = false
--- 					for countryN, country in pairs(mission.coalition[side_name].country) do															--iterate through countries
--- 						if country.vehicle then																	--country has vehicles
--- 							for g = 1, #country.vehicle.group do
--- 								if oobGroup.name == country.vehicle.group[g].name then
--- 									foundGroup = true
--- 								end
--- 							end
--- 						end
--- 					end
--- 					if not foundGroup then
--- 						print("DcUOOBG remove vehicle: no foundGroup: "..side_name.." "..oobGroup.name)
--- 						table.remove(oob_ground[side_name][country_n].vehicle.group, o)
--- 						-- table.insert(tabRemoveGroupe, o)
-
--- 					end
--- 				end
--- 			end
--- 		end
-
--- 		if obCountry.static then
--- 			for o = #obCountry.static.group, 1, -1 do
--- 				if string.find(string.lower(obCountry.static.group[o].name),"farp") then
--- 					local foundGroup = false
--- 					for countryN, country in pairs(mission.coalition[side_name].country) do
--- 						if country.static then
--- 							for g = 1, #country.static.group do
--- 								if obCountry.static.group[o].name == country.static.group[g].name then
--- 									foundGroup = true
--- 								end
--- 							end
--- 						end
--- 					end
--- 					if not foundGroup then
--- 						print("DcUOOBG remove static: no foundGroup: "..side_name.." "..obCountry.static.group[o].name)
--- 						table.remove(oob_ground[side_name][country_n].static.group, o)
--- 						-- table.insert(tabRemoveGroupe, o)
-
--- 					end
--- 				end
--- 			end
--- 		end
--- 	end
--- end
 
 --check les doublons de name, groupId et unitId
 local GroupId = {}

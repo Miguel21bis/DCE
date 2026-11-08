@@ -9,12 +9,27 @@
 --          Les charges elinguees (static cargo) sont creditees quand elles restent holdS secondes dans la zone Drop.
 -- Sortie : wargame_airlift_deliveries.lua (dans PathDCE), lu par DEBRIEF_Master.lua
 -- Tous les messages du journal DCS commencent par "DCE_Airlift:".
+--
+-- LEGENDE DES LIGNES DE DIAGNOSTIC (chercher "CARGO-" dans dcs.log ; chaque ligne porte t = temps de mission en s)
+--   CARGO-SPAWN    creation d'une caisse de la mission (type, kg demandes, position, relecture)
+--   CARGO-SLING    vie d'une caisse posee par le script : mobile/immobile, zone DROP, chrono, credit ou cause de non-credit
+--   CARGO-SIM      chargement/dechargement simule F10 (demande, refus et cause, charge, decharge, perte au respawn)
+--   CARGO-MARK     fumigene/fusee de zone : declencheur (auto-approche, auto-500m, menu, naissance-silencieux), resultat
+--   CARGO-EVT      evenement DCS recu (premiere occurrence de chaque id, evenements dont l'acteur est un statique/cargo, ids 47 et 48)
+--   CARGO-PROCHE   Unit.getNearestCargos d'un helico joueur (a chaque changement de la liste)
+--   CARGO-CREDIT   credit des caisses dynamiques (F8) : transportee, chrono en zone DROP, CREDITEE (kg) ou cause de remise a zero
+--   CARGO-ZONE     decor (Object.Category.SCENERY) trouve dans chaque zone de depose au demarrage
+--   CARGO-OBJ      observation par balayage : APPARU / ETAT / DISPARU / REAPPARU d'un objet cargo ou statique de type caisse
+--   CARGO-ENTREPOT inventaire des entrepots (bases/FARP proches des zones) : etat initial puis differences
+--   CARGO-OBS      limite de lignes atteinte
+-- Aucune de ces lignes ne modifie la mission : observation seule, rien n'est credite par elles.
 
 if AirliftMod and AirliftMod.started then return end
 
 AirliftMod = { started = true, deliveries = {}, ai = {}, cargos = {}, onboard = {}, slots = {}, markId = 7300,
 	menus = {}, grp = {}, want = {}, ignored = {}, busy = {}, op = {}, opN = 0, nextScan = 0,
-	mk = {}, hint = {}, near = {}, nextSmoke = 0 }
+	mk = {}, hint = {}, near = {}, nextSmoke = 0, nextWatch = 0, watch = {}, unknownEv = 0,
+	born = {}, known = {}, obs = {}, scanN = 0, nextObs = 0, nextWh = 0, wh = {}, obsLines = 0, evSeen = {}, evLines = 0 }
 local M = AirliftMod
 
 local PERIOD   = 2		--s, pas du detecteur
@@ -34,10 +49,24 @@ local SMOKE_CHECK = 4	--s, periode de controle des marquages
 local LOAD_NEAR = 3000	--m, zone de chargement : marquage (une fois par vie) quand le joueur s'approche a moins de ca
 local DROP_FAR, DROP_NEAR = 4000, 500	--m, zone de depose : marquage a 4 km, rallumage a 500 m si eteint
 local NIGHT_FROM, NIGHT_TO = 20.5 * 3600, 5.5 * 3600	--s depuis minuit (heure de la mission) : de nuit, fusees au lieu de fumigenes
+local OBS_S, OBS_R, OBS_MAX = 6, 1500, 600	--s periode du balayage des objets ; m rayon autour des zones ; nombre max de lignes CARGO-OBJ/ENTREPOT
+local WH_S, WH_R, WH_ITEMS = 30, 20000, 600	--s periode des inventaires d'entrepot ; m distance max zone-base ; nb max d'entrees par inventaire
+local CARRY_D, FREE_D = 3, 5	--m : caisse "en soute" si a moins de CARRY_D d'un aeronef ; "decharge" si a plus de FREE_D
+local EV_MAX = 300			--nombre max de lignes CARGO-EVT liees a des statiques/cargos
 local EV_BIRTH = (world and world.event and world.event.S_EVENT_BIRTH) or 15
 local EV_ENTER = (world and world.event and world.event.S_EVENT_PLAYER_ENTER_UNIT) or 20
 
 local function log(m) env.info("DCE_Airlift: "..tostring(m)) end
+
+local callIf, describeObj		--definies plus bas (diagnostic)
+
+--ligne de diagnostic : "CARGO-<tag> t=<temps de mission>"
+local function clog(tag, msg)
+	local okT, t = pcall(timer.getTime)
+	log("CARGO-"..tag.." t="..math.floor((okT and tonumber(t)) or 0).." "..tostring(msg))
+end
+
+local function fp(p) return math.floor(p.x + 0.5)..","..math.floor(p.y + 0.5) end
 
 local function dist2(a, b)
 	local dx, dy = a.x - b.x, a.y - b.y
@@ -232,9 +261,14 @@ local function spawnCargos(cfg)
 		})
 		if ok then
 			table.insert(M.cargos, { name = c.name, slot = c.slot, side = c.side, kg = c.kg, x = c.x, y = c.y })
+			M.known[c.name] = true
 			log("charge "..c.name.." "..c.kg.." kg posee")
+			local so = StaticObject.getByName(c.name)
+			clog("SPAWN", c.name.." type="..tostring(c.typeName or "ammo_cargo").." kg_demandes="..tostring(c.kg).." slot="..tostring(c.slot)
+				.." cote="..tostring(c.side).." pos="..fp(c).." relue="..(so and ("<"..describeObj(so)..">") or "INTROUVABLE apres creation"))
 		else
 			log("ERREUR charge "..tostring(c.name)..": "..tostring(err))
+			clog("SPAWN", tostring(c.name).." ECHEC creation : "..tostring(err))
 		end
 	end
 end
@@ -255,50 +289,79 @@ end
 
 -- charges elinguees (crochet DCS natif) : creditees si elles restent holdS secondes immobiles dans une zone Drop du camp,
 -- apres avoir ete deplacees de plus de 50 m. La charge livree RESTE sur place (c.delivered empeche le double comptage).
--- Les logs "charge accrochee/deplacee", "entree en zone DROP" et "LIVRAISON" servent a valider le crochet natif en jeu.
+-- Les lignes CARGO-SLING suivent chaque changement d'etat (voir la legende en haut du fichier).
 local function tickCargos(cfg, now)
 	local zones = cfg.zones or {}
+	local hold = cfg.holdS or 30
 	for _, c in ipairs(M.cargos) do
 		if not c.taken and not c.delivered then
 			local so = StaticObject.getByName(c.name)
 			if so and so:isExist() then
-				c.gone = nil
+				if c.gone then
+					clog("SLING", c.name.." de nouveau interrogeable apres "..math.floor(now - c.gone).." s")
+					c.gone = nil
+				end
 				local p = so:getPoint()
 				local pos = { x = p.x, y = p.z }
 				local moved = dist2(pos, c)
-				local still = c.last and dist2(pos, c.last) < 1
+				local still = (c.last ~= nil) and dist2(pos, c.last) < 1
+				local agl = p.y - land.getHeight({ x = p.x, y = p.z })
 				c.last = pos
 				if moved > 2 and not c.movedLogged then
 					c.movedLogged = true
 					log("charge accrochee/deplacee "..c.name.." ("..math.floor(moved).." m de son point de depart)")
+					clog("SLING", c.name.." deplacee de "..math.floor(moved).." m (chargee a la main OU accrochee : ce log ne les distingue pas) pos="..fp(pos).." agl="..math.floor(agl))
 				end
+				local st = still and "immobile" or "mobile"
+				if still then c.stillSince = c.stillSince or now else c.stillSince = nil end
+				if c.movedLogged and c.state ~= st then
+					clog("SLING", c.name.." "..st.." pos="..fp(pos).." agl="..math.floor(agl).." deplacee="..math.floor(moved).." m")
+				end
+				c.state = st
 				local zone
 				for _, z in ipairs(zones) do
 					if z.kind == "drop" and z.side == c.side and dist2(pos, z) <= z.radius then zone = z end
 				end
 				if zone and not c.zoneLogged then
-					c.zoneLogged = true
+					c.zoneLogged = zone.slot
+					c.ncLogged = nil
 					log("charge "..c.name.." entree en zone DROP "..tostring(zone.slot).." (deplacee de "..math.floor(moved).." m)")
-				elseif not zone then
+					clog("SLING", c.name.." ENTREE zone DROP "..tostring(zone.slot).." deplacee="..math.floor(moved).." m "..st)
+				elseif not zone and c.zoneLogged then
+					clog("SLING", c.name.." SORTIE zone DROP "..tostring(c.zoneLogged).." sans credit")
 					c.zoneLogged = nil
 				end
 				if zone and moved > 50 and still then
-					c.inT = c.inT or now
-					if now - c.inT >= (cfg.holdS or 30) then
+					if not c.inT then
+						c.inT = now
+						clog("SLING", c.name.." chrono "..hold.." s demarre (zone "..tostring(zone.slot)..", deplacee "..math.floor(moved).." m, immobile)")
+					end
+					if now - c.inT >= hold then
 						c.delivered = true
+						clog("SLING", c.name.." CREDITEE immobile "..math.floor(now - c.inT).." s dans zone "..tostring(zone.slot).." ("..c.kg.." kg)")
 						addDelivery(zone.slot, c.side, c.kg, "sling", c.name)
 					end
 				else
+					if c.inT then
+						local why = (not zone) and "sortie de zone" or ((moved <= 50) and "deplacement insuffisant" or "de nouveau mobile")
+						clog("SLING", c.name.." chrono remis a zero apres "..math.floor(now - c.inT).." s : "..why)
+					end
 					c.inT = nil
+					if zone and still and moved <= 50 and c.stillSince and now - c.stillSince >= hold and not c.ncLogged then
+						c.ncLogged = true
+						clog("SLING", c.name.." NON-CREDITEE : immobile "..math.floor(now - c.stillSince).." s en zone mais deplacement "..math.floor(moved).." m <= 50 m (la caisse n'a pas ete transportee)")
+					end
 				end
 			elseif c.last then
 				--introuvable : peut-etre accrochee et non interrogeable, on ne conclut qu'apres LOST_S
 				if not c.gone then
 					c.gone = now
 					log("charge introuvable "..c.name.." (accrochee ?)")
+					clog("SLING", c.name.." INTROUVABLE (derniere pos="..fp(c.last)..")")
 				elseif now - c.gone >= LOST_S then
 					c.taken = true
 					log("charge perdue: "..c.name)
+					clog("SLING", c.name.." PERDUE (introuvable depuis "..LOST_S.." s, derniere pos="..fp(c.last)..")")
 				end
 			end
 		end
@@ -379,6 +442,9 @@ local function clearPrefix(t, name)
 end
 
 local function resetUnit(name)
+	local ob = M.onboard[name]
+	if ob and ob.kg > 0 then clog("SIM", name.." PERDU a la naissance : "..ob.kg.." kg de charge simulee abandonnes") end
+	M.born[name] = true		--premier passage de tickSmoke : pas de marquage automatique pour ce qui est deja a portee
 	clearPrefix(M.hint, name)
 	clearPrefix(M.near, name)
 	M.onboard[name] = nil
@@ -393,6 +459,7 @@ local function finishLoad(cfg, name, id, z, all)
 	local pos, sp, agl = unitState(u)
 	if agl > LANDED_AGL or sp > LANDED_V or dist2(pos, z) > z.radius then
 		sayUnit(u, "Airlift: chargement interrompu.", 8)
+		clog("SIM", name.." chargement INTERROMPU agl="..math.floor(agl).." v="..string.format("%.1f", sp).." d_zone="..math.floor(dist2(pos, z)))
 		return
 	end
 	local side = sideOf(u)
@@ -428,8 +495,10 @@ local function finishLoad(cfg, name, id, z, all)
 	end
 	if n == 0 then
 		sayUnit(u, "Airlift: rien a charger (aucune charge ne rentre ou zone vide). Capacite "..cap.." kg.", 10)
+		clog("SIM", name.." chargement : RIEN (candidates="..#cands.." capacite="..cap.." deja_a_bord="..ob.kg..")")
 	else
 		log("CHARGE joueur="..tostring(u:getPlayerName()).." caisses="..n.." total="..ob.kg.." kg")
+		clog("SIM", name.." CHARGE caisses="..n.." total="..ob.kg.." kg capacite="..cap.." candidates="..#cands)
 		sayUnit(u, "Airlift: "..n.." charge(s) a bord, total "..ob.kg.." kg (capacite "..cap.." kg).", 12)
 	end
 end
@@ -441,12 +510,14 @@ local function finishUnload(cfg, name, id, z)
 	local pos, sp, agl = unitState(u)
 	if agl > LANDED_AGL or sp > LANDED_V or dist2(pos, z) > z.radius then
 		sayUnit(u, "Airlift: dechargement interrompu.", 8)
+		clog("SIM", name.." dechargement INTERROMPU agl="..math.floor(agl).." v="..string.format("%.1f", sp).." d_zone="..math.floor(dist2(pos, z)))
 		return
 	end
 	local ob = M.onboard[name]
 	if not ob or ob.kg <= 0 then return end
 	--tout ce qui est a bord est credite au point de ravitaillement de cette zone de depose
 	local kg = ob.kg
+	clog("SIM", name.." DECHARGE zone="..tostring(z.slot).." kg="..kg.." caisses="..#ob.items)
 	for _, c in ipairs(ob.items) do c.delivered = true end
 	M.onboard[name] = nil
 	addDelivery(z.slot, sideOf(u), kg, tostring(u:getPlayerName() or name), name)
@@ -459,20 +530,22 @@ local function startOp(cfg, u, kind, all)
 	local z, delay
 	if kind == "load" then
 		z = nearestZone(cfg, "load", side, pos)
-		if not z then sayUnit(u, "Airlift: vous n'etes pas dans une zone de chargement.", 8) return end
+		if not z then sayUnit(u, "Airlift: vous n'etes pas dans une zone de chargement.", 8) clog("SIM", name.." demande load REFUSEE : hors zone de chargement") return end
 		delay = LOAD_S
 	else
 		local ob = M.onboard[name]
-		if not ob or ob.kg <= 0 then sayUnit(u, "Airlift: rien a bord.", 8) return end
+		if not ob or ob.kg <= 0 then sayUnit(u, "Airlift: rien a bord.", 8) clog("SIM", name.." demande unload REFUSEE : rien a bord") return end
 		z = nearestZone(cfg, "drop", side, pos)
-		if not z then sayUnit(u, "Airlift: vous n'etes pas dans une zone de depose.", 8) return end
+		if not z then sayUnit(u, "Airlift: vous n'etes pas dans une zone de depose.", 8) clog("SIM", name.." demande unload REFUSEE : hors zone de depose") return end
 		delay = cfg.holdS or 30
 	end
 	if agl > LANDED_AGL or sp > LANDED_V then
 		sayUnit(u, "Airlift: posez-vous pour "..((kind == "load") and "charger." or "decharger."), 8)
+		clog("SIM", name.." demande "..kind.." REFUSEE : pas pose (agl="..math.floor(agl).." v="..string.format("%.1f", sp)..")")
 		return
 	end
 	local id = beginOp(name)
+	clog("SIM", name.." demande "..kind.." ACCEPTEE zone="..tostring(z.slot).." delai="..delay.." s")
 	sayUnit(u, "Airlift: "..((kind == "load") and "chargement" or "dechargement").." en cours, ne decollez pas ("..delay.." s).", delay)
 	timer.scheduleFunction(function()
 		local ok, err
@@ -551,24 +624,28 @@ local function hasCargoAt(z, side)
 end
 
 -- lance le marquage si la zone n'est pas deja marquee, et previent le joueur
-local function ensureMark(u, zi, z, pos, intro)
+local function ensureMark(u, zi, z, pos, intro, why)
 	local now = timer.getTime()
 	local d, brg = whereIs(pos, z)
 	local where = string.format("%s a %.1f km, cap %03d", intro, d / 1000, math.floor(brg + 0.5) % 360)
 	if markActive(zi, now) then
 		local m = M.mk[zi]
 		sayUnit(u, "Airlift: "..where..". Marquage deja actif (encore "..math.floor(m.dur - (now - m.t)).." s).", 12)
+		clog("MARK", u:getName().." zone="..zi.." ("..z.kind.." "..tostring(z.slot)..") declencheur="..tostring(why).." : deja actif, encore "..math.floor(m.dur - (now - m.t)).." s, rien lance")
 		return
 	end
 	local ok, night = launchMark(zi, z, now)
 	if not ok then
 		sayUnit(u, "Airlift: "..where..". Marquage impossible.", 12)
+		clog("MARK", u:getName().." zone="..zi.." ("..z.kind.." "..tostring(z.slot)..") declencheur="..tostring(why).." : ECHEC du lancement")
 		return
 	end
 	local color = (z.kind == "load") and "vert" or "rouge"
 	local what
 	if night then what = (z.kind == "load") and "fusee" or "3 fusees" else what = (z.kind == "load") and "fumigene" or "3 fumigenes" end
 	sayUnit(u, "Airlift: "..where..". "..what.." "..color.." lance(s).", 12)
+	clog("MARK", u:getName().." zone="..zi.." ("..z.kind.." "..tostring(z.slot)..") declencheur="..tostring(why).." : "..what.." "..color
+		.." nuit="..tostring(night).." distance="..math.floor(d).." m duree="..(night and LIGHT_S or SMOKE_S).." s")
 end
 
 -- demande F10 : zone la plus proche du type voulu pour le camp du joueur
@@ -587,7 +664,7 @@ local function cmdMark(u, kind)
 		sayUnit(u, "Airlift: aucune zone de "..((kind == "load") and "chargement" or "depose").." pour votre camp.", 8)
 		return
 	end
-	ensureMark(u, best, cfg.zones[best], pos, (kind == "load") and "Zone de chargement" or "Zone de depose")
+	ensureMark(u, best, cfg.zones[best], pos, (kind == "load") and "Zone de chargement" or "Zone de depose", "menu")
 end
 
 local function tickSmoke(cfg, now)
@@ -600,28 +677,43 @@ local function tickSmoke(cfg, now)
 		if u and u:isExist() and u:getPlayerName() then
 			local pos = unitState(u)
 			local side = sideOf(u)
+			local born = M.born[name]
+			local quiet = {}
 			for zi, z in ipairs(zones) do
 				if z.side == side then
 					local d = dist2(pos, z)
 					local k = name.."|"..zi
 					if z.kind == "load" then
-						--une seule fois par vie, des que le joueur est a moins de LOAD_NEAR (ou deja dans la zone a la naissance)
+						--une seule fois par vie, des que le joueur est a moins de LOAD_NEAR
 						if d <= LOAD_NEAR and not M.hint[k] and hasCargoAt(z, side) then
 							M.hint[k] = true
-							ensureMark(u, zi, z, pos, "Zone de chargement")
+							if born then
+								quiet[#quiet + 1] = k
+							else
+								ensureMark(u, zi, z, pos, "Zone de chargement", "auto-approche")
+							end
 						end
 					elseif z.kind == "drop" then
 						if d > DROP_FAR + 500 then
 							M.near[k] = nil		--parti loin : la prochaine approche redeclenchera
 						elseif d <= DROP_FAR and not M.near[k] then
 							M.near[k] = true
-							ensureMark(u, zi, z, pos, "Zone de depose")
+							if born then
+								quiet[#quiet + 1] = k
+							else
+								ensureMark(u, zi, z, pos, "Zone de depose", "auto-approche")
+							end
 						end
-						if d <= DROP_NEAR and not markActive(zi, now) then
-							ensureMark(u, zi, z, pos, "Zone de depose")
+						if d <= DROP_NEAR and not born and not markActive(zi, now) then
+							ensureMark(u, zi, z, pos, "Zone de depose", "auto-500m")
 						end
 					end
 				end
+			end
+			if born then
+				--naissance (ou menu tout juste cree) : ce qui est deja a portee est marque "deja annonce" sans rien lancer
+				M.born[name] = nil
+				clog("MARK", "silencieux a la naissance unite="..name.." zones="..(#quiet > 0 and table.concat(quiet, ",") or "aucune a portee"))
 			end
 		end
 	end
@@ -647,6 +739,7 @@ local function handleCommand(arg)
 	local b = M.busy[arg.u]
 	if b and timer.getTime() - b < BUSY_MAX then
 		sayUnit(u, "Airlift: operation deja en cours.", 6)
+		clog("SIM", arg.u.." demande "..arg.a.." REFUSEE : operation deja en cours")
 		return
 	end
 	if arg.a == "unload" then
@@ -722,6 +815,7 @@ local function buildMenu(name)
 		M.menus[name] = nil
 		return "retry"
 	end
+	if M.born[name] == nil then M.born[name] = true end		--joueur deja present au demarrage (pas de BIRTH) : meme regle
 	log("menu F10 cree pour "..name.." ("..(sim and "chargement simule" or "marquage seul, cargo DCS natif")..", groupe "..gid..(rec.single and ", unite seule)" or ", sous-menu par unite)"))
 	return "done"
 end
@@ -741,7 +835,23 @@ end
 
 -- Etape 3 : observation du cargo interne natif (F8). On ECRIT dans le journal, on ne credite RIEN.
 local CARGO_EV = {}		--id d'evenement -> nom
+local EV_NAME = {}		--id -> nom, pour reperer les evenements que cette version de DCS envoie sans nom connu
+local UNKNOWN_EV_MAX = 40	--nombre maximum de lignes "evenement inconnu" dans le journal
 local function initCargoEvents()
+	--diagnostic : tout ce que cette version de DCS declare dans world.event
+	local nTot, idMax, cargoNames = 0, -1, {}
+	if world and type(world.event) == "table" then
+		for k, v in pairs(world.event) do
+			nTot = nTot + 1
+			if type(v) == "number" then
+				EV_NAME[v] = tostring(k)
+				if v > idMax then idMax = v end
+			end
+			if string.find(string.upper(tostring(k)), "CARGO", 1, true) then cargoNames[#cargoNames + 1] = tostring(k).."="..tostring(v) end
+		end
+	end
+	table.sort(cargoNames)
+	log("DIAG world.event : "..nTot.." entrees, id max "..idMax..", noms contenant CARGO : "..(#cargoNames > 0 and table.concat(cargoNames, ", ") or "aucun"))
 	for _, n in ipairs({ "S_EVENT_NEW_DYNAMIC_CARGO", "S_EVENT_DYNAMIC_CARGO_LOADED",
 			"S_EVENT_DYNAMIC_CARGO_UNLOADED", "S_EVENT_DYNAMIC_CARGO_REMOVED" }) do
 		local id = world and world.event and world.event[n]
@@ -754,7 +864,7 @@ local function initCargoEvents()
 	end
 end
 
-local function callIf(o, fn)		--o:fn() sous pcall ; nil si la methode n'existe pas
+callIf = function(o, fn)		--o:fn() sous pcall ; nil si la methode n'existe pas
 	local okF, f = pcall(function() return o[fn] end)
 	if not okF or type(f) ~= "function" then return nil end
 	local ok, r = pcall(f, o)
@@ -762,7 +872,7 @@ local function callIf(o, fn)		--o:fn() sous pcall ; nil si la methode n'existe p
 	return nil
 end
 
-local function describeObj(o)
+describeObj = function(o)
 	local parts = {}
 	local n = callIf(o, "getName")
 	if n ~= nil then parts[#parts + 1] = "nom="..tostring(n) end
@@ -773,6 +883,17 @@ local function describeObj(o)
 	local w = callIf(o, "getCargoWeight")
 	if w == nil then w = callIf(o, "getMass") end
 	if w ~= nil then parts[#parts + 1] = "poids="..tostring(w) end
+	local cat = callIf(o, "getCategory")
+	if cat ~= nil then parts[#parts + 1] = "categorie="..tostring(cat) end
+	local d = callIf(o, "getDesc")
+	if type(d) == "table" then
+		local dk = {}
+		for k, v in pairs(d) do
+			if type(v) == "number" or type(v) == "string" or type(v) == "boolean" then dk[#dk + 1] = tostring(k).."="..tostring(v) end
+		end
+		table.sort(dk)
+		if #dk > 0 then parts[#parts + 1] = "desc{"..table.concat(dk, ",", 1, math.min(#dk, 10)).."}" end
+	end
 	local pl = callIf(o, "getPlayerName")
 	if pl ~= nil then parts[#parts + 1] = "joueur="..tostring(pl) end
 	local p = callIf(o, "getPoint")
@@ -796,7 +917,7 @@ local function logCargoEvent(e)
 			out[#out + 1] = tostring(k).."=<"..describeObj(v)..">"
 		end
 	end
-	log("CARGO-EVT "..CARGO_EV[e.id].." t="..math.floor(timer.getTime()).." "..table.concat(out, " ; "))
+	log("CARGO-EVT "..tostring(CARGO_EV[e.id] or EV_NAME[e.id] or ("inconnu "..tostring(e.id))).." t="..math.floor(timer.getTime()).." "..table.concat(out, " ; "))
 end
 
 local function onWorldEvent(e)
@@ -804,6 +925,26 @@ local function onWorldEvent(e)
 	if e.id ~= nil and CARGO_EV[e.id] then
 		logCargoEvent(e)
 		return
+	end
+	if type(e.id) == "number" then
+		--premiere occurrence de chaque id (toujours) ; ensuite seulement : acteur/cible statique ou cargo (categorie 3 ou 6), ids 47 et 48
+		local first = not M.evSeen[e.id]
+		local obj = false
+		if not first and M.evLines < EV_MAX then
+			for _, key in ipairs({ "initiator", "target" }) do
+				local o = e[key]
+				if type(o) == "table" then
+					local c = callIf(o, "getCategory")
+					if c == 3 or c == 6 then obj = true end
+				end
+			end
+		end
+		if first or ((obj or e.id == 47 or e.id == 48) and M.evLines < EV_MAX) then
+			M.evSeen[e.id] = true
+			if not first then M.evLines = M.evLines + 1 end
+			if first and not EV_NAME[e.id] then log("DIAG evenement inconnu id="..e.id.." (absent de world.event)") end
+			pcall(logCargoEvent, e)
+		end
 	end
 	if e.id ~= EV_BIRTH and e.id ~= EV_ENTER then return end
 	if not (campL and campL.wargame_airlift) then return end
@@ -815,6 +956,374 @@ local function onWorldEvent(e)
 	resetUnit(name)		--nouvelle vie : charge perdue, operation annulee
 	if M.menus[name] and REBUILD_ON_BIRTH then removeMenu(name) end
 	wantMenu(name, timer.getTime())
+end
+
+-- Diagnostic : caisses que "voit" l'helicoptere du joueur (Unit.getNearestCargos). On journalise a chaque CHANGEMENT de la liste :
+-- on y verra apparaitre une caisse creee par le menu F8, puis disparaitre quand elle est chargee a bord.
+local function tickCargoWatch(now)
+	if now < M.nextWatch then return end
+	M.nextWatch = now + SMOKE_CHECK
+	for name in pairs(M.menus) do
+		local u = Unit.getByName(name)
+		if u and u:isExist() and u:getPlayerName() then
+			local list = callIf(u, "getNearestCargos")
+			local parts = {}
+			if type(list) == "table" then
+				for i = 1, math.min(#list, 8) do parts[#parts + 1] = describeObj(list[i]) end
+			end
+			local sig = tostring(list ~= nil and #parts or "nil").."|"..table.concat(parts, " ; ")
+			if M.watch[name] ~= sig then
+				M.watch[name] = sig
+				if list == nil then
+					log("CARGO-PROCHE "..name.." : getNearestCargos indisponible pour ce type")
+				else
+					log("CARGO-PROCHE "..name.." : "..#parts.." caisse(s) visible(s) [ "..table.concat(parts, " ; ").." ]")
+				end
+			end
+		end
+	end
+end
+
+-- Observation : balayage des objets cargo/statiques autour des zones et des joueurs, et inventaires d'entrepot.
+-- Sert a savoir ce que DCS cree et fait disparaitre quand une caisse est chargee, deposee ou larguee. Rien n'est credite ici.
+local function nearestAircraftRaw(pos)
+	local best, bd, bagl
+	local function try(u)
+		if u and u:isExist() then
+			local p = u:getPoint()
+			local d = dist2(pos, { x = p.x, y = p.z })
+			if not bd or d < bd then best, bd, bagl = u:getName(), d, p.y - land.getHeight({ x = p.x, y = p.z }) end
+		end
+	end
+	for name in pairs(M.menus) do try(Unit.getByName(name)) end
+	for _, st in ipairs(M.ai) do
+		local g = Group.getByName(st.name)
+		if g and g:isExist() then try(g:getUnit(1)) end
+	end
+	return best, bd, bagl
+end
+
+local function nearestAircraft(pos)
+	local best, bd, bagl = nearestAircraftRaw(pos)
+	if not best then return "aucun" end
+	return best.." d="..math.floor(bd).." m agl="..math.floor(bagl)
+end
+
+local function zoneOf(cfg, pos)
+	local best, bd
+	for _, z in ipairs(cfg.zones or {}) do
+		local d = dist2(pos, z)
+		if not bd or d < bd then best, bd = z, d end
+	end
+	if not best then return "aucune zone" end
+	local r = best.radius or 0
+	return best.kind.." "..tostring(best.slot).." d="..math.floor(bd).."/"..math.floor(r).." m "..((bd <= r) and "DANS" or "hors")
+end
+
+-- credit des caisses dynamiques (menu F8 / elingage / largage) : une caisse est creditee quand elle a ete transportee
+-- (vue a moins de CARRY_D d'un aeronef, ou deplacee de plus de 50 m) puis reste immobile holdS secondes dans une zone
+-- de depose de son camp, a plus de FREE_D de tout aeronef. Une seule fois par nom. Les caisses du script (M.known) restent
+-- gerees par tickCargos.
+local function creditStep(cfg, now, n, o, rec, pos)
+	if rec.credited then return end
+	local an, ad = nearestAircraftRaw(pos)
+	if an and ad <= CARRY_D then
+		if not rec.carried then
+			rec.carried = true
+			clog("CREDIT", n.." transportee : en soute de "..an.." (d="..math.floor(ad).." m)")
+		end
+		local au = Unit.getByName(an)
+		if au and au:isExist() then
+			rec.side = sideOf(au)
+			rec.by = au:getPlayerName() or an
+		end
+	end
+	if not rec.carried and dist2(pos, { x = rec.x0, y = rec.y0 }) > 50 then
+		rec.carried = true
+		clog("CREDIT", n.." transportee : deplacee de plus de 50 m (elingage ou largage) pos="..fp(pos).." aeronef le plus proche : "..tostring(an).." d="..tostring(ad and math.floor(ad)))
+		if an and ad <= 300 and not rec.side then		--elingage / largage : le camp est celui de l'aeronef qui vient de passer
+			local au = Unit.getByName(an)
+			if au and au:isExist() then
+				rec.side = sideOf(au)
+				rec.by = au:getPlayerName() or an
+			end
+		end
+	end
+	if not rec.carried then return end
+	local side = rec.side
+	if not side then
+		local c = callIf(o, "getCoalition")
+		if c == 1 then side = "red" elseif c == 2 then side = "blue" end
+	end
+	if not side then		--dernier recours : camp de la zone de depose dans laquelle elle se trouve
+		for _, z in ipairs(cfg.zones or {}) do
+			if z.kind == "drop" and dist2(pos, z) <= z.radius then side = z.side end
+		end
+		if side and not rec.noSide then
+			rec.noSide = true
+			clog("CREDIT", n.." camp inconnu : deduit de la zone de depose ("..side..")")
+		end
+	end
+	if not side then return end
+	local zone
+	for _, z in ipairs(cfg.zones or {}) do
+		if z.kind == "drop" and z.side == side and dist2(pos, z) <= z.radius then zone = z end
+	end
+	local hold = cfg.holdS or 30
+	if zone and rec.state == "immobile" and (not ad or ad > FREE_D) then
+		if not rec.inT then
+			rec.inT = now
+			clog("CREDIT", n.." chrono "..hold.." s demarre : immobile en zone "..tostring(zone.slot).." (aeronef le plus proche "..(an and math.floor(ad) or "aucun").." m)")
+		end
+		if now - rec.inT >= hold then
+			local kg = callIf(o, "getCargoWeight")
+			if type(kg) ~= "number" then kg = callIf(o, "getMass") end
+			if type(kg) ~= "number" or kg <= 0 then
+				clog("CREDIT", n.." poids illisible ("..tostring(kg).."), nouvel essai plus tard")
+				rec.inT = now
+				return
+			end
+			rec.credited = true
+			clog("CREDIT", n.." CREDITEE "..math.floor(kg + 0.5).." kg zone "..tostring(zone.slot).." camp "..side.." par "..tostring(rec.by))
+			addDelivery(zone.slot, side, kg, rec.by or "?", n)
+		end
+	elseif rec.inT then
+		local why = (not zone) and "hors zone de depose" or ((rec.state ~= "immobile") and "mobile" or "trop pres d'un aeronef")
+		clog("CREDIT", n.." chrono remis a zero apres "..math.floor(now - rec.inT).." s : "..why)
+		rec.inT = nil
+	end
+end
+
+local function olog(tag, msg)
+	if M.obsLines >= OBS_MAX then
+		if not M.obsCap then
+			M.obsCap = true
+			clog("OBS", "limite de "..OBS_MAX.." lignes CARGO-OBJ/ENTREPOT atteinte : plus de lignes")
+		end
+		return
+	end
+	M.obsLines = M.obsLines + 1
+	clog(tag, msg)
+end
+
+local function cargoLike(n, ty)
+	local s = string.lower(tostring(n).." "..tostring(ty))
+	for _, w in ipairs({ "cargo", "crate", "container", "ammo", "barrel", "pallet", "box", "sling", "iso", "fuel" }) do
+		if string.find(s, w, 1, true) then return true end
+	end
+	return false
+end
+
+-- contenu "entrepot" d'une caisse (Warehouse.getCargoAsWarehouse, DCS 2.9.6+), en resume
+local function crateContent(o)
+	local out = "n/a"
+	pcall(function()
+		local w = Warehouse.getCargoAsWarehouse(o)
+		if not w then out = "aucun" return end
+		local inv = w:getInventory()
+		local t, cnt = {}, { n = 0 }
+		local function walk(x, pre, dep)
+			if dep > 4 or cnt.n >= 12 then return end
+			for k, v in pairs(x) do
+				if type(v) == "number" and v ~= 0 then t[#t + 1] = pre.."/"..tostring(k).."="..v cnt.n = cnt.n + 1
+				elseif type(v) == "table" then walk(v, pre.."/"..tostring(k), dep + 1) end
+			end
+		end
+		if type(inv) == "table" then walk(inv, "", 0) end
+		table.sort(t)
+		out = (#t > 0) and table.concat(t, " ") or "vide"
+	end)
+	return out
+end
+
+local function tickObserve(cfg, now)
+	if now < M.nextObs then return end
+	M.nextObs = now + OBS_S
+	local centers = {}
+	for _, z in ipairs(cfg.zones or {}) do
+		centers[#centers + 1] = { x = z.x, y = z.y, r = math.max(OBS_R, z.radius or 0), l = z.kind.." "..tostring(z.slot) }
+	end
+	for name in pairs(M.menus) do
+		local u = Unit.getByName(name)
+		if u and u:isExist() then
+			local p = u:getPoint()
+			centers[#centers + 1] = { x = p.x, y = p.z, r = 300, l = "joueur "..name }
+		end
+	end
+	local cats = {}
+	if Object and Object.Category then
+		if Object.Category.CARGO then cats[#cats + 1] = { Object.Category.CARGO, "CARGO" } end
+		if Object.Category.STATIC then cats[#cats + 1] = { Object.Category.STATIC, "STATIC" } end
+	end
+	local cur = {}
+	for _, c in ipairs(centers) do
+		for _, cat in ipairs(cats) do
+			pcall(function()
+				local vol = { id = world.VolumeType.SPHERE, params = {
+					point = { x = c.x, y = land.getHeight({ x = c.x, y = c.y }), z = c.y }, radius = c.r } }
+				world.searchObjects(cat[1], vol, function(o)
+					local okN, n = pcall(function() return o:getName() end)
+					if okN and n and not cur[n] then cur[n] = { o = o, cat = cat[2], near = c.l } end
+					return true
+				end)
+			end)
+		end
+	end
+	M.scanN = M.scanN + 1
+	for n, e in pairs(cur) do
+		local o = e.o
+		local ty = callIf(o, "getTypeName")
+		if e.cat == "CARGO" or M.known[n] or cargoLike(n, ty) then
+			local p = callIf(o, "getPoint")
+			if type(p) == "table" and p.x and p.z then
+				local pos = { x = p.x, y = p.z }
+				local agl = p.y - land.getHeight({ x = p.x, y = p.z })
+				local v = callIf(o, "getVelocity")
+				local sp = (type(v) == "table" and v.x and v.z) and math.sqrt(v.x * v.x + v.z * v.z) or -1
+				local rec = M.obs[n]
+				if not rec then
+					rec = { x = pos.x, y = pos.y, x0 = pos.x, y0 = pos.y, state = "immobile", scan = M.scanN }
+					M.obs[n] = rec
+					olog("OBJ", "APPARU "..n.." ["..e.cat.."] pres de "..e.near.." zone_la_plus_proche="..zoneOf(cfg, pos).." pos="..fp(pos).." agl="..math.floor(agl)
+						.." v="..string.format("%.1f", sp).." connue_du_script="..(M.known[n] and "oui" or "non")
+						.." aeronef_proche="..nearestAircraft(pos).." <"..describeObj(o).."> contenu="..crateContent(o))
+				else
+					if rec.gone then
+						rec.gone = nil
+						olog("OBJ", "REAPPARU "..n.." pos="..fp(pos).." aeronef_proche="..nearestAircraft(pos))
+					end
+					local moved = dist2(pos, rec)
+					local st = (moved > 0.5) and "mobile" or "immobile"
+					if rec.state ~= st then
+						rec.state = st
+						olog("OBJ", "ETAT "..n.." "..st.." zone_la_plus_proche="..zoneOf(cfg, pos).." pos="..fp(pos).." agl="..math.floor(agl).." v="..string.format("%.1f", sp)
+							.." deplace_depuis_dernier_balayage="..string.format("%.1f", moved).." m aeronef_proche="..nearestAircraft(pos))
+					end
+					rec.x, rec.y, rec.scan = pos.x, pos.y, M.scanN
+				end
+				if e.cat == "CARGO" and not M.known[n] then
+					local okC, errC = pcall(creditStep, cfg, now, n, o, rec, pos)
+					if not okC then log("ERREUR credit caisse "..n..": "..tostring(errC)) end
+				end
+			end
+		end
+	end
+	for n, rec in pairs(M.obs) do
+		if rec.scan ~= M.scanN and not rec.gone then
+			rec.gone = true
+			local q = StaticObject.getByName(n)
+			olog("OBJ", "DISPARU "..n.." derniere pos="..fp(rec).." interrogeable_par_nom="..((q and q:isExist()) and "OUI" or "non")
+				.." aeronef_proche_de_la_derniere_pos="..nearestAircraft(rec).." (peut aussi avoir quitte la zone observee)")
+		end
+	end
+end
+
+-- inventaires d'entrepot des bases/FARP proches des zones : on ne journalise que les differences
+local function flatten(t, prefix, out, dep, cnt)
+	if dep > 4 then return end
+	for k, v in pairs(t) do
+		if cnt.n >= WH_ITEMS then return end
+		local key = prefix.."/"..tostring(k)
+		if type(v) == "number" then
+			out[key] = v
+			cnt.n = cnt.n + 1
+		elseif type(v) == "table" then
+			flatten(v, key, out, dep + 1, cnt)
+		end
+	end
+end
+
+local function tickWarehouse(cfg, now)
+	if now < M.nextWh then return end
+	M.nextWh = now + WH_S
+	local zones = cfg.zones or {}
+	if #zones == 0 then return end
+	local okA, bases = pcall(world.getAirbases)
+	if not okA or type(bases) ~= "table" then return end
+	for _, ab in ipairs(bases) do
+		local bn = callIf(ab, "getName")
+		local bp = callIf(ab, "getPoint")
+		if bn and type(bp) == "table" and bp.x then
+			local near = false
+			for _, z in ipairs(zones) do
+				if dist2({ x = bp.x, y = bp.z }, z) <= WH_R then near = true break end
+			end
+			local w = near and callIf(ab, "getWarehouse")
+			if w then
+				local snap, cnt = {}, { n = 0 }
+				local inv = callIf(w, "getInventory")
+				local invInfo = {}
+				if type(inv) == "table" then
+					flatten(inv, "inv", snap, 0, cnt)
+					for k, v in pairs(inv) do
+						local c = 0
+						if type(v) == "table" then for _ in pairs(v) do c = c + 1 end end
+						invInfo[#invInfo + 1] = tostring(k).."="..(type(v) == "table" and (c.." entrees") or tostring(v))
+					end
+					table.sort(invInfo)
+				end
+				for liq = 0, 3 do
+					local ok, v = pcall(function() return w:getLiquidAmount(liq) end)
+					if ok and type(v) == "number" then snap["liq/"..liq] = v end
+				end
+				local prev = M.wh[bn]
+				if not prev then
+					olog("ENTREPOT", bn.." (type="..tostring(callIf(ab, "getTypeName"))..", cote="..tostring(callIf(ab, "getCoalition"))..") ETAT INITIAL : "
+						..cnt.n.." valeurs ; inventaire{"..table.concat(invInfo, ", ").."} ; liquides 0="..tostring(snap["liq/0"])
+						.." 1="..tostring(snap["liq/1"]).." 2="..tostring(snap["liq/2"]).." 3="..tostring(snap["liq/3"])
+						..(cnt.n == 0 and " ; INVENTAIRE VIDE (illimite ?)" or ""))
+				else
+					local lines = 0
+					for k, v in pairs(snap) do
+						if prev[k] ~= v and lines < 20 then
+							lines = lines + 1
+							olog("ENTREPOT", bn.." "..k.." : "..tostring(prev[k]).." -> "..tostring(v).." (delta "..tostring(v - (prev[k] or 0))..")")
+						end
+					end
+					for k, v in pairs(prev) do
+						if snap[k] == nil and lines < 20 then
+							lines = lines + 1
+							olog("ENTREPOT", bn.." "..k.." : "..tostring(v).." -> absent")
+						end
+					end
+				end
+				M.wh[bn] = snap
+			end
+		end
+	end
+end
+
+-- decor present dans chaque zone de depose (a lancer une fois au demarrage, apres le nettoyage fait par la mission)
+local function scanScenery(cfg)
+	if not (Object and Object.Category and Object.Category.SCENERY and world and world.searchObjects) then
+		clog("ZONE", "Object.Category.SCENERY indisponible : pas de balayage du decor")
+		return
+	end
+	for _, z in ipairs(cfg.zones or {}) do
+		if z.kind == "drop" then
+			local n, types = 0, {}
+			local ok, err = pcall(function()
+				local vol = { id = world.VolumeType.SPHERE, params = {
+					point = { x = z.x, y = land.getHeight({ x = z.x, y = z.y }), z = z.y }, radius = z.radius or 100 } }
+				world.searchObjects(Object.Category.SCENERY, vol, function(o)
+					n = n + 1
+					if n <= 2000 then
+						local t = callIf(o, "getTypeName") or callIf(o, "getName") or "?"
+						types[tostring(t)] = (types[tostring(t)] or 0) + 1
+					end
+					return true
+				end)
+			end)
+			local keys = {}
+			for k in pairs(types) do keys[#keys + 1] = k end
+			table.sort(keys, function(a, b) return types[a] > types[b] end)
+			local parts = {}
+			for i = 1, math.min(#keys, 8) do parts[#parts + 1] = keys[i].."="..types[keys[i]] end
+			clog("ZONE", "drop "..tostring(z.slot).." rayon="..math.floor(z.radius or 0).." m : "..n.." objet(s) de decor"
+				..(ok and "" or " (ERREUR "..tostring(err)..")")..(#parts > 0 and " ["..table.concat(parts, ", ").."]" or "")
+				.." (les arbres ne sont peut-etre pas detectables)")
+		end
+	end
 end
 
 local function tickMenus(now)
@@ -862,6 +1371,12 @@ local function tick(_, now)
 			if not ok then log("ERREUR tickAI: "..tostring(err)) end
 		end
 		pcall(tickCargos, cfg, now)
+		local okW, errW = pcall(tickCargoWatch, now)
+		if not okW then log("ERREUR tickCargoWatch: "..tostring(errW)) end
+		local okO, errO = pcall(tickObserve, cfg, now)
+		if not okO then log("ERREUR tickObserve: "..tostring(errO)) end
+		local okH, errH = pcall(tickWarehouse, cfg, now)
+		if not okH then log("ERREUR tickWarehouse: "..tostring(errH)) end
 		local okS, errS = pcall(tickSmoke, cfg, now)
 		if not okS then log("ERREUR tickSmoke: "..tostring(errS)) end
 		local okM, errM = pcall(tickMenus, now)
@@ -903,9 +1418,81 @@ local function start(_, now)
 	scanMission(cfg)
 	spawnCargos(cfg)
 	drawZones(cfg)
+	pcall(scanScenery, cfg)
 	writeResult()		--ecrase le fichier de la mission precedente
 	timer.scheduleFunction(tick, nil, now + PERIOD)
 	return nil
+end
+
+-- DIAGNOSTIC TEMPORAIRE "DCE_Clear:" : nettoyage ME des zones WG_CLEAR_SCPT_* (arbres / batiments), t=0, 6 et 60 s
+-- a supprimer une fois le probleme tranche
+local function clearZoneList()
+	local list = {}
+	local zs = env and env.mission and env.mission.triggers and env.mission.triggers.zones
+	for _, z in pairs(zs or {}) do
+		if type(z.name) == "string" and string.sub(z.name, 1, 14) == "WG_CLEAR_SCPT_" then list[#list + 1] = z.name end
+	end
+	table.sort(list)
+	return list
+end
+
+local function clearCount(tz, cat)
+	local n, types = 0, {}
+	local vol = { id = world.VolumeType.SPHERE, params = {
+		point = { x = tz.point.x, y = land.getHeight({ x = tz.point.x, y = tz.point.z }), z = tz.point.z }, radius = tz.radius } }
+	world.searchObjects(cat, vol, function(o)
+		n = n + 1
+		if n <= 500 then
+			local t = tostring(callIf(o, "getTypeName") or "?")
+			types[t] = (types[t] or 0) + 1
+		end
+		return true
+	end)
+	local keys = {}
+	for k in pairs(types) do keys[#keys + 1] = k end
+	table.sort(keys, function(a, b) return types[a] > types[b] end)
+	local parts = {}
+	for i = 1, math.min(#keys, 5) do parts[#parts + 1] = keys[i].."="..types[keys[i]] end
+	return n, table.concat(parts, ",")
+end
+
+local clearFirst = {}
+local function clearDiag(arg)
+	local t = arg.t
+	local function say(m) env.info("DCE_Clear: t="..t.." "..m) end
+	local ok, err = pcall(function()
+		if t == 0 then
+			--triggers : presents dans le .miz ? (comment contenant "WG airlift")
+			local nt = 0
+			for _, r in pairs((env and env.mission and env.mission.trigrules) or {}) do
+				if type(r) == "table" and type(r.comment) == "string" and string.find(r.comment, "WG airlift", 1, true) then
+					nt = nt + 1
+					say("trigrule '"..r.comment.."' type="..tostring(r.eventlist or r.predicate))
+				end
+			end
+			say("triggers WG airlift dans le .miz : "..nt.." (attendu 2)")
+		end
+		local names = clearZoneList()
+		if #names == 0 then say("AUCUNE zone WG_CLEAR_SCPT_* dans env.mission.triggers.zones") end
+		for _, name in ipairs(names) do
+			local tz = trigger.misc.getZone(name)
+			if not tz or not tz.point then
+				say(name.." : trigger.misc.getZone = nil (zone absente)")
+			else
+				local ns, ts = clearCount(tz, Object.Category.SCENERY)
+				local nb, tb = clearCount(tz, Object.Category.STATIC)
+				local before = clearFirst[name]
+				say(name.." x="..math.floor(tz.point.x).." z="..math.floor(tz.point.z).." r="..math.floor(tz.radius)
+					.." decor="..ns..(before and (" (t=0: "..before..")") or "").." ["..ts.."] statics="..nb.." ["..tb.."]")
+				if t == 0 then clearFirst[name] = ns end
+			end
+		end
+	end)
+	if not ok then say("ERREUR "..tostring(err)) end
+end
+
+for _, dt in ipairs({ 0, 6, 60 }) do
+	timer.scheduleFunction(function() clearDiag({ t = dt }) end, nil, timer.getTime() + dt + 0.5)
 end
 
 timer.scheduleFunction(start, nil, timer.getTime() + 6)

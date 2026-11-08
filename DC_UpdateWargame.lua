@@ -224,6 +224,9 @@ local function rebuildUnitsFromBucket(group, elements, unitIndex)
 		if templateUnit then
 			local newUnit = DeepCopy(templateUnit)
 
+			newUnit.dead = nil							--defensif : DeepCopy part du template, qui ne porte normalement pas ces champs
+			newUnit.CheckDay = nil
+
 			newUnit.name = element.name
 			newUnit.x = element.x
 			newUnit.y = element.y
@@ -238,6 +241,68 @@ local function rebuildUnitsFromBucket(group, elements, unitIndex)
 			end
 
 			table.insert(group.units, newUnit)
+		end
+	end
+end
+
+--=====================================================================================================
+-- 0) une formation ne doit exister qu'UNE fois dans targetlist
+--    DCE_Manager renomme ses formations a chaque generation (RED_094_MECH -> _G2 -> _G3...). Si un
+--    ancien nom revient dans l'Active (par exemple reinjecte depuis Init/targetlist_init.lua), deux
+--    cibles portent alors le meme wargameFormationId : l'upsert ci-dessous tournerait deux fois sur
+--    le meme groupe oob_ground et la position finale dependrait de l'ordre de parcours de pairs().
+--    On ne garde donc que la generation la plus recente, et on retire les autres de targetlist.
+--=====================================================================================================
+
+--numero de generation d'un nom de formation : suffixe _G<n>, un nom sans suffixe valant 1
+local function wargameGeneration(name)
+	local n = string.match(tostring(name), "_G(%d+)$")
+	return tonumber(n) or 1
+end
+
+for sideName, targets in pairs(targetlist) do
+	if type(targets) == "table" then
+
+		--generation la plus haute trouvee pour chaque formationId
+		local bestKey = {}				--formationId -> cle (dans targets) de la cible gardee
+		local bestGen = {}				--formationId -> generation de cette cible
+
+		for target_key, target in pairs(targets) do
+			if type(target) == "table" and target.wargameFormation and target.wargameFormationId then
+				local gen = wargameGeneration(target.name or target_key)
+
+				if not bestGen[target.wargameFormationId] or gen > bestGen[target.wargameFormationId] then
+					bestKey[target.wargameFormationId] = target_key
+					bestGen[target.wargameFormationId] = gen
+				end
+			end
+		end
+
+		--tout ce qui n'est pas la generation gardee est retire : une cle texte est mise a nil, une
+		--cle numerique est retiree en ordre decroissant pour ne pas decaler les cles suivantes
+		local numericToRemove = {}
+
+		for target_key, target in pairs(targets) do
+			if type(target) == "table" and target.wargameFormation and target.wargameFormationId
+				and bestKey[target.wargameFormationId] ~= target_key then
+
+				local keptKey = bestKey[target.wargameFormationId]
+				local keptName = (targets[keptKey] and targets[keptKey].name) or keptKey
+
+				dcuwLog("DcUW doublon de formation: |"..tostring(target.name or target_key).."| (formationId "
+					..tostring(target.wargameFormationId)..") retire de targetlist, generation |"..tostring(keptName).."| gardee")
+
+				if type(target_key) == "number" then
+					table.insert(numericToRemove, target_key)
+				else
+					targets[target_key] = nil
+				end
+			end
+		end
+
+		table.sort(numericToRemove, function(a, b) return a > b end)
+		for _, idx in ipairs(numericToRemove) do
+			table.remove(targets, idx)
 		end
 	end
 end
@@ -333,6 +398,13 @@ for sideName, targets in pairs(targetlist) do
 						group.wargameFormationId = target.wargameFormationId
 						group.wargameGroupOrdinal = groupOrdinal
 						group.wargameTemplateGroupName = templateGroup.name		--traçabilité/debug: nom du groupe d'origine dans le .stm
+
+						--un groupe reutilise d'un cycle a l'autre ne doit pas rester marque mort par une
+						--ancienne destruction : pour une formation wargame, c'est DCE_Manager qui decide
+						--de la vie et de la mort, par la presence ou l'absence de la formation dans targetlist
+						group.dead = nil
+						group.CheckDay = nil
+						group.hidden = templateGroup.hidden		--la destruction (UTIL_Functions) pose aussi hidden = true : on revient a la valeur d'origine du template
 
 						--position du groupe = position du 1er element du paquet
 						local firstElement = bucketElements[1]
