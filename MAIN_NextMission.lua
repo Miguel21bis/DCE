@@ -1007,11 +1007,8 @@ end
 
 -- dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
 
-	Include("ATO_RouteGenerator.lua")
-	-- Include("ATO_Generator.lua")
-	Include("ATO_Generator_A_Debug.lua")
-	Include("ATO_Generator_B_Eval.lua")
-	Include("ATO_Generator_C_Core.lua")
+   Include("ATO_RouteGenerator.lua")
+   Include("ATO_Generator.lua")	--point d'entree : charge les fichiers du dossier ATO_Generator\
 
 	Include("ATO_PlayerAssign.lua")
 

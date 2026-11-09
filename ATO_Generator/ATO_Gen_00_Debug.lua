@@ -1,13 +1,13 @@
---ATO_Generator_A_Debug.lua
+--ATO_Gen_00_Debug.lua
 --Sous-module de ATO_Generator : logs de debug, tracking structure des rejets et des echecs de generation (squad / player)
---A charger AVANT ATO_Generator_B_Eval.lua et ATO_Generator_C_Core.lua (ceux-ci utilisent debugLog/rejectStep/etc en globale)
+--Charge par ATO_Generator.lua (point d'entree), AVANT ATO_Gen_01_Eval.lua et ATO_Gen_Main.lua (ceux-ci utilisent debugLog/rejectStep/etc en globale)
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Generator_A_Debug.lua"] = "1.21.137"
+versionDCE["ATO_Gen_00_Debug.lua"] = "1.21.137"
 -------------------------------------------------------------------------------------------------------
 
 if Debug.debug then
-	print("START ATO_Generator_A_Debug.lua "..versionDCE["ATO_Generator_A_Debug.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+	print("START ATO_Gen_00_Debug.lua "..versionDCE["ATO_Gen_00_Debug.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
 -- Mettre a false pour couper l'affichage console de chaque echec joueur
@@ -121,7 +121,7 @@ RejectReasonInfo = {
 	insufficient_aircraft         = { priority = 50, texte = "Insufficient aircraft generated for this request." },
 	unknown                        = { priority = 0,  texte = "Cause undetermined." },
 	
-	--rejets remontes par rejectDraft() dans createATO_table (ATO_Generator_C_Core.lua) :
+	--rejets remontes par rejectDraft() dans createATO_table (ATO_Gen_Main.lua) :
 	--un 3e circuit, distinct de rejectStep/SquadGenerationStatus, qui intervient plus tard
 	--dans la construction du package (apres qu'un loadout ait ete juge eligible).
 	insufficient_aircraft_count   = { priority = 90, texte = "Not enough aircraft to fill this tasking." },
@@ -231,7 +231,7 @@ function isPlayerRelatedDraft(draft)
 		return true
 	end
 
-	--Filet de securite solo : dans createATO_table (ATO_Generator_C_Core.lua), l'objet "draft"
+	--Filet de securite solo : dans createATO_table (ATO_Gen_Main.lua), l'objet "draft"
 	--manipule (draftSortiesEntry) ne porte ni .unit ni .player/.client, seulement .name (nom du
 	--squad). En solo, le squad du joueur est connu via playerInfo.squadBAT (deja utilise par
 	--ExplainPlayerRejectionSP) : on s'en sert ici pour reconnaitre le draft du joueur a ce stade.
