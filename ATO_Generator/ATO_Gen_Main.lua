@@ -186,6 +186,215 @@ function HoDumpATO(titre, apresAssign)
 	end
 end
 
+-- ============================================================================
+-- CORRECTION (vols IA sur un squad humainOnly) : nettoyage APRES ATO_PlayerAssign.
+-- Pourquoi : un squad humainOnly passe le filtre "passHumain" des qu'il est le squad du joueur
+-- (unit.player = true), donc TOUS ses drafts (ex : un airlift par cible WG_AIRLIFT_*) deviennent
+-- des vols. Le joueur n'en choisit qu'UN ; les autres restaient dans l'ATO et volaient en IA,
+-- ce que humainOnly doit interdire (trace : "VERDICT ... <== BUG : des vols IA utilisent ce squad").
+-- On retire donc de l'ATO les vols (ni player, ni client) des squads humainOnly.
+--   - un package dont le vol main est retire disparait en entier, sauf s'il contient un humain
+--     ou s'il est reference par un autre package (target_pack) : il garde alors son vol main ;
+--   - les numeros de package / de vol sont recalcules (camp.player, camp.client, HumainPack,
+--     camp.MultiPlayer.pack_n, target_pack, init_packN).
+-- A appeler dans MAIN_NextMission.lua juste apres Include("ATO_PlayerAssign.lua").
+-- HUMAIN_ONLY_PRUNE = false : desactive le nettoyage (retour au comportement precedent).
+-- ============================================================================
+HUMAIN_ONLY_PRUNE = true
+
+function PruneHumainOnlyAI()
+	if not HUMAIN_ONLY_PRUNE then return end
+
+	local humainOnlySquad = {}
+	local nbSquad = 0
+	for _, squads in pairs(oob_air) do
+		for _, sq in pairs(squads) do
+			if type(sq) == "table" and HumainOnlyUnit(sq) and not (IsHumainProhibited and IsHumainProhibited(sq)) then
+				humainOnlySquad[sq.name] = true
+				nbSquad = nbSquad + 1
+			end
+		end
+	end
+	if nbSquad == 0 then return end
+
+	--retrouve l'objet vol (table) d'une reference {side, pack_n, role, flight}
+	local function getFlightObj(ref)
+		if type(ref) ~= "table" then return nil end
+		local s = ATO[ref.side]
+		local p = s and s[ref.pack_n]
+		local r = p and p[ref.role]
+		return r and r[ref.flight]
+	end
+
+	--on memorise les objets vol du joueur / des clients : leur index change si des vols sont retires
+	local playerObj = getFlightObj(camp.player)
+	local clientObjs = {}
+	if camp.client then
+		for i, cl in ipairs(camp.client) do clientObjs[i] = getFlightObj(cl) end
+	end
+
+	local packOldIndex = {}		--packOldIndex[side][table package] = ancien index
+	local remap = {}			--remap[side][ancien index] = nouvel index (nil si package supprime)
+	local anyDropped = false
+	local nbRemoved = 0
+
+	for side, packs in pairs(ATO) do
+		local nOld = #packs
+		packOldIndex[side] = {}
+		for p = 1, nOld do packOldIndex[side][packs[p]] = p end
+
+		--packages references par un vol d'un AUTRE package : on ne les supprime pas
+		local referenced = {}
+		for s2, packs2 in pairs(ATO) do
+			for p2 = 1, #packs2 do
+				for _, flights2 in pairs(packs2[p2]) do
+					if type(flights2) == "table" then
+						for f2 = 1, #flights2 do
+							local fl2 = flights2[f2]
+							if type(fl2) == "table" and fl2.target_pack and fl2.target_side == side and not (s2 == side and p2 == fl2.target_pack) then
+								referenced[fl2.target_pack] = true
+							end
+						end
+					end
+				end
+			end
+		end
+
+		local kept = {}
+		remap[side] = {}
+
+		for p = 1, nOld do
+			local pack = packs[p]
+
+			local protected = referenced[p] == true
+			for _, flights in pairs(pack) do
+				if type(flights) == "table" then
+					for f = 1, #flights do
+						local fl = flights[f]
+						if type(fl) == "table" and (fl.player or fl.client) then protected = true end
+					end
+				end
+			end
+
+			local removedHere = 0
+			for role, flights in pairs(pack) do
+				if type(flights) == "table" then
+					for f = #flights, 1, -1 do
+						local fl = flights[f]
+						if type(fl) == "table" and fl.name and humainOnlySquad[fl.name] and not fl.player and not fl.client then
+							if role == "main" and protected and #flights <= 1 then
+								--package protege : on garde au moins un vol main (ATO_Timing / DC_Briefing lisent main[1])
+								HoLog("  PRUNE_GARDE (package protege) "..tostring(side).." pack"..p.." id="..tostring(fl.id))
+							else
+								HoLog("  PRUNE_RETIRE "..tostring(side).." pack"..p.." "..tostring(role).."["..f.."] id="..tostring(fl.id).." squad="..tostring(fl.name).." task="..tostring(fl.task).." cible="..tostring(fl.target_name))
+								table.remove(flights, f)
+								removedHere = removedHere + 1
+							end
+						end
+					end
+				end
+			end
+			nbRemoved = nbRemoved + removedHere
+
+			if removedHere > 0 and not protected and (not pack.main or #pack.main == 0) then
+				anyDropped = true
+				HoLog("  PRUNE_PACKAGE_SUPPRIME "..tostring(side).." pack"..p)
+			else
+				if removedHere > 0 then
+					--roles devenus vides : on retire la cle (sauf main)
+					local empty = {}
+					for role, flights in pairs(pack) do
+						if type(flights) == "table" and #flights == 0 and role ~= "main" then empty[#empty + 1] = role end
+					end
+					for _, role in ipairs(empty) do pack[role] = nil end
+				end
+				table.insert(kept, pack)
+				remap[side][p] = #kept
+			end
+		end
+
+		if #kept ~= nOld then
+			for p = 1, nOld do packs[p] = nil end
+			for i = 1, #kept do packs[i] = kept[i] end
+		end
+	end
+
+	if nbRemoved == 0 then return end
+	HoLog("  PRUNE : "..nbRemoved.." vol(s) IA retire(s) des squads humainOnly")
+	if AddLog then AddLog("PruneHumainOnlyAI: "..nbRemoved.." AI flight(s) removed from humainOnly squads") end
+
+	--renumerotation des references a un numero de package
+	if anyDropped then
+		for side, packs in pairs(ATO) do
+			for p = 1, #packs do
+				for _, flights in pairs(packs[p]) do
+					if type(flights) == "table" then
+						for f = 1, #flights do
+							local fl = flights[f]
+							if type(fl) == "table" then
+								if fl.target_pack and fl.target_side and remap[fl.target_side] then
+									fl.target_pack = remap[fl.target_side][fl.target_pack] or fl.target_pack
+								end
+								if fl.init_packN and remap[side] then
+									fl.init_packN = remap[side][fl.init_packN] or fl.init_packN
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	--camp.player / camp.client : on retrouve chaque vol par son objet (numero de package ET de vol ont pu changer)
+	local function locate(obj)
+		if not obj then return nil end
+		for side, packs in pairs(ATO) do
+			for p = 1, #packs do
+				for role, flights in pairs(packs[p]) do
+					if type(flights) == "table" then
+						for f = 1, #flights do
+							if flights[f] == obj then return side, p, role, f end
+						end
+					end
+				end
+			end
+		end
+		return nil
+	end
+
+	local oldPlayerPack = camp.player and camp.player.pack_n
+	local humainSide = camp.player and camp.player.side
+
+	if camp.player and playerObj then
+		local s, p, r, f = locate(playerObj)
+		if s then camp.player.side, camp.player.pack_n, camp.player.role, camp.player.flight = s, p, r, f end
+	end
+	if camp.client then
+		for i, cl in ipairs(camp.client) do
+			local s, p, r, f = locate(clientObjs[i])
+			if s then cl.side, cl.pack_n, cl.role, cl.flight = s, p, r, f end
+		end
+	end
+
+	--HumainPack et camp.MultiPlayer.pack_n sont indexes par numero de package (camp du joueur)
+	if anyDropped and humainSide and remap[humainSide] then
+		local newHP, newMP = {}, {}
+		for p, v in pairs(HumainPack or {}) do
+			local np = remap[humainSide][p]
+			if np then newHP[np] = v end
+		end
+		if camp.MultiPlayer and camp.MultiPlayer.pack_n then
+			for p, v in pairs(camp.MultiPlayer.pack_n) do
+				local np = remap[humainSide][p]
+				if np then newMP[np] = v end
+			end
+			camp.MultiPlayer.pack_n = newMP
+		end
+		HumainPack = newHP
+	end
+end
+
 local atoMainTaskFound = false
 
 multiPlaneSet = {}
@@ -1383,6 +1592,10 @@ for sideName, units in pairs(oob_air) do
 			local squadStatus = SquadGenerationStatus[unit.name]
 
 			if squadStatus then
+
+				--CORRECTION (bug 12) : playerRejectReason n'etait jamais appelee, donc PlayerMainTaskFailure restait vide.
+				--On la branche ici : tache MAIN sans sortie generee = echec a rapporter (la fonction ignore les taches non demandees par un joueur).
+				playerRejectReason(draftContext, draftContext.task, getDominantRejectReason(draftContext))
 
 				local score = computeRejectScore(draftContext)
 
@@ -2657,7 +2870,20 @@ local allFlightName_AtoG = {}
 for _, packages in pairs(ATO) do
 	for packN, pack in pairs(packages) do
 		for _, flights in pairs(pack) do
-			for flightN, flight in pairs(flights) do
+			--CORRECTION (ordre des vols) : avant, pairs(flights) donnait un ordre indefini, d'ou "Strike 1" = x2 et "Strike 2" = x4.
+			--On trie d'abord les vols du role du plus gros au plus petit (tri stable : a taille egale on garde l'ordre de creation),
+			--puis on numerote avec ipairs : 6 avions -> 1:x4 2:x2 ; 10 avions -> 1:x4 2:x4 3:x2 (le dernier vol comble les trous), en solo comme en MP.
+			if type(flights) == "table" and #flights > 1 then
+				local orderRef = {}
+				for i, f in ipairs(flights) do orderRef[f] = i end
+				table.sort(flights, function(a, b)
+					local na = (type(a) == "table" and tonumber(a.number)) or 0
+					local nb = (type(b) == "table" and tonumber(b.number)) or 0
+					if na ~= nb then return na > nb end
+					return (orderRef[a] or 0) < (orderRef[b] or 0)
+				end)
+			end
+			for flightN, flight in ipairs(flights) do
 
 				if type(flight) == "table" and flight.name then
 

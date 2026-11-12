@@ -354,7 +354,9 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 			else
 				debugMulti = debugMulti.."\n"..("AtoG passe A_AAg ==? target_name? " .. tostring(target_name).." "..unit.type.." "..tostring(task))
 
-				Multi.Target = {}
+				--CORRECTION (bug 7) : on arrive ici aussi quand Multi.Target existe deja mais n'a pas d'entree pour CE camp ;
+				--l'ancien 'Multi.Target = {}' effacait alors la cible deja memorisee pour l'autre camp. On ne cree la table que si elle manque.
+				Multi.Target = Multi.Target or {}
 				Multi.Target[sideName] = target_name
 				draftContext.overideMP_A = true
 			end
@@ -443,7 +445,7 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 		repeat
 
 			if not passHumain then
-				rejectStep( draftContext, "passHumain", "HumainRequired", nil)
+				rejectStep( draftContext, "passHumain", "HumainRequired", nil, "BLOCK_A", SafeGetLine())	--CORRECTION (bug 14) : bloc et ligne manquaient (comme tous les autres rejectStep), le rapport ne pouvait pas localiser ce rejet
 				break
 			end
 
@@ -638,7 +640,13 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 						--mode degrade : a partir de la 5e tentative infructueuse, on ignore le
 						--depassement de portee pour le draft du joueur plutot que de ne rien
 						--lui proposer (cf RelaxGeneration, ATO_Gen_00_Debug.lua).
-						if not rangeOK and RelaxGeneration and isPlayerRelatedDraft(draftContext) then
+						--CORRECTION (bug 15) : GetRoute() calcule un cap entre la base et la cible (GetHeadingDegre) : sans coordonnees x/y
+						--il plante ("arithmetic on field 'x' (a nil value)", FUNC_Geometry.lua:58). Une cible sans position (ex: zone, cible
+						--wargame) donne toTarget = 9999999 donc rangeOK = false, et c'est le mode degrade (RelaxGeneration, actif a partir de
+						--la 5e tentative) qui forcait rangeOK = true et envoyait cette cible sans position dans GetRoute. On ne relache donc
+						--la portee que si la cible ET la base ont une position.
+						if not rangeOK and RelaxGeneration and isPlayerRelatedDraft(draftContext)
+							and target.x and target.y and airbasePoint.x and airbasePoint.y then
 
 							recordRelaxedLimit(unit.name, "range", {
 								toTarget = math.floor(toTarget),

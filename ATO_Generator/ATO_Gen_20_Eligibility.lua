@@ -48,9 +48,13 @@ function checkWeatherEligibility(draftContext, currentLoadout, isDebugMode)
 			end
 
 			if task == "Strike" or task == "Anti-ship Strike" or task == "Reconnaissance" then										--extra requirement for A-G tasks
-				if currentLoadout.hAttack > cloud_base then																		--attack alt is above cloud base
+				--CORRECTION (bug 6) : hAttack peut etre nil dans le loadout ; "nil > nombre" provoque une erreur Lua qui arrete
+				--toute la generation des que les nuages sont denses (density > 8). On teste donc hAttack avant de le comparer
+				--(meme garde que celle deja utilisee plus haut pour hCruise / hAttack).
+				if currentLoadout.hAttack and currentLoadout.hAttack > cloud_base then																		--attack alt is above cloud base
 					if currentLoadout.adverseWeather == false then																--loadout is not adverse weather capable
 						debugLocal = debugLocal .. " /n Strike/Reconnaissance hAttack > cloud_base & adverseWeather == false "
+                        addRejectReason(draftContext, "weather")	--CORRECTION (bug 6) : seule cette branche ne comptabilisait pas le rejet meteo (les autres appellent addRejectReason)
                         weatherEligible = false																					--not eligible for this weather
 					end
 				end
@@ -208,6 +212,12 @@ local function cleanupUnavailableAircraft(unit)
 
 	for u = #AcftAvail[unit.name].unavailable, 1, -1 do
 
+		--ANNULATION de la correction du bug 3 : j'avais supprime la remise a 0, pour que le delai de remise en etat (ATO_Timing)
+		--soit respecte. Mais ATO_Timing ecrit AUSSI des heures de retour pour les avions d'une tentative de generation RATEE
+		--(cycles 1, 2, 3... d'une meme generation, CampTotalTimeH identique). Sans la remise a 0, ces avions restaient
+		--indisponibles pour les cycles suivants : constate sur 421st TFS, 10 avions prets -> 4 -> 2 -> 2 -> 2, donc le vol MP
+		--demande ne pouvait plus etre genere. Comportement d'origine restaure : toute entree est retiree a chaque calcul.
+		--Pour que le turnaround soit un jour efficace, il faudra qu'ATO_Timing n'ecrive qu'une fois la mission validee.
 		if AcftAvail[unit.name].unavailable[u] > CampTotalTimeH then
 			AcftAvail[unit.name].unavailable[u] = 0
 		end
@@ -301,7 +311,15 @@ local function allocateAircraftByTask(unit, totalAvailable)
 	end
 
 	--2eme passage: distribue ce qui reste (par paquets de unitSize) aux tâches ayant le plus gros reste
-	table.sort(candidates, function(a, b) return a.remainder > b.remainder end)
+	--CORRECTION (bug 14) : a reste egal, table.sort n'est pas stable et 'candidates' vient de pairs() (ordre indefini) :
+	--la tache qui recevait l'avion restant changeait d'une generation a l'autre. On departage par le nom de la tache
+	--pour obtenir une repartition reproductible.
+	table.sort(candidates, function(a, b)
+		if a.remainder ~= b.remainder then
+			return a.remainder > b.remainder
+		end
+		return a.name < b.name
+	end)
 
 	local remaining = totalAvailable - usedTotal
 	local guard = 0

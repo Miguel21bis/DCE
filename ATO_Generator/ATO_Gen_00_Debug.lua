@@ -148,6 +148,12 @@ GeneratorPass = (GeneratorPass or 0) + 1
 
 -- Réinitialiser le fichier au démarrage
 local function initDebugLogs()
+    --CORRECTION (bug 11) : avant, le fichier de log etait cree/vide a chaque chargement meme avec Debug.debug = false
+    --(ecriture disque inutile en jeu normal, et ecrase le log d'une session precedente). Sans debug, on ne touche pas au fichier.
+    if not Debug.debug then
+        return
+    end
+
     -- On ne vide le fichier qu'au TOUT PREMIER chargement du process.
     -- Sinon, comme ce fichier est rejoue a chaque tentative de generation,
     -- on ne garderait que les logs de la derniere passe (et donc jamais ceux
@@ -614,15 +620,21 @@ function computeRejectScore(draftContext)
 
 	local score = 0
 
-	for reason, count in pairs(draftContext.rejectStats) do
+	for rejectKey, count in pairs(draftContext.rejectStats) do
+
+		--CORRECTION (bug 5) : rejectStep() range les stats sous la cle "etape|raison" (ex: "range|range_too_short"),
+		--mais l'ancien code comparait cette cle entiere a "range", "weather"... : aucune comparaison ne reussissait,
+		--le score restait toujours 0 et Main ne gardait que le PREMIER rejet (bestScore initial = -1, 0 > -1 une seule fois).
+		--On extrait donc la raison (partie apres "|") et on compare aux VRAIS codes utilises par rejectStep().
+		local reason = string.match(rejectKey, "|(.+)$") or rejectKey
 
 		if reason == "no_loadoutEligible" then
 			score = score + count * 100
 
-		elseif reason == "range" then
+		elseif reason == "range_too_short" or reason == "support_no_range" then
 			score = score + count * 80
 
-		elseif reason == "weather" then
+		elseif reason == "no_weatherEligible" or reason == "weather_not_eligible" then
 			score = score + count * 60
 
 		elseif reason == "loadout_day_only" then
@@ -657,10 +669,10 @@ function addRejectReason(draftContext, reason)
 		draftContext.rejectCount = {}
 	end
 
-	--évite les doublons simples
-	if not draftContext.rejectReasons[reason] then
-		draftContext.rejectReasons[reason] = true
-	end
+	--CORRECTION (bug 13) : l'ancien code ecrivait ici draftContext.rejectReasons[reason] = true (cle texte),
+	--alors que rejectStep() utilise la MEME table comme liste d'entrees {step, reason, data, ...}.
+	--Deux usages dans une seule table : risque de collision et de confusion a la lecture. Le compteur
+	--rejectCount[reason] ci-dessous suffit a savoir qu'une raison est survenue ; on n'ecrit plus de cle texte dans rejectReasons.
 
 	--compteur détaillé
 	if not draftContext.rejectCount[reason] then
@@ -671,9 +683,21 @@ function addRejectReason(draftContext, reason)
 end
 
 -- Report uniquement des MAIN tasks demandées par joueur
-local function playerRejectReason(draftContext, reason, rejectReason)
+--CORRECTION (bug 12) : cette fonction etait 'local' et n'etait appelee nulle part (PlayerMainTaskFailure restait vide,
+--"echecs MAIN demandees" = 0 dans printGeneratorSummary). De plus elle lisait draftContext.draft qui n'existe pas
+--(le contexte EST le draft). Elle est maintenant globale, lit les champs reels du contexte (side, unit.type, task)
+--et est appelee par ATO_Gen_Main.lua quand une tache MAIN demandee par un joueur n'a pas genere de sortie.
+function playerRejectReason(draftContext, reason, rejectReason)
 
-	local draft = draftContext.draft
+	local draft = nil
+
+	if draftContext and draftContext.side and draftContext.task and (draftContext.unitType or (draftContext.unit and draftContext.unit.type)) then
+		draft = {
+			side = draftContext.side,
+			type = draftContext.unitType or draftContext.unit.type,
+			task = draftContext.task,
+		}
+	end
 
 	if draft and draft.type and draft.task and draft.side then
 

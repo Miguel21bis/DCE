@@ -156,7 +156,10 @@ function createATO_table(draftPriority)
 							--que sa part réellement allouée, tant que le pool global (partagé avec CAP/Escort/...)
 							--n'était pas totalement à sec. On clampe donc ici, AVANT toute décision d'accepter le
 							--draft, pas seulement au moment de l'assignation réelle dans addFlight.
-							if AcftAvail[draft.name].taskCap and AcftAvail[draft.name].taskCap[draft.task] ~= nil then
+							--CORRECTION (bug 16) : un vol demande par un joueur en multijoueur (main_overideMP) ne doit pas etre limite par la part
+							--par tache (taskCap) : le joueur a demande N avions, le plafond calcule par tasksCoef (ex: Strike = 4 sur 10) donnait
+							--"Generated 4 / 6 aircraft" alors que le stock du squad suffisait.
+							if AcftAvail[draft.name].taskCap and AcftAvail[draft.name].taskCap[draft.task] ~= nil and not draft.main_overideMP then
 
 								local usedForTask = (AcftAvail[draft.name].taskUsed and AcftAvail[draft.name].taskUsed[draft.task]) or 0
 								local capRemaining = AcftAvail[draft.name].taskCap[draft.task] - usedForTask
@@ -677,6 +680,13 @@ function createATO_table(draftPriority)
 													-- draft.number = test_Aircraftnumber
 													request_Main_Nb = test_Aircraftnumber
 
+													--CORRECTION (bug 8) : test_Aircraftnumber vaut draft.number ou floor(ready/2) et ECRASE le plafonnement fait plus haut
+													--(request_Main_Nb <= available_Main, qui tient compte du stock et de la part par tache). La demande pouvait donc depasser
+													--le stock et rendre 'unassigned' negatif. On replafonne apres coup, comme le fait le premier plafonnement.
+													if request_Main_Nb > available_Main and not draft.main_overideMP then
+														request_Main_Nb = available_Main
+													end
+
 													if not needeMindAircraft then
 														support_available = false
 
@@ -822,8 +832,12 @@ function createATO_table(draftPriority)
 														debugE = debugE .. " _F_ || elseAFTER assigned: "..assigned
 													end
 
-													if arg_Assign >= 4 then															--if more than 4 aircraft are to be assigned
-														assigned = 4																--assign flight of 4 aircaft
+													--CORRECTION (bug 4) : l'ancien code forcait assigned = 4 des que arg_Assign >= 4, ce qui ecrasait toutes les regles
+													--precedentes (vol d'1 avion : Escort Jammer, illumination, bombardiers flyingAlone, SAR/CSAR, taches a duree de
+													--station ; vol de 2 : Intercept...). Le but reel est seulement de ne jamais depasser 4 avions par vol :
+													--on plafonne donc a 4 au lieu de forcer 4.
+													if assigned > 4 then				--never more than 4 aircraft per flight
+														assigned = 4				--cap flight at 4 aircraft
 													-- else
 													-- 	assigned = arg_Assign															--else assign flight size of what is left
 													end
@@ -834,6 +848,67 @@ function createATO_table(draftPriority)
 													-- 		assigned = arg_Entry.number
 													-- 	end
 													-- end
+
+													--CORRECTION (bug 1) : ce plafonnement (stock du squad + part par tache TASKCAP) etait fait APRES la construction
+													--et l'insertion du vol dans l'ATO : flight.number et flight.firepower gardaient la valeur d'avant plafond, et si
+													--assigned tombait a 0 le vol restait dans l'ATO sans qu'aucun avion soit decompte (plus d'avions en vol que de stock).
+													--On plafonne maintenant AVANT de creer le vol, et on ne cree aucun vol si assigned <= 0.
+
+													if not AcftAvail[arg_Entry.name] then
+														debugLog(draft.id.." ERROR AcftAvail missing for "..tostring(arg_Entry.name))
+														return
+													end
+
+													--Pourquoi: si ce squad a une répartition par tâche (tasksCoef), on plafonne "assigned" à ce qu'il
+													--reste pour CETTE tâche précise, même si le pool global AcftAvail n'est pas épuisé -- sinon la
+													--première tâche traitée peut engloutir tout le squad avant que les autres n'aient leur part.
+													local taskForCap = (arg_Role == "main") and draft.task or arg_Role
+													local assigned_avant_clamp = assigned
+
+													--CORRECTION (bug 16) : meme exception ici pour le vol principal d'une demande multijoueur (voir plus haut)
+													if AcftAvail[arg_Entry.name].taskCap and AcftAvail[arg_Entry.name].taskCap[taskForCap] ~= nil and not (arg_Role == "main" and draft.main_overideMP) then
+
+														AcftAvail[arg_Entry.name].taskUsed = AcftAvail[arg_Entry.name].taskUsed or {}
+														local usedSoFar = AcftAvail[arg_Entry.name].taskUsed[taskForCap] or 0
+														local cap = AcftAvail[arg_Entry.name].taskCap[taskForCap]
+														local remaining = cap - usedSoFar
+
+														if remaining <= 0 then
+															assigned = 0
+														elseif assigned > remaining then
+															assigned = remaining
+														end
+
+														AcftAvail[arg_Entry.name].taskUsed[taskForCap] = usedSoFar + assigned
+
+														if Debug.debug then	--CORRECTION (bug 11) : ce debugLog n'etait pas protege par Debug.debug (log ecrit meme hors debug)
+														debugLog(draft.id.." AtoG TASKCAP squad: "..tostring(arg_Entry.name)
+															.." arg_Role: "..tostring(arg_Role)
+															.." taskForCap: "..tostring(taskForCap)
+															.." cap: "..tostring(cap)
+															.." deja_utilise_avant: "..tostring(usedSoFar)
+															.." assigned_avant_clamp: "..tostring(assigned_avant_clamp)
+															.." assigned_final: "..tostring(assigned)
+															.." deja_utilise_apres: "..tostring(AcftAvail[arg_Entry.name].taskUsed[taskForCap]))
+														end
+
+													else
+														--Pourquoi: si on arrive ICI, le plafond n'a PAS été consulté du tout pour cet appel
+														--(pas de taskCap pour ce squad, ou taskForCap ne correspond à aucune clé de taskCap)
+														---> assigned part sans aucune limite par tâche, uniquement limité par le pool global.
+														if Debug.debug then	--CORRECTION (bug 11) : idem, protege par Debug.debug
+														debugLog(draft.id.." AtoG TASKCAP_SKIPPED squad: "..tostring(arg_Entry.name)
+															.." arg_Role: "..tostring(arg_Role)
+															.." taskForCap: "..tostring(taskForCap)
+															.." assigned_sans_plafond: "..tostring(assigned)
+															.." taskCap_existe: "..tostring(AcftAvail[arg_Entry.name].taskCap ~= nil))
+														end
+													end
+
+													if assigned <= 0 then
+														--plus de part disponible pour CETTE tâche précise (même si le pool global n'est pas vide)
+														return
+													end
 
 													if isDebugModeC then
 														debugLog(draft.id.." AtoG passe C_11 |||BEFORE insert/create ATO table|||  _A_" ..debugA.." \r\n _E_ "..debugE.." \r\n assigned "..assigned)
@@ -924,57 +999,6 @@ function createATO_table(draftPriority)
 														if isDebugModeC then
 															debugLog(draft.id.." AtoG passe C_14 (NbPlane - assigned) "..multiPlaneSet[side][draft.type][draft.name].NbPlane)
 														end
-													end
-
-													if not AcftAvail[arg_Entry.name] then
-														debugLog(draft.id.." ERROR AcftAvail missing for "..tostring(arg_Entry.name))
-														return
-													end
-
-													--Pourquoi: si ce squad a une répartition par tâche (tasksCoef), on plafonne "assigned" à ce qu'il
-													--reste pour CETTE tâche précise, même si le pool global AcftAvail n'est pas épuisé -- sinon la
-													--première tâche traitée peut engloutir tout le squad avant que les autres n'aient leur part.
-													local taskForCap = (arg_Role == "main") and draft.task or arg_Role
-													local assigned_avant_clamp = assigned
-
-													if AcftAvail[arg_Entry.name].taskCap and AcftAvail[arg_Entry.name].taskCap[taskForCap] ~= nil then
-
-														AcftAvail[arg_Entry.name].taskUsed = AcftAvail[arg_Entry.name].taskUsed or {}
-														local usedSoFar = AcftAvail[arg_Entry.name].taskUsed[taskForCap] or 0
-														local cap = AcftAvail[arg_Entry.name].taskCap[taskForCap]
-														local remaining = cap - usedSoFar
-
-														if remaining <= 0 then
-															assigned = 0
-														elseif assigned > remaining then
-															assigned = remaining
-														end
-
-														AcftAvail[arg_Entry.name].taskUsed[taskForCap] = usedSoFar + assigned
-
-														debugLog(draft.id.." AtoG TASKCAP squad: "..tostring(arg_Entry.name)
-															.." arg_Role: "..tostring(arg_Role)
-															.." taskForCap: "..tostring(taskForCap)
-															.." cap: "..tostring(cap)
-															.." deja_utilise_avant: "..tostring(usedSoFar)
-															.." assigned_avant_clamp: "..tostring(assigned_avant_clamp)
-															.." assigned_final: "..tostring(assigned)
-															.." deja_utilise_apres: "..tostring(AcftAvail[arg_Entry.name].taskUsed[taskForCap]))
-
-													else
-														--Pourquoi: si on arrive ICI, le plafond n'a PAS été consulté du tout pour cet appel
-														--(pas de taskCap pour ce squad, ou taskForCap ne correspond à aucune clé de taskCap)
-														---> assigned part sans aucune limite par tâche, uniquement limité par le pool global.
-														debugLog(draft.id.." AtoG TASKCAP_SKIPPED squad: "..tostring(arg_Entry.name)
-															.." arg_Role: "..tostring(arg_Role)
-															.." taskForCap: "..tostring(taskForCap)
-															.." assigned_sans_plafond: "..tostring(assigned)
-															.." taskCap_existe: "..tostring(AcftAvail[arg_Entry.name].taskCap ~= nil))
-													end
-
-													if assigned <= 0 then
-														--plus de part disponible pour CETTE tâche précise (même si le pool global n'est pas vide)
-														return
 													end
 
 													--Pourquoi: tracer précisément CHAQUE décrémentation réelle d'AcftAvail (la seule dans tout le

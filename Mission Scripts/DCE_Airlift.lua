@@ -7,7 +7,7 @@
 --          en plus, pour les types listes dans simTypes : charger (pose dans la zone Load), decharger (pose dans la zone Drop), etat.
 --          Marquage auto : zone Load a l'approche (une fois par vie), zone Drop a 4 km puis rallumage a 500 m.
 --          Les charges elinguees (static cargo) sont creditees quand elles restent holdS secondes dans la zone Drop.
--- Sortie : wargame_airlift_deliveries.lua (dans PathDCE), lu par DEBRIEF_Master.lua
+-- Sortie : chaque livraison est ajoutee a CustomLog (type "airlift delivery"), ecrit dans MissionEventsLog.lua a la fin de la mission par EventsTracker
 -- Tous les messages du journal DCS commencent par "DCE_Airlift:".
 --
 -- LEGENDE DES LIGNES DE DIAGNOSTIC (chercher "CARGO-" dans dcs.log ; chaque ligne porte t = temps de mission en s)
@@ -75,42 +75,6 @@ end
 
 local function sideId(side) if side == "red" then return 1 end return 2 end
 
-local function ser(v, ind)
-	ind = ind or ""
-	if type(v) == "table" then
-		local keys = {}
-		for k in pairs(v) do keys[#keys + 1] = k end
-		table.sort(keys, function(a, b) return tostring(a) < tostring(b) end)
-		local out = { "{\n" }
-		for _, k in ipairs(keys) do
-			local ks = (type(k) == "string") and string.format("%q", k) or tostring(k)
-			out[#out + 1] = ind.."\t["..ks.."] = "..ser(v[k], ind.."\t")..",\n"
-		end
-		out[#out + 1] = ind.."}"
-		return table.concat(out)
-	elseif type(v) == "string" then
-		return string.format("%q", v)
-	end
-	return tostring(v)
-end
-
-local function writeResult()
-	if not (PathDCE and io and io.open) then
-		log("ecriture impossible (PathDCE ou io absent)")
-		return
-	end
-	local air = {}
-	for _, s in ipairs(M.slots) do air[s] = 0 end
-	for _, d in ipairs(M.deliveries) do air[d.slot] = (air[d.slot] or 0) + d.kg end
-	local f = io.open(PathDCE.."wargame_airlift_deliveries.lua", "w")
-	if not f then
-		log("ecriture impossible : "..PathDCE.."wargame_airlift_deliveries.lua")
-		return
-	end
-	f:write("wargame_airlift_deliveries = "..ser({ mission = campL and campL.mission, deliveries = M.deliveries, air = air }).."\n")
-	f:close()
-end
-
 local function say(side, txt, t)
 	pcall(function() trigger.action.outTextForCoalition(sideId(side), txt, t or 15) end)
 end
@@ -119,7 +83,11 @@ local function addDelivery(slot, side, kg, by, group)
 	kg = math.floor(kg + 0.5)
 	table.insert(M.deliveries, { slot = slot, side = side, kg = kg, by = by, group = group, t = math.floor(timer.getTime()) })
 	log("LIVRAISON slot="..slot.." kg="..kg.." par="..tostring(by).." groupe="..tostring(group))
-	writeResult()
+	if CustomLog then
+		table.insert(CustomLog, { t = timer.getTime(), infoEvent = "DCE_AIRLIFT_DELIVERY", type = "airlift delivery", slot = slot, side = side, kg = kg, by = by, group = group })
+	else
+		log("ERREUR CustomLog absent : livraison "..slot.." "..kg.." kg NON transmise au debriefing")
+	end
 	say(side, "Airlift "..slot..": "..kg.." kg livres ("..tostring(by)..")")
 end
 
@@ -773,12 +741,14 @@ local function buildMenu(name)
 	local rec = M.grp[gid]
 	if not rec then
 		local size = 1
-		local okS, s = pcall(function() return g:getInitialSize() end)
-		if okS and type(s) == "number" then
-			size = s
+		--getInitialSize() peut renvoyer une valeur aberrante (vu : 604556874) : on compte les unites, et on ne garde
+		--getInitialSize que si la valeur est plausible
+		local okU, us = pcall(function() return g:getUnits() end)
+		if okU and type(us) == "table" and #us >= 1 then
+			size = #us
 		else
-			local us = g:getUnits()
-			size = us and #us or 1
+			local okS, s = pcall(function() return g:getInitialSize() end)
+			if okS and type(s) == "number" and s >= 1 and s <= 50 then size = s end
 		end
 		if size > 9 then log("ATTENTION groupe de "..size.." unites : limite de 10 entrees par menu F10") end
 		rec = { single = (size <= 1) }
@@ -1419,7 +1389,6 @@ local function start(_, now)
 	spawnCargos(cfg)
 	drawZones(cfg)
 	pcall(scanScenery, cfg)
-	writeResult()		--ecrase le fichier de la mission precedente
 	timer.scheduleFunction(tick, nil, now + PERIOD)
 	return nil
 end

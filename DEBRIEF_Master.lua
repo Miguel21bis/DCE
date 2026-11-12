@@ -336,7 +336,10 @@ end
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
 IncludeOnce("UTIL_Functions.lua")
 --wargame airlift : livraisons de la mission -> Active/wargame_logistics_result.lua (lu par DCE_Manager)
---Le fichier wargame_airlift_deliveries.lua est ecrit par DCE_Airlift.lua (mission). Pas de fichier = 0 kg partout.
+--Les livraisons sont lues dans MissionEventsLog.lua (global "events", chargee plus haut) : entrees type = "airlift delivery"
+--ecrites en mission par DCE_Airlift.lua dans CustomLog. Aucune entree = 0 kg partout.
+--Le resultat est calcule ici mais ECRIT seulement apres acceptation du debrief (voir branche "y" plus bas).
+WgAirResult = nil
 do
 	local wgAir = campL and campL.wargame_airlift
 	if wgAir then
@@ -346,30 +349,20 @@ do
 			result.air[z.slot] = 0
 		end
 
-		local fnDeliv = loadfile("wargame_airlift_deliveries.lua")
-		if fnDeliv then
-			wargame_airlift_deliveries = nil
-			local okD = pcall(fnDeliv)
-			local d = wargame_airlift_deliveries
-			if okD and type(d) == "table" and d.mission == campL.mission then
-				result.deliveries = d.deliveries or {}
-				for _, x in ipairs(result.deliveries) do
-					result.air[x.slot] = (result.air[x.slot] or 0) + (x.kg or 0)
+		local nEv = 0
+		if type(events) == "table" then
+			for _, ev in ipairs(events) do
+				if type(ev) == "table" and ev.type == "airlift delivery" and ev.slot then
+					local kg = tonumber(ev.kg) or 0
+					table.insert(result.deliveries, { slot = ev.slot, side = ev.side, kg = kg, by = ev.by, group = ev.group, t = ev.t })
+					result.air[ev.slot] = (result.air[ev.slot] or 0) + kg
+					nEv = nEv + 1
 				end
-			else
-				print("DEBRIEF wargame airlift: fichier de livraisons ignore (absent de cette mission ou illisible)")
 			end
-			wargame_airlift_deliveries = nil
-			os.remove("wargame_airlift_deliveries.lua")
 		end
+		print("DEBRIEF wargame airlift: "..nEv.." livraison(s) lue(s) dans MissionEventsLog")
 
-		local wgOut = io.open("Active/wargame_logistics_result.lua", "w")
-		if wgOut then
-			wgOut:write("wargame_logistics_result = " .. TableSerialization(result, 0))
-			wgOut:close()
-		else
-			print("DEBRIEF wargame airlift: ecriture impossible de Active/wargame_logistics_result.lua")
-		end
+		WgAirResult = result
 	end
 end
 
@@ -582,6 +575,17 @@ print("\n\n")
 
 if input == "y" or input == "yes" then
 
+		--wargame airlift : le debrief est accepte, on ecrit le resultat pour DCE_Manager
+	if WgAirResult then
+		local wgOut = io.open("Active/wargame_logistics_result.lua", "w")
+		if wgOut then
+			wgOut:write("wargame_logistics_result = " .. TableSerialization(WgAirResult, 0))
+			wgOut:close()
+		else
+			print("DEBRIEF wargame airlift: ecriture impossible de Active/wargame_logistics_result.lua")
+		end
+	end
+	
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_AcceptMission.lua")
 	IncludeOnce("MAIN_AcceptMission.lua")
 

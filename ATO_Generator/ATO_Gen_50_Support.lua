@@ -47,6 +47,23 @@ function addSupportToDraft(
 
 	TrackPlayability(unitSupport.player, "escort_target_range")									--track playabilty criterium has been met
 
+	--CORRECTION (bug 2) : Main appelle cette fonction pour CHAQUE loadout eligible du squad (boucle sans break).
+	--Quand le slot (tache + type d'avion) etait deja pris, rien n'etait ajoute au draft MAIS le reste de la fonction
+	--modifiait quand meme le draft : menace reduite une nouvelle fois (Escort Jammer divise par 2 a chaque loadout),
+	--score recalcule, fenetre TOT reduite, NbPlane multijoueur decremente, compteur status_counter_escorts incremente.
+	--Si ce type d'avion est deja enregistre pour cette tache, on sort donc tout de suite sans toucher au draft.
+	if draft.support[sptTask][unitSupport.type] ~= nil then
+		return
+	end
+
+	--CORRECTION (bug 9) : SEAD / Escort / Strike divisent par uSupportLoadout.firepower ; une valeur nil ou 0 donnait
+	--une division par zero (inf / NaN) et un nombre d'escorteurs absurde. On refuse proprement ce loadout.
+	if (sptTask == "SEAD" or sptTask == "Escort" or sptTask == "Strike")
+	and (not uSupportLoadout.firepower or uSupportLoadout.firepower <= 0) then
+		rejectStep(draft, "firepower", "firepower_insufficient", {requestedTask = sptTask}, "BLOCK_B", SafeGetLine())
+		return
+	end
+
 	local debuGenTxt1545 = "\n"..(tostring(draft.id).." AtoG II_support() S1 pass B_17  ")
 
 	--determine number of escorts
@@ -119,7 +136,9 @@ function addSupportToDraft(
 		escort_num = 1																	--laser illumination by single aircraft
 	elseif sptTask == "Strike" and not overideMP_B then
 		-- escort_num = 4
-		escort_num = draft.remainingFirepower / uSupportLoadout.firepower
+		--CORRECTION (bug 9) : le resultat etait une fraction d'avion (ex: 2.5), alors que les autres taches arrondissent.
+		--On arrondit a l'entier superieur (un avion ne se partage pas).
+		escort_num = math.ceil(draft.remainingFirepower / uSupportLoadout.firepower)
 	elseif sptTask == "Strike"  then
 		escort_num = 4
 	end
@@ -135,7 +154,13 @@ function addSupportToDraft(
 	end
 
 	if escort_num <= 0 then
-		rejectStep(draft, "aircraft_available", "no_aircraft_available", {requestedTask = sptTask}, "BLOCK_B", SafeGetLine())
+		--CORRECTION (bug 10) : l'ancien code enregistrait le rejet puis continuait quand meme (et modifiait le draft
+		--avec 0 escorteur). On sort maintenant. Exception : une tache en mode multijoueur voit escort_num remplace plus bas
+		--par InitNbPlane (nombre demande par le joueur) ; pour elle le 0 n'est pas definitif, on ne rejette pas.
+		if not getMultiPlaneTask(side, unitSupport.name, unitSupport.type, sptTask) then
+			rejectStep(draft, "aircraft_available", "no_aircraft_available", {requestedTask = sptTask}, "BLOCK_B", SafeGetLine())
+			return
+		end
 	end
 
 	debuGenTxt1545 = debuGenTxt1545.."\r\n"..(tostring(draft.id).." AtoG II_support() S6 pass_Escort "..unitSupport.type.." "..sptTask.." "..escort_num)
