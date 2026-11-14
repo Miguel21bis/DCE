@@ -3865,9 +3865,8 @@ local function getDcsRootFromExe()
     return root
 end
 
--- Remplace la fonction DataCompilation_DataDiscoveryA2() de UTIL_Data.lua
--- (juste avant "--rempli la table TaskByPlane ..." / DataCompilation_TaskByPlane)
---
+
+
 -- Appel sans argument : comportement historique (modules de la campagne uniquement).
 -- Appel avec opts (utilisé par DCEM_Function) :
 --   opts.allModules      = true  -> tous les modules de Data_divers qui ont un folderModName
@@ -3876,12 +3875,14 @@ end
 --   opts.pathDCS         = "C:/.../DCS World/"      (sinon pathDCS env, exe luae, camp.path_dcs)
 --   opts.pathSavedGames  = "C:/.../Saved Games/DCS/" (sinon pathSavedGames env, camp.path)
 --   opts.stats           = {}    -> rempli : dcsRoot, savedGames, scanned, files, missing
+--   opts.detail          = {}    -> rempli : detail[planeType] = texte de diagnostic (chemin, fichier lu, avions trouvés)
 function DataCompilation_DataDiscoveryA2(opts)
 
 	opts = opts or {}
 	local allModules = (opts.allModules == true)
 	local radioOnly  = (opts.radioOnly == true)
 	local stats      = opts.stats
+	local detail     = opts.detail
 
 	local function log(msg)
 		if type(AddLog) == "function" then AddLog(msg) end
@@ -3905,9 +3906,21 @@ function DataCompilation_DataDiscoveryA2(opts)
 		stats.missing    = 0
 	end
 
+	-- charge un fichier Lua dans un environnement donné : Lua 5.1 (setfenv) comme Lua 5.4 (paramètre env de loadfile)
+	local function loadWithEnv(path, env)
+		if setfenv then
+			local f, err = loadfile(path)
+			if not f then return nil, err end
+			setfenv(f, env)
+			return f
+		end
+		return loadfile(path, "t", env)
+	end
+
 	-- plusieurs types d'avion partagent le même entry.lua (F14, A-10, L-39 ...) :
 	-- on ne le charge qu'une fois, le résultat (la liste des add_aircraft) est gardé ici
 	local cache = {}
+	local cacheInfo = {}
 
 	local function isWantedAircraft(aircraft, wanted)
 		local name = aircraft.Name or aircraft.self_ID
@@ -3931,7 +3944,7 @@ function DataCompilation_DataDiscoveryA2(opts)
 		env.tonumber = tonumber
 		env.tostring = tostring
 		env.type     = type
-		env.unpack   = unpack
+		env.unpack   = unpack or table.unpack
 		env.select   = select
 
 		env.math   = math
@@ -3989,11 +4002,10 @@ function DataCompilation_DataDiscoveryA2(opts)
 
 		-- dofile sandboxé
 		env.dofile = function(path)
-			local f = loadfile(path)
+			local f = loadWithEnv(path, env)
 			if not f then
 				return nil
 			end
-			setfenv(f, env)
 			local ok, res = pcall(f)
 			if not ok then
 				return nil
@@ -4011,20 +4023,24 @@ function DataCompilation_DataDiscoveryA2(opts)
 		})
 
 		-- chargement entry.lua
-		local chunk = loadfile(fullPath)
+		local info = { loaded = false, err = nil }
+		local chunk, loadErr = loadWithEnv(fullPath, env)
 		if chunk then
-			setfenv(chunk, env)
 			local ok, err = pcall(chunk)
+			info.loaded = true
 			if not ok then
+				info.err = tostring(err)
 				log("ERROR loading entry.lua for "..tostring(planeType)..": "..tostring(err))
 			end
 			if stats then stats.files = stats.files + 1 end
 		else
+			info.err = tostring(loadErr)
 			log("ERROR: entry.lua not found for "..tostring(planeType).." at path: "..tostring(fullPath))
 			if stats then stats.missing = stats.missing + 1 end
 		end
 
 		cache[fullPath] = collected
+		cacheInfo[fullPath] = info
 		return collected
 	end
 
@@ -4084,6 +4100,7 @@ function DataCompilation_DataDiscoveryA2(opts)
 
 		--  collected contient TOUS les avions du module
 		local collected = loadEntry(fullPath, modRoot, planeType)
+		local matched = false
 
 		for _, aircraft in ipairs(collected) do
 
@@ -4092,6 +4109,7 @@ function DataCompilation_DataDiscoveryA2(opts)
 
 			if wanted then
 				if isWantedAircraft(aircraft, wanted) then
+					matched = true
 
 					if aircraft.Tasks and not radioOnly then
 						dst.Tasks = aircraft.Tasks
@@ -4119,16 +4137,42 @@ function DataCompilation_DataDiscoveryA2(opts)
 				log("WARNING: collected aircraft "..tostring(aircraft.Name or aircraft.self_ID).." does not match wanted "..tostring(wanted).." for planeType "..tostring(planeType))
 			end
 		end
+
+		if detail then
+			local names = {}
+			for _, aircraft in ipairs(collected) do
+				local n = aircraft.Name or aircraft.self_ID
+				names[#names + 1] = (type(n) == "string") and n or "?"
+			end
+			local info = cacheInfo[fullPath] or {}
+			detail[planeType] = "entry=" .. tostring(fullPath)
+				.. " | fichier=" .. (info.loaded and "lu" or "ABSENT/illisible")
+				.. " | erreur=" .. tostring(info.err)
+				.. " | avions=[" .. table.concat(names, ",") .. "]"
+				.. " | cherche=" .. tostring(planeData.inherited_All_Mod_From or planeType)
+				.. " | trouve=" .. tostring(matched)
+				.. " | racineDCS=" .. tostring(path_dcs)
+		end
 	end
 
 	for planeType, planeData in pairs(Data_divers) do
 		if allModules or (AircraftInCampaign and AircraftInCampaign[planeType]) then
 			if planeData.folderModName then
-				discoverPlane(planeType, planeData)
+				if allModules then
+					-- un module qui pose problème ne doit pas empêcher la lecture des autres
+					local ok, err = pcall(discoverPlane, planeType, planeData)
+					if not ok then
+						log("DataDiscoveryA2 erreur sur "..tostring(planeType)..": "..tostring(err))
+						if detail then detail[planeType] = "ERREUR: " .. tostring(err) end
+					end
+				else
+					discoverPlane(planeType, planeData)
+				end
 			end
 		end
 	end
 end
+
 
 
 

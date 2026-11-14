@@ -365,8 +365,13 @@ debugTab["C"] = nType
 --  Fréquences en MHz.
 --  source : "panelRadio" | "HumanRadio" | "default"
 --
---  radioInfo : diagnostic (dcsRoot, savedGames, scanned, files, missing, modules,
+--  radioData[module] = { panelRadio = {...}, HumanRadio = {...} } : les données brutes de DCS
+--  (panelRadio avec name / range / channels{name,default,modulation,connect}, HumanRadio),
+--  même forme que dans entry.lua. Absent du tableau = aucune donnée trouvée pour ce module.
+--
+--  radioInfo : diagnostic (dcsRoot, dcsRootSource, savedGames, scanned, files, missing, modules,
 --  withData, seconds, error) pour que DCE_Manager sache si la lecture a marché.
+--  Chaque Debug/RadioRangeModule_<module>.lua commence par une ligne de diagnostic.
 --******************************************************************--
 --******************************************************************--
 
@@ -448,6 +453,118 @@ local function RadiosOfModule(m)
     return radios
 end
 
+-- Copie "propre" d'une table radio : garde chaînes / nombres / booléens / sous-tables,
+-- jette les fonctions et les stubs du bac à sable (tables avec metatable).
+local function CleanCopy(v, depth)
+    local t = type(v)
+    if t == "string" or t == "number" or t == "boolean" then return v end
+    if t ~= "table" or getmetatable(v) or depth > 6 then return nil end
+    local out = {}
+    for k, x in pairs(v) do
+        if type(k) == "string" or type(k) == "number" then
+            local c = CleanCopy(x, depth + 1)
+            if c ~= nil then out[k] = c end
+        end
+    end
+    return out
+end
+
+-- Données radio brutes d'un module : { panelRadio = {...}, HumanRadio = {...} } ou nil
+local function RawRadioOf(m)
+    local p = CleanCopy(m.panelRadio, 0)
+    local h = CleanCopy(m.HumanRadio, 0)
+    if type(p) ~= "table" or next(p) == nil then p = nil end
+    if type(h) ~= "table" or next(h) == nil then h = nil end
+    if p or h then return { panelRadio = p, HumanRadio = h } end
+    return nil
+end
+
+-- Sérialisation Lua lisible, clés triées (fichier identique d'un lancement à l'autre),
+-- chaînes protégées par %q (une apostrophe dans un nom de radio ne casse plus le fichier)
+local function SerializeRadio(v, indent)
+    local t = type(v)
+    if t == "number" then return string.format("%.15g", v) end
+    if t == "boolean" then return tostring(v) end
+    if t == "string" then return string.format("%q", v) end
+    if t ~= "table" then return "nil" end
+
+    local nums, strs = {}, {}
+    for k, _ in pairs(v) do
+        if type(k) == "number" then nums[#nums + 1] = k else strs[#strs + 1] = k end
+    end
+    table.sort(nums)
+    table.sort(strs)
+
+    local tab = string.rep("\t", indent + 1)
+    local lines = { "{" }
+    for _, k in ipairs(nums) do
+        lines[#lines + 1] = tab .. "[" .. k .. "] = " .. SerializeRadio(v[k], indent + 1) .. ","
+    end
+    for _, k in ipairs(strs) do
+        lines[#lines + 1] = tab .. "[" .. string.format("%q", k) .. "] = " .. SerializeRadio(v[k], indent + 1) .. ","
+    end
+    lines[#lines + 1] = string.rep("\t", indent) .. "}"
+    return table.concat(lines, "\n")
+end
+
+-- Dossier d'installation DCS (avec "CoreMods/aircraft/") : variable globale posée par
+-- DCE_Manager (pathDCS), sinon variable d'environnement, sinon emplacements habituels.
+local function FindDcsRoot()
+    local function ok(root)
+        if type(root) ~= "string" or root == "" then return false end
+        if not root:find("[/\\]$") then root = root .. "/" end
+        local f = io.open(root .. "CoreMods/aircraft/A-10/entry.lua", "r")
+        if f then f:close() return root end
+        return false
+    end
+
+    local r = ok(pathDCS) if r then return r, "pathDCS (global)" end
+    r = ok(os.getenv("pathDCS")) if r then return r, "pathDCS (env)" end
+
+    -- registre Windows (écrit par l'installeur DCS) : donne le vrai dossier, quel que soit le disque
+    if io.popen then
+        for _, key in ipairs({ "DCS World OpenBeta", "DCS World" }) do
+            local okp, p = pcall(io.popen, 'reg query "HKCU\\Software\\Eagle Dynamics\\' .. key .. '" /v Path 2>nul')
+            if okp and p then
+                local out = p:read("*a") or ""
+                p:close()
+                local path = out:match("REG_SZ%s+([^\r\n]+)")
+                if path then
+                    r = ok((path:gsub("\\", "/")))
+                    if r then return r, "registre (" .. key .. ")" end
+                end
+            end
+        end
+    end
+
+    -- emplacements habituels, sur les disques C à H
+    local suffixes = {
+        "Program Files/Eagle Dynamics/DCS World OpenBeta/",
+        "Program Files/Eagle Dynamics/DCS World/",
+        "Eagle Dynamics/DCS World OpenBeta/",
+        "Eagle Dynamics/DCS World/",
+        "DCS World OpenBeta/",
+        "DCS World/",
+        "Games/DCS World OpenBeta/",
+        "Games/DCS World/",
+        "Program Files (x86)/Steam/steamapps/common/DCS World OpenBeta/",
+        "Program Files (x86)/Steam/steamapps/common/DCS World/",
+        "SteamLibrary/steamapps/common/DCS World OpenBeta/",
+        "SteamLibrary/steamapps/common/DCS World/",
+        "Steam/steamapps/common/DCS World OpenBeta/",
+        "Steam/steamapps/common/DCS World/",
+    }
+    for _, drive in ipairs({ "C", "D", "E", "F", "G", "H" }) do
+        for _, s in ipairs(suffixes) do
+            r = ok(drive .. ":/" .. s)
+            if r then return r, "emplacement habituel" end
+        end
+    end
+    return nil, "introuvable"
+end
+
+local radioData = {}
+local radioDetail = {}
 local radioRanges = {}
 local radioInfo = { modules = 0, withData = 0 }
 local radioClock = os.clock()
@@ -461,13 +578,18 @@ local okRadio, errRadio = pcall(function()
         savedGames = p:match("^(.*/DCS[^/]*/)Mods/")
     end
 
+    local dcsRoot, dcsSource = FindDcsRoot()
+    radioInfo.dcsRootSource = dcsSource
+
     -- lit les entry.lua de TOUS les modules connus (pas seulement ceux de la campagne),
     -- sans toucher à Tasks ni Failures
     DataCompilation_DataDiscoveryA2({
         allModules     = true,
         radioOnly      = true,
         pathSavedGames = savedGames,
+        pathDCS        = dcsRoot,
         stats          = radioInfo,
+        detail         = radioDetail,
     })
 
     for planeType, m in pairs(Data_divers) do
@@ -484,6 +606,17 @@ local okRadio, errRadio = pcall(function()
             depth = depth + 1
         end
 
+        -- données brutes (panelRadio + HumanRadio, canaux compris), parent si pas de donnée propre
+        local raw = RawRadioOf(m)
+        local rawDepth = 0
+        local rawParent = m.inheritedFrom and Data_divers[m.inheritedFrom]
+        while not raw and rawParent and rawDepth < 5 do
+            raw = RawRadioOf(rawParent)
+            rawParent = rawParent.inheritedFrom and Data_divers[rawParent.inheritedFrom]
+            rawDepth = rawDepth + 1
+        end
+        if raw then radioData[planeType] = raw end
+
         local isDefault = (#radios == 0)
         if isDefault then
             -- même défaut que Make_Db_Frequency (FUNC_Radio.lua)
@@ -499,6 +632,62 @@ end)
 if not okRadio then
     radioInfo.error = tostring(errRadio)
 end
+
+-- Un fichier Debug/RadioRangeModule_<module>.lua par module, avec les données radio brutes
+-- telles que DCS les décrit (panelRadio avec ses canaux, HumanRadio). Module sans donnée :
+-- "panelRadio = nil / HumanRadio = nil". Réécrit seulement si le contenu change.
+local function WriteIfChanged(path, text)
+    local f = io.open(path, "r")
+    if f then
+        local old = f:read("*a")
+        f:close()
+        if old == text then return false end
+    end
+    f = io.open(path, "w")
+    if not f then return nil end
+    f:write(text)
+    f:close()
+    return true
+end
+
+radioInfo.moduleFiles = 0
+radioInfo.moduleFilesWritten = 0
+radioInfo.moduleFilesFailed = 0
+radioInfo.modulesWithRawData = 0
+
+local okFiles, errFiles = pcall(function()
+    for planeType, _ in pairs(radioRanges) do
+        local raw = radioData[planeType]
+        local text
+        if raw then
+            radioInfo.modulesWithRawData = radioInfo.modulesWithRawData + 1
+            text = "panelRadio = " .. (raw.panelRadio and SerializeRadio(raw.panelRadio, 0) or "nil")
+                .. "\nHumanRadio = " .. (raw.HumanRadio and SerializeRadio(raw.HumanRadio, 0) or "nil") .. "\n"
+        else
+            text = "panelRadio = nil\nHumanRadio = nil\n"
+        end
+
+        -- diagnostic de lecture en tête de fichier (chemin essayé, fichier lu, avions trouvés)
+        if radioDetail[planeType] then
+            text = "-- " .. (tostring(radioDetail[planeType]):gsub("[\r\n]+", " ")) .. "\n" .. text
+        elseif Data_divers[planeType] and not Data_divers[planeType].folderModName then
+            text = "-- pas de folderModName dans Data_divers : rien à lire pour ce module\n" .. text
+        end
+
+        local name = (tostring(planeType):gsub("[^%w%-%._]", "_"))
+        local res = WriteIfChanged(pathCampaign .. "/Debug/RadioRangeModule_" .. name .. ".lua", text)
+        radioInfo.moduleFiles = radioInfo.moduleFiles + 1
+        if res == true then
+            radioInfo.moduleFilesWritten = radioInfo.moduleFilesWritten + 1
+        elseif res == nil then
+            radioInfo.moduleFilesFailed = radioInfo.moduleFilesFailed + 1
+        end
+    end
+end)
+if not okFiles then
+    radioInfo.filesError = tostring(errFiles)
+end
+
 radioInfo.seconds = os.clock() - radioClock
 
 debugTab["radioSeconds"] = radioInfo.seconds
@@ -538,5 +727,6 @@ return {
     CallsignWest = all_callsign_west,
     SpecificCallnames = all_specific_callsigns,
     RadioRanges = radioRanges,
+    RadioData = radioData,
     RadioRangesInfo = radioInfo,
 }

@@ -40,6 +40,41 @@ if type(aircraft_task) ~= "function" then
 	end
 end
 
+-------------------------------------------------------------------------------
+-- COMPATIBILITÉ Lua 5.1 -> 5.4 (DCE_Manager passe par NLua = Lua 5.4)
+-- ScriptsMod a été écrit pour Lua 5.1 (luae.exe) : setfenv / getfenv / unpack / loadstring
+-- n'existent plus en 5.4. UTIL_Data.lua (lecture des entry.lua des modules) appelle setfenv.
+-- Chaque garde est conditionnelle : sous Lua 5.1 rien n'est remplacé.
+-------------------------------------------------------------------------------
+if not setfenv and debug and debug.getupvalue and debug.upvaluejoin and debug.setupvalue then
+	function setfenv(f, env)
+		if type(f) ~= "function" then error("setfenv : function expected", 2) end
+		local up, name = 0, nil
+		repeat
+			up = up + 1
+			name = debug.getupvalue(f, up)
+		until name == "_ENV" or name == nil
+		if name then
+			debug.upvaluejoin(f, up, function() return name end, 1)
+			debug.setupvalue(f, up, env)
+		end
+		return f
+	end
+
+	function getfenv(f)
+		if type(f) ~= "function" then return _G end
+		local up, name, val = 0, nil, nil
+		repeat
+			up = up + 1
+			name, val = debug.getupvalue(f, up)
+		until name == "_ENV" or name == nil
+		return val or _G
+	end
+end
+
+unpack = unpack or table.unpack
+loadstring = loadstring or load
+
 -- Unique chemin construit à la main de tout le système.
 local root = (pathScriptsMod or "."):gsub("[/\\]+$", "")
 dofile(root .. "/UTIL_Include.lua")
