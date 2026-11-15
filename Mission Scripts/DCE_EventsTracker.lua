@@ -1,7 +1,7 @@
---To run during mission to track destroyed static objects and trigger debriefing actions on mission end 
+--To run during mission to track destroyed static objects and trigger debriefing actions on mission end
 --Script attached to mission and executed via trigger
 --Requires DCS os and io functions sanitizer to be deactivated
-------------------------------------------------------------------------------------------------------- 
+-------------------------------------------------------------------------------------------------------
 
 Info_event_C = {}
 
@@ -62,11 +62,169 @@ local function WarningText()
 	trigger.action.outText(text, 600)
 end
 local ErrorMessage = timer.scheduleFunction(WarningText, {}, timer.getTime() + 1)	--schedule output of warning text
-local check = os.time()															--run random os function. If os functions are sanitized this will fail and stop the script
-timer.removeFunction(ErrorMessage)												--if the script continues to here, os functions work and the sdchedzled warning message is removed
+local check = os.time()							--run random os function. If os functions are sanitized this will fail and stop the script
+timer.removeFunction(ErrorMessage)							--if the script continues to here, os functions work and the sdchedzled warning message is removed
+
+-------------------------------------------------
+-- POSITION DES AVIONS / HELICOS PERDUS (crash, kill, dead, unit lost)
+-------------------------------------------------
+-- Probleme : sur DEAD / UNIT_LOST / KILL le moteur DCS peut avoir deja supprime
+-- l'objet avant d'appeler le script. Toute methode (getPoint, getName...) leve alors
+-- "Unit doesn't exist" (ou l'initiator est nil). Le champ .id_ reste lisible (simple
+-- champ de table, deja utilise dans DCE_Background.lua).
+-- Solution en 3 temps :
+--   1) lecture protegee par pcall (SafeGet / SafePoint), jamais de plantage ;
+--   2) a la naissance (BIRTH) on note quels objets sont des avions/helicos (cle .id_) ;
+--   3) a chaque HIT sur l'un d'eux on memorise sa derniere position connue,
+--      reutilisee si l'objet n'a plus de position au moment de sa perte.
+-- Positions stockees au format DCE : x = vec3.x, y = vec3.z, z = vec3.y (altitude MSL).
+-- Resultat : les entrees "crash", "kill", "dead", "unit lost" d'un avion/helico
+-- recoivent x, y, z + posSource ("event" | "last_known" | "none") dans MissionEventsLog.lua.
+-- Les lignes "DCE_AirLoss" dans dcs.log permettent de verifier ce que DCS fournit reellement.
+
+local airById = {}	-- [id_] = { name, t, x, y, z, tPos, lostAt }
+
+local function readField(o, k)
+	return o[k]
+end
+
+-- appelle obj:method() sans jamais planter (nil si l'objet n'existe plus)
+local function SafeGet(obj, method)
+	if not obj then return nil end
+	local okF, f = pcall(readField, obj, method)
+	if not okF or not f then return nil end
+	local ok, res = pcall(f, obj)
+	if ok then return res end
+	return nil
+end
+
+local function readIdField(o)
+	return o.id_
+end
+
+-- identifiant interne de l'objet (champ id_), lisible meme si l'objet est supprime
+local function SafeIdField(obj)
+	if not obj then return nil end
+	local ok, id = pcall(readIdField, obj)
+	if ok then return id end
+	return nil
+end
+
+-- vec3 DCS ou nil (un point 0,0,0 est considere comme invalide)
+local function SafePoint(obj)
+	local p = SafeGet(obj, "getPoint")
+	if p and p.x and p.y and p.z and not (p.x == 0 and p.y == 0 and p.z == 0) then
+		return p
+	end
+	return nil
+end
+
+local function IsAirCategory(cat)
+	return cat == Unit.Category.AIRPLANE or cat == Unit.Category.HELICOPTER
+end
+
+-- BIRTH : note les avions/helicos vivants (cache par getID, sinon getDesc une seule fois)
+local function RegisterAir(obj, objCat, getIdValue)
+	if objCat ~= Object.Category.UNIT then return end
+	local id = SafeIdField(obj)
+	if not id or airById[id] then return end
+
+	local cat
+	local entry = Cache_UnitCategoryByGetID and getIdValue and Cache_UnitCategoryByGetID[getIdValue]
+	if entry then cat = entry.category end
+	if cat == nil then
+		local desc = SafeGet(obj, "getDesc")
+		cat = desc and desc.category
+	end
+
+	if IsAirCategory(cat) then
+		airById[id] = { name = SafeGet(obj, "getName"), t = timer.getTime() }
+	end
+end
+
+-- HIT : memorise la derniere position connue d'un avion/helico touche
+local function RememberAirPos(obj)
+	local id = SafeIdField(obj)
+	local mem = id and airById[id]
+	if not mem then return end
+	local p = SafePoint(obj)
+	if p then
+		mem.x, mem.y, mem.z, mem.tPos = p.x, p.z, p.y, timer.getTime()
+	end
+end
+
+-- CRASH / KILL / DEAD / UNIT_LOST : ajoute la position de la victime (avion/helico) au log_entry
+-- KILL : la victime est event.target (l'initiator est le tueur) ; autres : event.initiator
+local function AddAirLossPosition(log_entry, event, victimObjCat)
+	local isKill = (event.id == world.event.S_EVENT_KILL)
+	local victim
+	if isKill then victim = event.target else victim = event.initiator end
+	if not victim then return end
+
+	local id = SafeIdField(victim)
+	local mem = id and airById[id]
+
+	-- CRASH ne concerne que des appareils ; sinon on se fie au registre de naissance
+	local isAir = (mem ~= nil) or (event.id == world.event.S_EVENT_CRASH)
+	if not isAir and victimObjCat == Object.Category.UNIT then
+		-- dernier recours, seulement si l'objet repond encore
+		local desc = SafeGet(victim, "getDesc")
+		isAir = (desc ~= nil) and IsAirCategory(desc.category)
+	end
+	if not isAir then return end
+
+	local now = timer.getTime()
+	local x, y, z, src, age
+	local p = SafePoint(victim)
+	if p then
+		x, y, z, src = p.x, p.z, p.y, "event"
+	elseif mem and mem.x then
+		x, y, z, src = mem.x, mem.y, mem.z, "last_known"
+		age = math.floor(now - (mem.tPos or now))
+	end
+
+	if x then
+		log_entry.x = x
+		log_entry.y = y
+		log_entry.z = z
+	end
+	log_entry.posSource = src or "none"
+	if age then log_entry.posAge = age end
+	if id then log_entry.victimObjId = id end
+
+	-- nom de la victime si l'objet ne l'a plus donne
+	if mem and mem.name then
+		if isKill then
+			if not log_entry.target or log_entry.target == "" then log_entry.target = mem.name end
+		elseif not log_entry.initiator or log_entry.initiator == "unknown" then
+			log_entry.initiator = mem.name
+		end
+	end
+
+	if mem and not mem.lostAt then mem.lostAt = now end
+
+	local victimName = isKill and log_entry.target or log_entry.initiator
+	local txt = "DCE_AirLoss " .. tostring(log_entry.infoEvent) .. " | " .. tostring(victimName) .. " | pos=" .. tostring(src or "none")
+	if x then
+		txt = txt .. " x=" .. tostring(math.floor(x)) .. " y=" .. tostring(math.floor(y)) .. " alt=" .. tostring(math.floor(z))
+	end
+	if age then txt = txt .. " age=" .. tostring(age) .. "s" end
+	env.info(txt)
+end
+
+-- nettoyage periodique : retire les appareils perdus depuis plus de 5 minutes
+local function purgeAirById()
+	local now = timer.getTime()
+	for id, mem in pairs(airById) do
+		if mem.lostAt and now - mem.lostAt > 300 then
+			airById[id] = nil
+		end
+	end
+	return now + 120
+end
 
 local function health1s(arg)
-	
+
 	local healthTemp = arg[1]
 	local event = arg[2]
 
@@ -125,7 +283,7 @@ end
 --1s apres le hit, la valeur est plus proche de la réalité
 local function schedulHit(hitTemp)
 
-	
+
 	scenLog[hitTemp.scenaryName] = {							--add scenery object to table
 		lifePourcent = 0,
 		x = hitTemp.x,
@@ -340,7 +498,7 @@ local function destructionScenaryInZone(point, radius, launcherName)
 		if campL.debug then
 			env.info("DCE_EventT destructionScenaryInZone: radius too big, RETURN ")
 		end
-		
+
 		return
 	end
 
@@ -348,7 +506,7 @@ local function destructionScenaryInZone(point, radius, launcherName)
 		local objName = obj.getName and obj:getName() or "unknown"
 		local objType = obj:getTypeName()
 		local objVec3 = obj:getPoint()
-		
+
 		if not scenLog[objName] then
 
 			-- Optimisation: évite de traiter les objets de forêt (très nombreux) pour économiser du CPU
@@ -387,7 +545,7 @@ end
 
 
 local function processhit1sQueue()
-	
+
     local batchSize = 10
     local count = 0
     while #hit1sQueue > 0 and count < batchSize do
@@ -479,13 +637,13 @@ local function trackBomb(bomb, desc, initiator)
 		lastPosVec3 = nil,
 		impactHandled = false,
     }
-	
+
 end
 
 -- Fonction périodique pour notifier le joueur pendant le ravitaillement
 local function CheckRefuelProgress()
     local anyRefueling = false
-	
+
     for uid, plane in pairs(refuelStartByUnit) do
 
 		-- env.info("DCE_EventT_Refuel PROGRESS_A2 plane.uName "..tostring(plane.uName).." plane.fuel "..tostring(plane.fuel))
@@ -496,7 +654,7 @@ local function CheckRefuelProgress()
 			local plane_obj = nil
 			-- if plane.uName.getByName then	--ATTENTION, ça ne marche pas pour les string
 			plane_obj = Unit.getByName(plane.uName)
-				
+
 			-- env.info("DCE_EventT_Refuel PROGRESS_B0 fff uid "..tostring(uid).." unit "..tostring(plane_obj))
 
 			if (plane_obj and plane_obj.isExist and plane_obj.inAir and plane_obj:isExist() and plane_obj:inAir())  then	--and timerPass
@@ -507,11 +665,11 @@ local function CheckRefuelProgress()
 				-- env.info("DCE_EventT_Refuel PROGRESS_C fuelMassMax "..tostring(fuelMassMax).." fuelNow "..tostring(fuelNowPourcent))
 
 				if fuelMassMax > 0 and fuelNowPourcent then
-					
+
 					local fuelNowKg = fuelNowPourcent * fuelMassMax
 					local fuelNowLbs = fuelNowKg * 2.20462
 					local fuel_now = Deepcopy(plane["unit_kg"] and fuelNowKg or fuelNowLbs)
-					
+
 					-- Initialisation si nécessaire
 					if not plane.fuel_init_pourcent then
 						plane.fuel_init_pourcent = plane_obj:getFuel()		--getFuel() returns pourcent
@@ -539,15 +697,15 @@ local function CheckRefuelProgress()
 				end
 			end
 
-		else 	--refuelStartByUnit[uid].status == "REFUELING_STOP" 
-		
+		else 	--refuelStartByUnit[uid].status == "REFUELING_STOP"
+
 			local plane_obj = nil
 			plane_obj = Unit.getByName(plane.uName)
 
 			-- env.info("DCE_EventT_Refuel PROGRESS_G REFUELING ")
 
 			if (plane_obj and plane_obj.isExist and plane_obj.inAir and plane_obj:isExist() and plane_obj:inAir())  then
-				
+
 				anyRefueling = true
 
 				-- env.info("DCE_EventT_Refuel PROGRESS_G2 REFUELING_STOP? "..tostring(refuelStartByUnit[uid].status).." PROGRESS_X getTime "..timer.getTime().." start_time + 120>? "..tostring(plane.start_time + 120))
@@ -556,13 +714,13 @@ local function CheckRefuelProgress()
 
 					anyRefueling = false
 
-					env.info("DCE_EventT_Refuel PROGRESS_G3 Z88 = nil") 
+					env.info("DCE_EventT_Refuel PROGRESS_G3 Z88 = nil")
 					plane.fuel_palier = 0
 					plane.fuel_init_pourcent = nil
 					plane.fuel = nil
 				end
 			end
-			
+
 		end
     end
     if anyRefueling then
@@ -587,7 +745,7 @@ local eventsSurvey = {
 		[world.event.S_EVENT_SHOT] = true,--
 		[world.event.S_EVENT_HIT] = true,--
 		[world.event.S_EVENT_BDA] = true,--
-		
+
 
 		[world.event.S_EVENT_DEAD] = true,--
 		[world.event.S_EVENT_KILL] = true,--
@@ -683,17 +841,17 @@ Info_event = {
 local DCE_EventsTracker_Whitelist = {
     [world.event.S_EVENT_BDA]                          = true, -- anti-flood BDA
     [world.event.S_EVENT_SHOT]                         = true, -- log_entry "shot" + tracking bombes (trackBomb)
-    [world.event.S_EVENT_HIT]                          = true, -- log_entry "hit" + queue hit1s (scenery)
-    [world.event.S_EVENT_KILL]                         = true, -- log_entry "kill" + destruction scenery (kill)
-    [world.event.S_EVENT_UNIT_LOST]                    = true, -- log_entry "unit lost" + destruction scenery
+    [world.event.S_EVENT_HIT]                          = true, -- log_entry "hit" + queue hit1s (scenery) + derniere position des avions (RememberAirPos)
+    [world.event.S_EVENT_KILL]                         = true, -- log_entry "kill" + destruction scenery (kill) + position de l'avion abattu (AddAirLossPosition)
+    [world.event.S_EVENT_UNIT_LOST]                    = true, -- log_entry "unit lost" + destruction scenery + position avion perdu
     [world.event.S_EVENT_TAKEOFF]                      = true, -- log_entry "takeoff" + SatusGroupAircraft
     [world.event.S_EVENT_LAND]                         = true, -- log_entry "land" + despawn Pedro/CV + SatusGroupAircraft
     [world.event.S_EVENT_LANDING_QUALITY_MARK]         = true, -- log_entry "land quality"
-    [world.event.S_EVENT_CRASH]                        = true, -- log_entry "crash"
+    [world.event.S_EVENT_CRASH]                        = true, -- log_entry "crash" + position du crash (AddAirLossPosition)
     [world.event.S_EVENT_EJECTION]                     = true, -- log_entry "eject" + startTrack (parachute)
     [world.event.S_EVENT_REFUELING]                    = true, -- log_entry "refueling" + CheckRefuelProgress
     [world.event.S_EVENT_REFUELING_STOP]               = true, -- fin de ravitaillement (2e chaîne)
-    [world.event.S_EVENT_DEAD]                         = true, -- log_entry "dead" + destruction scenery
+    [world.event.S_EVENT_DEAD]                         = true, -- log_entry "dead" + destruction scenery + position avion mort
     [world.event.S_EVENT_PILOT_DEAD]                   = true, -- log_entry "pilot dead"
     [world.event.S_EVENT_DISCARD_CHAIR_AFTER_EJECTION] = true, -- log_entry "pilot seat separation"
     [world.event.S_EVENT_LANDING_AFTER_EJECTION]       = true, -- log_entry "pilot land"
@@ -701,7 +859,7 @@ local DCE_EventsTracker_Whitelist = {
     [world.event.S_EVENT_MISSION_START]                = true, -- log_entry "mission start"
     [world.event.S_EVENT_MISSION_END]                  = true, -- log_entry "mission end" + export debriefing complet
     [world.event.S_EVENT_TOOK_CONTROL]                 = true, -- log_entry "took control"
-    [world.event.S_EVENT_BIRTH]                        = true, -- log_entry "birth"
+    [world.event.S_EVENT_BIRTH]                        = true, -- log_entry "birth" + registre des avions/helicos (RegisterAir)
     [world.event.S_EVENT_ENGINE_STARTUP]               = true, -- log_entry "engine startup"
     [world.event.S_EVENT_ENGINE_SHUTDOWN]              = true, -- log_entry "engine shutdown"
     [world.event.S_EVENT_PLAYER_ENTER_UNIT]            = true, -- log_entry "player enter unit"
@@ -737,11 +895,11 @@ function eventHandlerDCE:onEvent(event)
 	if not DCE_EventsTracker_Whitelist[event.id] then
 		return
 	end
-	
+
 
 	-- Anti-flood BDA (global, sans getID ni getName)
     if event.id == world.event.S_EVENT_BDA then
-		
+
 		if survey_EVENT_BDA then
 
 			-- Vérification du flood BDA
@@ -767,13 +925,13 @@ function eventHandlerDCE:onEvent(event)
 			if #recent >= BDA_THRESHOLD then
 				trigger.action.outText("BDA FLOOD détecté : " .. #recent .. " événements en " .. BDA_WINDOW .. "s", 20)
 				env.info("[BDA-FLOOD B] Seuil atteint : " .. #recent)
-				
+
 				local tgt = event.target
-				
+
 				if tgt then
 
 					local tgtName = tgt.getName and tgt:getName() or "unknown"
-					
+
 					trigger.action.outText("BDA flood détecté tgtName : " .. tgtName ..  " sera upprimé", 20)
 					env.info("[BDA-FLOOD C]BDA flood détecté tgtName : " .. tgtName ..  "  sera upprimé")
 
@@ -810,7 +968,7 @@ function eventHandlerDCE:onEvent(event)
 						env.info("[BDA-FLOOD C]BDA flood détecté mais l initiateur est un joueur : " .. isPlayer ..  " ne sera pas supprimé")
 					end
 
-					
+
 				end
 
 				bdaTimestamps = {}
@@ -818,14 +976,14 @@ function eventHandlerDCE:onEvent(event)
 		end
 	end
 
-   
-		
+
+
 	--custom events log
-	local log_entry = {															--create a custom log entry for this event
-		t = timer.getTime(),														--store time of event
+	local log_entry = {							--create a custom log entry for this event
+		t = timer.getTime(),							--store time of event
 		infoEvent = Info_event[event.id] or "S_EVENT_UNKNOWN",		--store event name
 	}
-	if event.id == world.event.S_EVENT_SHOT then								--1
+	if event.id == world.event.S_EVENT_SHOT then				--1
 		log_entry.type = "shot"
 	elseif event.id == world.event.S_EVENT_HIT then								--2
 		log_entry.type = "hit"
@@ -872,7 +1030,7 @@ function eventHandlerDCE:onEvent(event)
 	elseif event.id == world.event.S_EVENT_PLAYER_LEAVE_UNIT then				--21
 		log_entry.type = "player leave unit"
 	end
-	
+
 	if campL.debug then
 		env.info("DCE_EventsTracker log_entry.type: "..tostring(log_entry.type).." | "..tostring(log_entry.infoEvent))
 	end
@@ -890,22 +1048,26 @@ function eventHandlerDCE:onEvent(event)
 	local initiatorObjCategory
 	local targetObjCategory
 
+	-- Lectures protegees (SafeGet / pcall) : sur DEAD / UNIT_LOST / KILL l'objet peut deja
+	-- avoir ete supprime par le moteur ("Unit doesn't exist"). Meme resultat qu'avant si l'objet existe.
 	if event.initiator then
-		initiatorObjCategory = Object.getCategory(event.initiator)
-		initiatorName = event.initiator.getName and event.initiator:getName() or "unknown"
-		initiatorVec3 = event.initiator.getPoint and event.initiator:getPoint()
-		initiatorId = event.initiator.getID and event.initiator:getID() or "unknown"
+		local okCat, catInit = pcall(Object.getCategory, event.initiator)
+		initiatorObjCategory = okCat and catInit or 0
+		initiatorName = SafeGet(event.initiator, "getName") or "unknown"
+		initiatorVec3 = SafeGet(event.initiator, "getPoint")
+		initiatorId = SafeGet(event.initiator, "getID") or "unknown"
 
 		if Object_Category[initiatorObjCategory] then
-			if event.initiator.getCoalition then
-				local coalitionId = event.initiator:getCoalition()
+			local coalitionId = SafeGet(event.initiator, "getCoalition")
+			if coalitionId then
 				initiatorSideName = CoalitionIdToName[tonumber(coalitionId)]
 			end
 		end
 	end
 
 	if event.target then
-		targetObjCategory = Object.getCategory(event.target)
+		local okCatT, catTgt = pcall(Object.getCategory, event.target)
+		targetObjCategory = okCatT and catTgt or 0
 
 		-- priorité : utiliser les données déjà présentes dans l'event (0 coût CPU, 0 risque)
 		local targetCoalId = event.target_coalition
@@ -934,6 +1096,19 @@ function eventHandlerDCE:onEvent(event)
 			end
 		end
 	end -- fin de "if event.target then" (ce end manquait : tout le reste du handler, dont l'export de fin de mission, etait saute quand l'event n'a pas de cible)
+
+	-- Suivi des avions / helicos (voir bloc "POSITION DES AVIONS / HELICOS PERDUS" en haut du fichier)
+	if event.id == world.event.S_EVENT_BIRTH then
+		if event.initiator then
+			local okReg, errReg = pcall(RegisterAir, event.initiator, initiatorObjCategory, initiatorId)
+			if not okReg then env.info("DCE_AirLoss ERROR RegisterAir " .. tostring(errReg)) end
+		end
+	elseif event.id == world.event.S_EVENT_HIT then
+		if event.target then
+			local okRem, errRem = pcall(RememberAirPos, event.target)
+			if not okRem then env.info("DCE_AirLoss ERROR RememberAirPos " .. tostring(errRem)) end
+		end
+	end
 
 		if log_entry.type == "eject"  then
             env.info("DCE_EventT_eject A, id: " .. tostring(event.id) .. " event.initiator " .. tostring(event.initiator))
@@ -1003,17 +1178,17 @@ function eventHandlerDCE:onEvent(event)
 						pilotEjection.countryName = string.lower(country.name[countryId])
 					end
 
-					-- land.SurfaceType 
+					-- land.SurfaceType
 					-- LAND             1
 					-- SHALLOW_WATER    2
-					-- WATER            3 
+					-- WATER            3
 					-- ROAD             4
 					-- RUNWAY           5
 					-- local point = {
 					-- 	x = pilotEjection.x,
 					-- 	y = pilotEjection.z,
                     -- }
-					
+
 					pilotEjection.SurfaceType = land.getSurfaceType({ x = pilotEjection.pos.vec3x, y = pilotEjection.pos.vec3z })
 					-- pilotEjection.grid = coord.LLtoMGRS(coord.LOtoLL(pilotEjection.unit:getPosition().p))
 					pilotEjection.grid = coord.LLtoMGRS(coord.LOtoLL({x=pilotEjection.pos.vec3x, y=pilotEjection.pos.vec3y, z=pilotEjection.pos.vec3z} ))
@@ -1064,7 +1239,7 @@ function eventHandlerDCE:onEvent(event)
 								end
 
 								pilotEjection.name = CleanName(pilotEjection.name)
-								
+
 								local distanceBase, baseName = ProxyBase(pilotEjection)
 								if distanceBase then
 									distanceBase = math.floor(distanceBase)
@@ -1090,7 +1265,7 @@ function eventHandlerDCE:onEvent(event)
 
 								CheckImmediatSAR(pilotEjection)
 
-								
+
                            		getOut({ groupObj, playerName })
 							end
 						end
@@ -1108,9 +1283,9 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 			local u = event.initiator
-			if not u then 
+			if not u then
 				env.info("DCE_PARA_TRACK event EJECT RETURN A ")
-				return 
+				return
 
 				end
 
@@ -1122,7 +1297,7 @@ function eventHandlerDCE:onEvent(event)
 				env.info("DCE_PARA_TRACK startTrack ")
 				startTrack(event.initiator)
 			end
-	
+
 		elseif log_entry.type == "pilot seat separation"  then
 			env.info( "DCE_EventT_seat A , id: "..tostring(event.id).."_type_"..tostring(log_entry.type))
 
@@ -1137,7 +1312,7 @@ function eventHandlerDCE:onEvent(event)
 					-- 	y = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
 					-- 	z = initiatorVec3.z,
 					-- }
-					
+
 					log_entry.initiatorMissionID = initiatorId
 					log_entry.x = initiatorVec3.x
 					log_entry.y = initiatorVec3.z
@@ -1150,7 +1325,7 @@ function eventHandlerDCE:onEvent(event)
 					local selectedEjection = {}
 
 					for n=1, #tabEjection do
-						if tabEjection[n] and tabEjection[n] ~= nil then						
+						if tabEjection[n] and tabEjection[n] ~= nil then
 							-- local distance = math.sqrt(math.pow(initiatorVec3.x - tabEjection[n].pos.vec3x, 2) + math.pow(initiatorVec3.z - tabEjection[n].pos.vec3z, 2))
 							local distance = GetDistance({ x = initiatorVec3.x, y = initiatorVec3.z }, { x = tabEjection[n].pos.vec3x, y = tabEjection[n].pos.vec3z })
 							if distance < selected_distance and (not tabEjection[n].SumEjectedPilotDay) then
@@ -1217,7 +1392,7 @@ function eventHandlerDCE:onEvent(event)
 					-- 	y = initiatorVec3.y,
 					-- 	z = initiatorVec3.z,
 					-- }
-					
+
 					--inscrit position et name dans le log
 					log_entry.initiatorMissionID = initiatorId
 					log_entry.x = initiatorVec3.x
@@ -1245,7 +1420,7 @@ function eventHandlerDCE:onEvent(event)
 
 							env.info("DCE_EventT_pilot_land DCE_ERROR pb tabEjection[n][pos].x nil, n: " .. n .. " total tabEjection " .. #tabEjection)
 							_affiche(tabEjection[n], "C tabEjection[n] ")
-							
+
 							local locTime = timer.getTime()
 							local logStr = "tabEjection = " .. TableSerialization(tabEjection, 0)
 							local logFile = io.open( PathDCE .. "Debug\\tabEjection" .. "_" .. locTime .. "_" .. "tabEjection.lua", "w")
@@ -1255,7 +1430,7 @@ function eventHandlerDCE:onEvent(event)
 							else
 								env.info("DCE_EventT_pilot_land K: Failed to open log file for writing.")
 							end
-							
+
 						end
 					end
 
@@ -1278,7 +1453,7 @@ function eventHandlerDCE:onEvent(event)
 							z = initiatorVec3.y,
 							altiLand = land.getHeight({ x = initiatorVec3.x, y = initiatorVec3.z }),
 							surfaceType = land.getSurfaceType({x = selPilotEject.x, y = selPilotEject.z})
-							
+
 						}
 
 						-- _affiche(selPilotEject, "D selPilotEject ")
@@ -1294,7 +1469,7 @@ function eventHandlerDCE:onEvent(event)
 						end
 
 						selPilotEject.name = CleanName(selPilotEject.name)
-						
+
 						local distanceBase, baseName = ProxyBase(selPilotEject)
 						if distanceBase then
 							distanceBase = math.floor(distanceBase)
@@ -1352,17 +1527,17 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 		-- miguel modification M18.d destroy Plane Landing CV
-		elseif log_entry.type == "land" then										--hit event with initiator or any other event (excludes hit events without initiator, like collisions)		
-			
+		elseif log_entry.type == "land" then										--hit event with initiator or any other event (excludes hit events without initiator, like collisions)
+
 			if event.initiator then
 
                 local playerName = event.initiator:getPlayerName()
-				
+
 				-- env.info("DCE_EventT land B " .. tostring(playerName))
 
 				if event.place then
                     -- env.info("DCE_EventT land C place name: " .. tostring(event.place:getName()) .. " | place type: " .. tostring(event.place:getTypeName()))
-					
+
 					log_entry.place = event.place and event.place:getName() or "unknown"
 					log_entry.placeTypeName = tostring(event.place:getTypeName())
 					-- local baseCoalitionId = Airbase.getCoalition(event.place)
@@ -1372,23 +1547,23 @@ function eventHandlerDCE:onEvent(event)
 					local elementId = event.initiator:getID()
 					local catEntry = elementId and Cache_UnitCategoryByGetID[elementId]
 					local isHelo = (catEntry and catEntry.category == Unit.Category.HELICOPTER)
-					
+
 					local placeDesc = event.place:getDesc()
-					
+
 					-- Airbase.Category = {
 					-- 	AIRDROME = 0,
-					-- 	HELIPAD = 1, 
+					-- 	HELIPAD = 1,
 					-- 	SHIP = 2,
 					-- }
-					-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then 
-					
+					-- if event.place:getCategory() == Airbase.Category.SHIP    and not event.initiator:getPlayerName() then
+
 					if not playerName then
                         -- env.info("DCE_EventT land D place category: " .. tostring(placeDesc.category) .. " | Airbase.Category.SHIP: " .. tostring(Airbase.Category.SHIP)
 						-- .. " | isHelo: " .. tostring(isHelo))
-						
+
 						if env.mission.theatre ~= "Kola" then
 							-- env.info("DCE_EventT land E theatre: " .. tostring(env.mission.theatre))
-							
+
                             if placeDesc.category == Airbase.Category.SHIP then -- category ship
                                 -- env.info(
                                     -- "DCE_EventT land F category ship detected, check if it's a Pedro and relaunch it if needed")
@@ -1460,10 +1635,10 @@ function eventHandlerDCE:onEvent(event)
 							-- env.info("DCE_EventT land M theatre is Kola, despawn without check")
 							table.insert(despawn, event.initiator)
 						end
-						
+
 					end
 
-					
+
 					-- if initDesc.displayName then
 					-- 	log_entry.initiator = initiatorName --store initiator name
 					-- 	log_entry.type_name = event.initiator:getTypeName()
@@ -1472,7 +1647,7 @@ function eventHandlerDCE:onEvent(event)
 					-- 	log_entry.placeCoalitionId = Airbase.getCoalition(event.place)
 					-- 	log_entry.place = CleanName(log_entry.place)
 
-	
+
                     if initiatorName then
                         log_entry.initiator = initiatorName --store initiator name
                         -- log_entry.type_name = event.initiator:getTypeName()
@@ -1481,7 +1656,7 @@ function eventHandlerDCE:onEvent(event)
                         log_entry.placeCoalitionId = Airbase.getCoalition(event.place)
                         log_entry.place = CleanName(log_entry.place)
                     end
-					
+
 					if event.initiator.getTypeName then
 						event.initiator:getTypeName()
 					end
@@ -1500,9 +1675,9 @@ function eventHandlerDCE:onEvent(event)
 						log_entry.z = initiatorVec3.y
 					end
 
-					local life = event.initiator:getLife()																	--get current life of unit
-					local init_life = event.initiator:getLife0()															--get initial life of unit
-					log_entry.health = math.ceil(100 / init_life * life)												--store unit health to log entry
+					local life = event.initiator:getLife()							--get current life of unit
+					local init_life = event.initiator:getLife0()							--get initial life of unit
+					log_entry.health = math.ceil(100 / init_life * life)							--store unit health to log entry
 
 					local healthTemp = {
 						PilotName = playerName,
@@ -1518,9 +1693,9 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 
-		elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions) 	
+		elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions)
 
-			if event.initiator and initiatorObjCategory ~= 0 then																													--event has an initiator	
+			if event.initiator and initiatorObjCategory ~= 0 then																					--event has an initiator
 
                 -- local initDesc = event.initiator:getDesc()
 				local catEntry = initiatorId and Cache_UnitCategoryByGetID[initiatorId]
@@ -1528,11 +1703,11 @@ function eventHandlerDCE:onEvent(event)
 				if event.initiator.getName then
 					log_entry.initiator = initiatorName
 				end
-				
+
 				if initiatorObjCategory == Object.Category.UNIT then										--initiator is a unit debug_ET01.h
 
 					-- local unitCat = initDesc.category
-					log_entry.pilotName = event.initiator:getPlayerName()
+					log_entry.pilotName = SafeGet(event.initiator, "getPlayerName")
 
 					if log_entry.pilotName then
 						log_entry.pilotName = CleanName(log_entry.pilotName)
@@ -1584,7 +1759,7 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 
-			if event.target then																														--event has a target
+			if event.target then																					--event has a target
 
 				-- Object.Category
 				-- UNIT    1
@@ -1596,10 +1771,10 @@ function eventHandlerDCE:onEvent(event)
 
 				if event.target.getName  then
 					--Function also works with UNIT, STATIC, BASE
-					log_entry.target = event.target:getName()
+					log_entry.target = SafeGet(event.target, "getName") or ""
 
-					if targetObjCategory == Object.Category.UNIT and event.target.getID and event.target.isExist and event.target:isExist() then
-						log_entry.targetMissionID = event.target:getID()
+					if targetObjCategory == Object.Category.UNIT and event.target.getID and event.target.isExist and SafeGet(event.target, "isExist") then
+						log_entry.targetMissionID = SafeGet(event.target, "getID")
 					end
 
 				else
@@ -1615,18 +1790,18 @@ function eventHandlerDCE:onEvent(event)
 				--   }
 
 				if targetObjCategory and targetObjCategory == Object.Category.UNIT then												--target is a unit
-					log_entry.targetPilotName = event.target:getPlayerName()													--store player name
+					log_entry.targetPilotName = SafeGet(event.target, "getPlayerName")									--store player name
 					-- local desc = event.target:getDesc()
                     -- local unitCat = desc.category
-					local elementId = event.target.getID and event.target:getID() or nil
+					local elementId = SafeGet(event.target, "getID")
 					local catEntry = elementId and Cache_UnitCategoryByGetID[elementId]
 					local isHelo = (catEntry and catEntry.category == Unit.Category.HELICOPTER)
 
-					if log_entry.type == "hit" then																				--log entry is a hit event	
+					if log_entry.type == "hit" then															--log entry is a hit event
 						-- if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
 						if isHelo then
-							local life = event.target:getLife()																	--get current life of unit
-							local init_life = event.target:getLife0()															--get initial life of unit
+							local life = event.target:getLife()															--get current life of unit
+							local init_life = event.target:getLife0()														--get initial life of unit
 							log_entry.health = math.ceil(100 / init_life * life)												--store unit health to log entry
 
 							local healthTemp = {
@@ -1655,6 +1830,15 @@ function eventHandlerDCE:onEvent(event)
 					end
 				end
 			end
+		end
+
+		--position des avions / helicos perdus : crash (point d'impact), kill / dead / unit lost (point de destruction)
+		--lecture protegee, ne doit jamais empecher l'insertion de l'entree dans CustomLog
+		if log_entry.type == "crash" or log_entry.type == "dead" or log_entry.type == "unit lost" or log_entry.type == "kill" then
+			local victimObjCat = initiatorObjCategory
+			if event.id == world.event.S_EVENT_KILL then victimObjCat = targetObjCategory end
+			local okAir, errAir = pcall(AddAirLossPosition, log_entry, event, victimObjCat)
+			if not okAir then env.info("DCE_AirLoss ERROR AddAirLossPosition " .. tostring(errAir)) end
 		end
 
 		--*********************insert CustomLog ********************
@@ -1709,7 +1893,7 @@ function eventHandlerDCE:onEvent(event)
 
             campL.RunwayLife = RunwayLife
 
-            env.setErrorMessageBoxEnabled(true) -- debug_ET02	n'affiche pas les messages d'error sauf � la fin de mission
+            env.setErrorMessageBoxEnabled(true) -- debug_ET02	n'affiche pas les messages d'error sauf à la fin de mission
 
             -- modification M35.d (d: info log) version ScriptsMod
             if campL.VersionPackageICM then
@@ -1878,13 +2062,13 @@ function eventHandlerDCE:onEvent(event)
                 if initiatorObjCategory == 5 then --if initiator is a scenery object
                     local scenaryName = initiatorName
 
-                    if scenLog[scenaryName] then
+                    if scenLog[scenaryName] and initiatorVec3 then
                         -- local initPointVec3 = event.initiator:getPoint()				--get point of dead scenery object
                         scenLog[scenaryName].x = initiatorVec3.x
                         scenLog[scenaryName].y = initiatorVec3.z
                         scenLog[scenaryName].z = initiatorVec3.y
                         scenLog[scenaryName].event = "S_EVENT_DEAD"
-                        local initDesc = event.initiator:getDesc() --debug ET01	
+                        local initDesc = event.initiator:getDesc() --debug ET01
                         if initDesc then
                             scenLog[scenaryName].Desc = initDesc
                         end
@@ -1896,7 +2080,7 @@ function eventHandlerDCE:onEvent(event)
                 if initiatorObjCategory == 5 then --if initiator is a scenery object
                     local scenaryName = initiatorName
 
-                    if scenLog[scenaryName] then
+                    if scenLog[scenaryName] and initiatorVec3 then
                         -- local initPointVec3 = event.initiator:getPoint()				--get point of dead scenery object
                         scenLog[scenaryName].x = initiatorVec3.x
                         scenLog[scenaryName].y = initiatorVec3.z
@@ -1904,7 +2088,7 @@ function eventHandlerDCE:onEvent(event)
 
                         scenLog[scenaryName].event = "S_EVENT_UNIT_LOST"
 
-                        local initDesc = event.initiator:getDesc() --debug ET01	
+                        local initDesc = event.initiator:getDesc() --debug ET01
                         if initDesc then
                             scenLog[scenaryName].Desc = initDesc
                         end
@@ -1916,7 +2100,7 @@ function eventHandlerDCE:onEvent(event)
                 if initiatorObjCategory == 5 then --if initiator is a scenery object
                     local scenaryName = initiatorName
 
-                    if scenLog[scenaryName] then
+                    if scenLog[scenaryName] and initiatorVec3 then
                         -- local initPointVec3 = event.initiator:getPoint()				--get point of dead scenery object
                         scenLog[scenaryName].x = initiatorVec3.x
                         scenLog[scenaryName].y = initiatorVec3.z
@@ -1924,7 +2108,7 @@ function eventHandlerDCE:onEvent(event)
 
                         scenLog[scenaryName].event = "S_EVENT_KILL"
 
-                        local initDesc = event.initiator:getDesc() --debug ET01	
+                        local initDesc = event.initiator:getDesc() --debug ET01
                         if initDesc then
                             scenLog[scenaryName].Desc = initDesc
                         end
@@ -2137,7 +2321,7 @@ function eventHandlerDCE:onEvent(event)
 
             SatusGroupAircraft[groupName]["landing"] = true
         end
-	
+
 end
 
 
@@ -2145,18 +2329,18 @@ world.addEventHandler(eventHandlerDCE)
 
 
 --collect initial health of ships
-if campL.ShipHealth0 == nil then																						--table does not exist yet
-	campL.ShipHealth0 = {}																							--create table
+if campL.ShipHealth0 == nil then																					--table does not exist yet
+	campL.ShipHealth0 = {}																						--create table
 end
-for coalition_name,coal in pairs(env.mission.coalition) do															--iterate through coalitions in mission
-	for country_n,country in pairs(coal.country) do																	--iterate through countries in coalitions
-		if country.ship then																						--country has ships
-			for group_n,group in pairs(country.ship.group) do														--iterate through groups in ships
-				for unit_n,unit in pairs(group.units) do															--iterate through units in group
-					local u = Unit.getByName(unit.name)																--get unit
-					if u then																						--unit exists
-						local health = u:getLife()																	--get current health of unit
-						campL.ShipHealth0[unit.name] = health														--store initial ship health
+for coalition_name,coal in pairs(env.mission.coalition) do														--iterate through coalitions in mission
+	for country_n,country in pairs(coal.country) do															--iterate through countries in coalitions
+		if country.ship then																				--country has ships
+			for group_n,group in pairs(country.ship.group) do													--iterate through groups in ships
+				for unit_n,unit in pairs(group.units) do													--iterate through units in group
+					local u = Unit.getByName(unit.name)														--get unit
+					if u then																			--unit exists
+						local health = u:getLife()															--get current health of unit
+						campL.ShipHealth0[unit.name] = health													--store initial ship health
 					end
 				end
 			end
@@ -2165,21 +2349,21 @@ for coalition_name,coal in pairs(env.mission.coalition) do															--itera
 end
 
 --apply ship damage
-if campL.ShipHealth then																						--table with ship health exists
+if campL.ShipHealth then																					--table with ship health exists
 	for name,health_stored in pairs(campL.ShipHealth) do														--iterate through ships in table
 		if health_stored < 66 and campL.ShipHealth0[name] > 10 then											--health is less than 100% and ship has more than 10 health points (do not do for exteremly small boats)
-			local u = Unit.getByName(name)																	--get unit
-			if u then																						--unit exists
+			local u = Unit.getByName(name)															--get unit
+			if u then																			--unit exists
 				local counter = 1
 				repeat
-					local h = u:getLife()																	--get current health of unit
-					local h0 = campL.ShipHealth0[name]														--get maximum health of unit
+					local h = u:getLife()															--get current health of unit
+					local h0 = campL.ShipHealth0[name]													--get maximum health of unit
 					local health_current = math.floor(h / h0 * 100)											--store health percentage of ship
-					local pointVec3 = u:getPoint()																--get position of ship
-					local power = h0 / 100																	--explosive power is relatve to ship strenght
+					local pointVec3 = u:getPoint()														--get position of ship
+					local power = h0 / 100													--explosive power is relatve to ship strenght
 					--trigger.action.outText(counter .. " / Name: " .. name .. " / Power: " ..power .. " / Health: " .. health_current, 1)	--DEBUG
 					trigger.action.explosion(pointVec3, power)													--apply explosion
-					counter = counter + 1																	--counter to prevent runaway repeat
+					counter = counter + 1													--counter to prevent runaway repeat
 				until health_current < health_stored + 5 or counter > 100										--repeat until ship health reaches dieserd level or for a maximum of 100 times
 			end
 		end
@@ -2193,7 +2377,7 @@ local function CheckRtbAirbase()
 		-- ['BA Wahda'] = {
 			-- coalition = "blue"
 			-- x = 00549355,
-			-- y = -00892454, 
+			-- y = -00892454,
 			-- elevation = 0,
 			-- airdromeId = nil,
 			-- ATC_frequency = "0",
@@ -2217,10 +2401,10 @@ local function CheckRtbAirbase()
 										local unitAeroFuel = unitAero:getFuel()
 										local alti = unitAeroPointVec3.y - base.elevation
 										if alti <= 1000 and unitAeroFuel <= 0.75 then
-											
+
 											-- local distance = math.floor(math.sqrt(math.pow(base.x - unitAeroPointVec3.x, 2) + math.pow(base.y - unitAeroPointVec3.z, 2)))
 											local distance = math.floor(GetDistance(base, { x = unitAeroPointVec3.x, y = unitAeroPointVec3.z }))
-											
+
 											if distance <= 20000 then
 
 												env.info( "DCE_CheckRtbAirbase despawn/destroy BaseAirStart "..tostring(group.units[n].name)
@@ -2264,7 +2448,7 @@ local function despawnIA()
 		end
 
 		reset = true
-		
+
 	end
 
 	if reset then
@@ -2280,6 +2464,8 @@ timer.scheduleFunction(CheckRtbAirbase, nil, timer.getTime() + 5)
 timer.scheduleFunction(despawnIA, nil, timer.getTime() + 10)
 
 timer.scheduleFunction(updateTrackedBombs, {}, timer.getTime() + 0.2)
+
+timer.scheduleFunction(purgeAirById, nil, timer.getTime() + 120)
 
 env.info("DCE_EventT END OF LOADING EventsTracker script ")
 

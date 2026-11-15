@@ -5,7 +5,11 @@
 --Utilise les globales de Main : multiPlaneSet, draftSorties, baseFARP, priorityMaxValue, targetAssignedFirepower, status_counter_sorties ; et celles de ATO_Gen_20_Eligibility.lua.
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Gen_30_Sorties.lua"] = "1.21.137"
+versionDCE["ATO_Gen_30_Sorties.lua"] = "1.21.139"
+-------------------------------------------------------------------------------------------------------
+--1.21.139 : MP, le nombre d'avions demande par le joueur (Multi.Group[k].NbPlane) etait compare a multiPlaneSet[..].NbPlane,
+--           qui vaut 0 des l'initialisation (ATO_Gen_Main.lua) : le relevement ne se faisait jamais (UH-1H CSAR x3 -> 1, C-130J Transport x4 -> 2 ou 3).
+--           Nouvelle fonction getMultiRequestedNb() ; chercher "MP_REQUESTED" pour retrouver les 2 endroits modifies.
 -------------------------------------------------------------------------------------------------------
 
 if Debug.debug then
@@ -62,6 +66,35 @@ function getMultiPlane(sideName, squadName, planeType)
 	end
 
 	return multiPlaneSet[sideName][planeType][squadName]
+end
+
+--MP_REQUESTED : nombre d'avions demande par le joueur pour ce squad + ce type + cette tache.
+--Pourquoi: multiPlaneSet[side][type][squad].NbPlane est initialise a 0 dans ATO_Gen_Main.lua et ne sert que de compteur
+--(addSupportToDraft le decremente) ; ce n'est PAS le nombre demande. Le nombre demande est dans Multi.Group[k].NbPlane
+--(precis : une ligne par groupe et par tache), ou a defaut dans InitNbPlane (somme de toutes les taches du squad).
+--Retourne 0 si aucune demande MP ne correspond.
+function getMultiRequestedNb(sideName, squadName, planeType, task, mp_Data)
+
+	local total = 0
+
+	if Multi and Multi.Group then
+		for kGroup, group in pairs(Multi.Group) do
+			if type(group) == "table"
+				and group.side == sideName
+				and (group.squad or group.unitName) == squadName
+				and (group.plane or group.PlaneType) == planeType
+				and group.task == task then
+
+				total = total + (group.NbPlane or 0)
+			end
+		end
+	end
+
+	if total == 0 and mp_Data and mp_Data.InitNbPlane then
+		total = mp_Data.InitNbPlane
+	end
+
+	return total
 end
 
 -- --packages collaboratifs
@@ -194,26 +227,26 @@ local function buildDraftSorties(
 		end
 
 		if draftContext.overideMP_A then
-			
+
 			if draftSortiesEntry.score < 100 then
 				draftSortiesEntry.scoreAdd = draftSortiesEntry.score + 100
-				
+
 				draftSortiesEntry.score = draftSortiesEntry.score + 100
 			end
 
 			if not target.newPriority then
-				
+
 				local maxVal = priorityMaxValue[draftSortiesEntry.side]
 				local coef = (maxVal / target.priority) + 0.1
-                
+
                 -- Si la priorite etait deja superieure ou egale au max, on s'assure que le coef soit au moins > 1
                 if coef <= 1 then coef = 1.1 end
-                
+
                 -- Application du coefficient
                 target.priority = target.priority * coef + 1
 				target.newPriority = true
 				draftSortiesEntry.targetPriority = draftSortiesEntry.targetPriority * coef + 1
-                
+
 				-- target.newPriority = true
 				-- target.priority = target.priority * 6
 				-- draftSortiesEntry.targetPriority = draftSortiesEntry.targetPriority * 6
@@ -329,9 +362,9 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 
 	if ( target.base and  ((task == "Intercept" and target.base == unit.base) or (task == "SAR" and target.base == unit.base) ) or (task == "Transport" and target.base == unit.base) or (task == "Nothing" and target.base == unit.base)
 		) or (task ~= "Intercept" and task ~= "Transport" and task ~= "Nothing" and task ~= "SAR") then
-		--intercept and transport missions are only assigned to units of a certain base as per targetlist	
+		--intercept and transport missions are only assigned to units of a certain base as per targetlist
 
-		TrackPlayability(unit.player, "target")																							--track playabilty criterium has been met
+		TrackPlayability(unit.player, "target")													--track playabilty criterium has been met
 
 		local mpTask_Check = getMultiPlaneTask(sideName, unit.name, unit.type, task)
 		local mp_Data = getMultiPlane(sideName, unit.name, unit.type)
@@ -459,16 +492,16 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 						target = target.titleName,
 						loadout = currentLoadout.name,
 					},
-					"BLOCK_A", 
+					"BLOCK_A",
 					SafeGetLine()
 				)
-				
+
 				break
 			end
 
 			if isDebugModeA3 then debugLog("draftId"..draftId.." AtoG passe A_13  Befor weather Condition  || "..target_name) end
 
-			TrackPlayability(unit.player, "target_firepower")																			--track playabilty criterium has been met
+			TrackPlayability(unit.player, "target_firepower")											--track playabilty criterium has been met
 
 			local weatherEligible = checkWeatherEligibility(draftContext, currentLoadout, isDebugModeA3)
 
@@ -480,7 +513,7 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 						daytime = Daytime,
 
 					},
-					"BLOCK_A", 
+					"BLOCK_A",
 					SafeGetLine()
 				)
 			end
@@ -502,7 +535,7 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 				debugLog("draftId"..draftId.." AtoG passe A_13__D weatherEligible? "..tostring(weatherEligible).." overideMP_A? "..tostring(draftContext.overideMP_A))
 			end
 
-			if (weatherEligible and proxiCSAR) then																				--continue of this loadout is eligible for weather
+			if (weatherEligible and proxiCSAR) then													--continue of this loadout is eligible for weather
 
 				if isDebugModeA3 then
 					debugLog("draftId"..draftId.." AtoG passe A_14 ".." After weatherEligible Condition "..target_name)
@@ -510,10 +543,10 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 
 				validateStep(draftContext, "weather")
 
-				TrackPlayability(unit.player, "weather")															--track playabilty criterium has been met
+				TrackPlayability(unit.player, "weather")											--track playabilty criterium has been met
 
 				-- --get airbase position
-				-- local airbasePoint = {																				--get the x-y coordinates of the airbase where the unit is located
+				-- local airbasePoint = {															--get the x-y coordinates of the airbase where the unit is located
 				-- 	x = db_airbases[unit.base].x,
 				-- 	y = db_airbases[unit.base].y,
 				-- 	h = db_airbases[unit.base].elevation,
@@ -524,7 +557,7 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 
 				local multipack = 1
 				if target.firepower.packmax  then	--and unit_loadouts[l].MaxAttackOffset								--target has a requirement for multiple packages and loadout is multipack capable (defined maximum attack offset)
-					multipack = target.firepower.packmax															--create draft sorties for this target for the requested amount of packages
+					multipack = target.firepower.packmax											--create draft sorties for this target for the requested amount of packages
 				end
 
 				if isDebugModeA3 then
@@ -563,11 +596,11 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 					i_timmer01 = i_timmer01 +1
 					if i_timmer01 >= 10  then io.write(".") i_timmer01 = 0 end
 					--determine route
-					status_counter_sorties = status_counter_sorties + 1													--status report
+					status_counter_sorties = status_counter_sorties + 1									--status report
 
 					draftContext.state.route = {}
 
-					if task == "Intercept" then																			--intercept task only get a stub route
+					if task == "Intercept" then															--intercept task only get a stub route
 						draftContext.state.route = {
 							[1] = {
 								['y'] = airbasePoint.y,
@@ -580,9 +613,9 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 								ground_total = 0.5,
 								air_total = 0.5
 							},
-							['lenght'] = target.radius * 2,																--interception task radius *2 because below it is compared with range *2
+							['lenght'] = target.radius * 2,												--interception task radius *2 because below it is compared with range *2
 						}
-					elseif task == "SAR" then																			--intercept task only get a stub route
+					elseif task == "SAR" then															--intercept task only get a stub route
 						draftContext.state.route = {
 							[1] = {
 								['y'] = airbasePoint.y,
@@ -595,15 +628,15 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 								ground_total = 0.5,
 								air_total = 0.5
 							},
-							['lenght'] = target.radius * 2,																--interception task radius *2 because below it is compared with range *2
+							['lenght'] = target.radius * 2,												--interception task radius *2 because below it is compared with range *2
 						}
-					else																								--all other tasks than intercept
+					else																				--all other tasks than intercept
 						local toTarget = 9999999
 						if not airbasePoint.x then print("AtoG No Airbase position "..tostring(unit.base)) os.execute 'pause' end
 						if not target.x then
 							-- print("AtoG No target position "..tostring(target_name))
 						else
-							toTarget = GetDistance(airbasePoint, target)												--direct distance to target
+							toTarget = GetDistance(airbasePoint, target)								--direct distance to target
 
 							if IsHelicopter[unit.type] and toTarget > currentLoadout.range then
 								for baseN, FARP in pairs(baseFARP[sideName]) do
@@ -665,7 +698,7 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 							tempDebug = tempDebug.."\n"..("                    AtoG variant" )
 							if draftContext.state.variant == 1 or draftContext.state.variant == 4 then
 								tempDebug = tempDebug.."\n"..("AtoG passe  A_27a day")
-															-- GetRoute(basePoint, target, profile,		sideName,	task, time,	multipackn,	multipackmax, unit,	viaFARP)
+														-- GetRoute(basePoint, target, profile,		sideName,	task, time,	multipackn,	multipackmax, unit,	viaFARP)
 								draftContext.state.route = GetRoute(airbasePoint, target, currentLoadout, sideName, task, "day", math.random(1,multipack), multipack,    unit, draftContext.state.viaFARP)	or {}
 
 							elseif draftContext.state.variant == 2 or draftContext.state.variant == 3 then
@@ -683,7 +716,7 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 												loadout = currentLoadout.name,
 												variant = draftContext.state.variant,
 											},
-											"BLOCK_A", 
+											"BLOCK_A",
 											SafeGetLine()
 										)
 								end
@@ -698,7 +731,7 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 									loadout = currentLoadout.name,
 									unit = unit.name,
 								},
-								"BLOCK_A", 
+								"BLOCK_A",
 								SafeGetLine()
 							)
 						end
@@ -749,11 +782,16 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 						draftContext.aircraft_requested = firepowerRequest / currentLoadout.firepower
 
 						if task == "Transport" then
-							if mp_Data and mp_Data.NbPlane
-							and draftContext.aircraft_requested < mp_Data.NbPlane
-							and task == "Transport"
+							--MP_REQUESTED : nombre demande par le joueur (avant : compare a mp_Data.NbPlane qui vaut 0 -> jamais applique)
+							local mpRequestedNb = 0
+							if mpTask_Check then
+								mpRequestedNb = getMultiRequestedNb(sideName, unit.name, unit.type, task, mp_Data)
+							end
+
+							if mpRequestedNb > 0
+							and draftContext.aircraft_requested < mpRequestedNb
 							then
-								draftContext.aircraft_requested = mp_Data.NbPlane
+								draftContext.aircraft_requested = mpRequestedNb
 								if draftContext.aircraft_requested > 4 then draftContext.aircraft_requested = 4 end
 							end
 						elseif task == "Strike" and draftContext.aircraft_requested < 2 then
@@ -783,12 +821,12 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 							draftContext.aircraft_requested = math.ceil(draftContext.aircraft_requested)
 						-- elseif (unit.type == "S-3B" or unit.type == "F-117A" or unit.type == "B-1B" or unit.type == "B-52H" or unit.type == "Tu-22M3" or unit.type == "Tu-95MS" or unit.type == "Tu-142" or unit.type == "Tu-160" or unit.type == "MiG-25RBT")
 						-- 	and task ~= "Runway Attack"	then
-						-- 	aircraft_requested = math.ceil(aircraft_requested)	
+						-- 	aircraft_requested = math.ceil(aircraft_requested)
 						elseif (Data_divers[unit.type] and Data_divers[unit.type].flyingAlone) and task ~= "Runway Attack"	then
 
 							draftContext.aircraft_requested = math.ceil(draftContext.aircraft_requested)
 						else
-							--aircraft_requested = math.ceil(aircraft_requested / 2) * 2								--round up to an even number
+							--aircraft_requested = math.ceil(aircraft_requested / 2) * 2							--round up to an even number
 							draftContext.aircraft_requested = math.ceil(draftContext.aircraft_requested)
 						end
 
@@ -820,12 +858,13 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 							end
 
 							--M11.z
-							if mp_Data and mp_Data.NbPlane then
-								if draftContext.state.futureAircraftAssign < mp_Data.NbPlane then
-									draftContext.state.futureAircraftAssign = mp_Data.NbPlane
-									logTmp = logTmp .. " /d "
-									debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe C "..unit.type.." aircraft_assign: "..tostring(draftContext.state.futureAircraftAssign))
-								end
+							--MP_REQUESTED : on force le nombre demande par le joueur (avant : compare a mp_Data.NbPlane qui vaut 0 -> jamais applique).
+							--La limite reste le stock reel du squad (AcftAvail[].available) : on ne cree jamais d'avion.
+							local mpRequestedNb = getMultiRequestedNb(sideName, unit.name, unit.type, task, mp_Data)
+							if mpRequestedNb > 0 and draftContext.state.futureAircraftAssign < mpRequestedNb then
+								draftContext.state.futureAircraftAssign = math.min(mpRequestedNb, math.floor(AcftAvail[unit.name].available))
+								logTmp = logTmp .. " /d "
+								debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe C MP_REQUESTED "..unit.type.." demande: "..tostring(mpRequestedNb).." aircraft_assign: "..tostring(draftContext.state.futureAircraftAssign))
 							end
 
 						end
@@ -868,23 +907,23 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 
 						if isDebugModeA3 then
 							debugLog(
-								"draftId"..draftId .." AtoG passe A_30 = = = = = = = = = = = = >>>>>> buildDraftSorties()  "
+								"draftId"..draftId.." AtoG passe A_30 = = = = = = = = = = = = >>>>>> buildDraftSorties()  "
 								.." draftContext.state.futureAircraftAssign: "..draftContext.state.futureAircraftAssign
-								.." logTmp : "..tostring(logTmp) 
+								.." logTmp : "..tostring(logTmp)
 
 						)
-							
-							
+
+
 							debugLog(
-								"draftId"..draftId .." AtoG passe A_30 = = = = = = = = = = = = >>>>>>  buildDraftSorties() PACKAGE COMPLETE "
-								..target_name .." targetAssignedFirepower/target.firepower.max: "
+								"draftId"..draftId.." AtoG passe A_30 = = = = = = = = = = = = >>>>>>  buildDraftSorties() PACKAGE COMPLETE "
+								..target_name.." targetAssignedFirepower/target.firepower.max: "
 								..targetAssignedFirepower[target_name] .."/" ..target.firepower.max
 							)
 						end
 
 					end
 
-					draftContext.state.variant = draftContext.state.variant - 2																			--determines if while-loop does another route variant depending on Daytime
+					draftContext.state.variant = draftContext.state.variant - 2													--determines if while-loop does another route variant depending on Daytime
 				end
 
 			end

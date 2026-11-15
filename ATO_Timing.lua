@@ -521,6 +521,12 @@ for sideName, packs in pairs(ATO) do
 				if flight[f].loadout.vCruise then main_vCruise = flight[f].loadout.vCruise end
 				if flight[f].loadout.vAttack then main_vAttack = flight[f].loadout.vAttack end
 
+				-- AJOUT : pas de vAttack (Transport, helico, escorte de Transport...) -> on prend vCruise
+				if not main_vAttack then
+					print("AtoT: pas de vAttack pour "..tostring(flight[f].type).." task="..tostring(flight[f].task).." role="..tostring(role).." -> vCruise utilise")
+					main_vAttack = main_vCruise
+				end
+
 				--flight TOT for packages continously covering a station
 				if flight[f].task == "AWACS" or flight[f].task == "Refueling" or flight[f].task == "AFAC" then		--flight is part of a package that continously covers a station
 					local available_station_coverage = #flight * flight[f].loadout.tStation							--total time that station can be covered

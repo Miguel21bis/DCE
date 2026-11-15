@@ -64,6 +64,49 @@ local function validSupportIterator(arg_supportTable, arg_dispoTmp)
 	return result
 end
 
+--=====================================================================================================
+--MP_OVERDRIVE : POINT UNIQUE (a chercher ce mot pour retrouver tout ce qui concerne le forcage MP)
+--=====================================================================================================
+--Pourquoi: la part par tache (AcftAvail[squad].prorataTask, calculee par allocateAircraftByTask a partir de
+--tasksCoef) sert a repartir equitablement le stock d'un squad entre les vols de l'IA. Un vol demande par un
+--JOUEUR en multijoueur ne doit JAMAIS etre limite par cette part : le joueur a demande N avions, et si le
+--generateur en fournit moins, AllCoopPossible = false et toute la generation est annulee puis relancee
+--(constate : F-4E-45MC Escort demande 4, part Escort du 421st TFS = 2 sur 10 -> "Generated 2 / 4 aircraft").
+--
+--Retourne true si le vol (arg_Role / arg_Entry) est une demande multijoueur a forcer :
+--  - role "main"   : le draft est le vol principal demande par le client (draft.main_overideMP),
+--                    ou un vol Transport d'un squad declare MP Transport (cible airlift differente de la cible MP)
+--  - role support  : l'entree de support a ete demandee par le client (arg_Entry.overideMP_B) ET le squad est
+--                    bien declare dans multiPlaneSet pour CETTE tache de support. (La 2eme condition evite une
+--                    fuite : overideMP_B est calcule dans ATO_Gen_Main.lua hors de la boucle des taches de
+--                    support, il peut donc rester vrai pour une autre tache du meme squad.)
+--
+--Effets quand true (voir createATO_table) :
+--  1) aucun plafonnement par prorataTask (draft-level + addFlight) ;
+--  2) les avions pris SONT COMPTES dans prorataUsed : la part restante de l'IA sur cette tache diminue,
+--     donc le MP est servi en premier et l'IA se partage le reste (pas de double distribution) ;
+--  3) la limite reste le STOCK REEL (AcftAvail[squad].unassigned) : on ne cree jamais d'avion.
+local function MP_Overdrive(side, draft, arg_Role, arg_Entry)
+
+	if arg_Role == "main" then
+		if draft.main_overideMP then
+			return true
+		end
+		--Transport MP : la cible airlift n'est jamais la cible MP choisie (Multi.Target = cible Strike/CSAR), donc draft.main_overideMP
+		--reste faux. Le groupe MP Transport est pourtant bien declare dans multiPlaneSet : on le force aussi (constate : C-130J demande 4, vol genere 2 ou 3).
+		if draft.task == "Transport" and getMultiPlaneTask(side, draft.name, draft.type, "Transport") then
+			return true
+		end
+		return false
+	end
+
+	if arg_Entry and arg_Entry.overideMP_B and getMultiPlaneTask(side, arg_Entry.name, arg_Entry.type, arg_Role) then
+		return true
+	end
+
+	return false
+end
+
 --table to store the final ATO
 ATO = {
 	blue = {},
@@ -71,13 +114,17 @@ ATO = {
 }
 
 --assign draft sorties to ATO and build packages/flights
+--MP_SAME_PACK : numero de package deja cree pour un vol principal MP, par camp + cible + tache
+--(2e type d'appareil sur la meme cible MP -> meme package, donc memes frequences radio)
+local mpPackByTarget = {}
+
 function createATO_table(draftPriority)
 	for side, drafts in pairs(draftPriority) do
 		if drafts and drafts ~= nil then
-			for draftN, draft in pairs(drafts) do																					--iterate through all draft sorties beginning with the highest scored			
+			for draftN, draft in pairs(drafts) do															--iterate through all draft sorties beginning with the highest scored
 
 				if MemTick then MemTick("C draft") end
-				
+
 				local override_MP_C = false
 
 				-- if draft.overideMP_B and draft.main_overideMP then
@@ -86,7 +133,7 @@ function createATO_table(draftPriority)
 				end
 
 				local isDebugModeC =
-					
+
 					Debug.Generator.affiche
 					and string.find(Debug.Generator.chapter, "C")
 					and (
@@ -143,26 +190,29 @@ function createATO_table(draftPriority)
 					end
 				end
 
-				if draft.loadout.minscore == nil or draft.score >= draft.loadout.minscore then					--draft sortie has no minimum score requirement or minimum score requirement is satisified		
+				if draft.loadout.minscore == nil or draft.score >= draft.loadout.minscore then					--draft sortie has no minimum score requirement or minimum score requirement is satisified
 
-					-- if draft.multipack > 0 then												--target does not have a requirment for a specific number of packages, or still needs more packages		
-					if multipackByTargetName[draft.target_name]["nbPack"] > 0 then
+					-- if draft.multipack > 0 then												--target does not have a requirment for a specific number of packages, or still needs more packages
+					--MP_MULTI_TYPE : un vol principal demande par un joueur (main_overideMP) n'est pas limite par le nombre de packages de la cible
+					--(sinon le 2e type d'helico CSAR sur la meme cible est rejete : nbPack tombe a 0 apres le 1er package).
+					--Les drafts IA restent bloques une fois la cible servie (nbPack <= 0).
+					if multipackByTargetName[draft.target_name]["nbPack"] > 0 or draft.main_overideMP then
 
-						if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min then	--the target of this draft sortie must have a need for firepower above the minimum firepower threshold	
-							local available_Main = AcftAvail[draft.name].unassigned											--shortcut for available aircraft for this draft sortie					
+						if draft.target.firepower.max > 0 and draft.target.firepower.max >= draft.target.firepower.min then	--the target of this draft sortie must have a need for firepower above the minimum firepower threshold
+							local available_Main = AcftAvail[draft.name].unassigned											--shortcut for available aircraft for this draft sortie
 
-							--Pourquoi: available_Main ne reflétait que le pool GLOBAL du squad, jamais le cap PAR TACHE
-							--(taskCap) -- résultat: un squad pouvait être accepté pour bien plus de packages "Strike"
+							--Pourquoi: available_Main ne reflétait que le pool GLOBAL du squad, jamais la part PAR TACHE
+							--(prorataTask) -- résultat: un squad pouvait être accepté pour bien plus de packages "Strike"
 							--que sa part réellement allouée, tant que le pool global (partagé avec CAP/Escort/...)
 							--n'était pas totalement à sec. On clampe donc ici, AVANT toute décision d'accepter le
 							--draft, pas seulement au moment de l'assignation réelle dans addFlight.
-							--CORRECTION (bug 16) : un vol demande par un joueur en multijoueur (main_overideMP) ne doit pas etre limite par la part
-							--par tache (taskCap) : le joueur a demande N avions, le plafond calcule par tasksCoef (ex: Strike = 4 sur 10) donnait
-							--"Generated 4 / 6 aircraft" alors que le stock du squad suffisait.
-							if AcftAvail[draft.name].taskCap and AcftAvail[draft.name].taskCap[draft.task] ~= nil and not draft.main_overideMP then
+							--MP_OVERDRIVE (ex bug 16) : un vol principal demande par un joueur en multijoueur n'est pas limite par la part
+							--par tache (voir MP_Overdrive plus haut).
+							if AcftAvail[draft.name].prorataTask and AcftAvail[draft.name].prorataTask[draft.task] ~= nil and not MP_Overdrive(side, draft, "main", draft) then
 
-								local usedForTask = (AcftAvail[draft.name].taskUsed and AcftAvail[draft.name].taskUsed[draft.task]) or 0
-								local capRemaining = AcftAvail[draft.name].taskCap[draft.task] - usedForTask
+								local usedForTask = (AcftAvail[draft.name].prorataUsed and AcftAvail[draft.name].prorataUsed[draft.task]) or 0
+								--math.max : les avions MP comptes dans prorataUsed (MP_Overdrive) peuvent depasser la part -> jamais negatif
+								local capRemaining = math.max(0, AcftAvail[draft.name].prorataTask[draft.task] - usedForTask)
 
 								if capRemaining < available_Main then
 									available_Main = capRemaining
@@ -179,7 +229,7 @@ function createATO_table(draftPriority)
 							end
 
 							--enough aircraft are available to satisfy minimum firepower requirement for target
-							-- if (available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min) or passPackmax_C then				
+							-- if (available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min) or passPackmax_C then
 							local firepowerPackOK = (available_Main * draft.loadout.firepower >= draft.target.firepower.min ) or passPackmax_C
 
 							--mode degrade : a partir de la 5e tentative infructueuse, on ignore ce manque de
@@ -200,7 +250,7 @@ function createATO_table(draftPriority)
 
 							if firepowerPackOK then
 
-								--if the target has a minimum package number requirement, sufficient aircraft are available from this unit to satisfy it	
+								--if the target has a minimum package number requirement, sufficient aircraft are available from this unit to satisfy it
 								local firepowerPackMultiOK =
 									draft.target.firepower.packmin == nil
 									or available_Main * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min
@@ -217,7 +267,7 @@ function createATO_table(draftPriority)
 									firepowerPackMultiOK = true
 								end
 
-								if firepowerPackMultiOK then				
+								if firepowerPackMultiOK then
 
 									local limitMP = true   --TODO a revoir, semble inutile
 
@@ -231,7 +281,7 @@ function createATO_table(draftPriority)
 											.." overideMP_B?: "..tostring(draft.overideMP_B))
 									end
 
-									if (draft.flights == nil or draft.number <= available_Main or draft.main_overideMP or passPackmax_C) and limitMP then											--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later 
+									if (draft.flights == nil or draft.number <= available_Main or draft.main_overideMP or passPackmax_C) and limitMP then									--for targets with station time (multiple flights), continue only if sufficient aircraft are availabe. Additional lower scored sorties with less airctaft required will come later
 
 										if request_Main_Nb > available_Main and not draft.main_overideMP then
 
@@ -243,11 +293,11 @@ function createATO_table(draftPriority)
 
 										end
 
-										--check if there are enough supports available if supports are required		
+										--check if there are enough supports available if supports are required
 										local support_available = true
-										local need = {}																														--collect the total number of aircraft needed from each unit to complete the package
+										local need = {}																								--collect the total number of aircraft needed from each unit to complete the package
 										need[draft.name] = request_Main_Nb
-										local avail = {}																													--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
+										local avail = {}																								--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
 										avail[draft.name] = AcftAvail[draft.name].unassigned
 
 										--en fonction du learning des missions passé, interdit une mission si les task support ne sont pas present
@@ -336,8 +386,8 @@ function createATO_table(draftPriority)
 
 										--TODO bizarre, il s agit du nb d avion du main, pas du support
 										for unitname,_ in pairs(need) do
-												if need[unitname] > avail[unitname] then																						--more aircraft are needed from this unit across all package tasks than are available
-												support_available = false																									--not enough support available
+											if need[unitname] > avail[unitname] then															--more aircraft are needed from this unit across all package tasks than are available
+												support_available = false																		--not enough support available
 												local tabRejected = {}
 												tabRejected["sujet"]  = draft.id.." type: "..draft.type.." AVION SUPPORT?Main? INSUFFISANT()support_available if need[unitname] > avail[unitname]"
 												tabRejected["cause"] = { tostring(need[unitname]), tostring(avail[unitname]) }
@@ -362,18 +412,18 @@ function createATO_table(draftPriority)
 
 													if squad.tasks then
 														if draft.main_overideMP or ((squad.tasks["Anti-ship Strike"]  or squad.tasks["Strike"] ) and squad.type == draft.type) then
-															local needSupport = {}																														--collect the total number of aircraft needed from each unit to complete the package																							--number of main body aircraft 
-															local availSupport = {}																													--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
+															local needSupport = {}																					--collect the total number of aircraft needed from each unit to complete the package							--number of main body aircraft
+															local availSupport = {}																					--collect the maximal number of available aircraft from this unit (biggest number of all tasks)
 
 															if not needSupport[draft.name] then needSupport[draft.name] = 0 end
 															if not availSupport[draft.name] then availSupport[draft.name] = 0 end
-															
+
 															-- needSupport[draft.name] = request_Main_Nb
 
 															--TODO comment ça marche? ça a l'air inutile....
 															availSupport[draft.name] =  AcftAvail[draft.name].unassigned
 
-															for _p,_support in pairs(draft.support) do																							--iterate through support in draft sortie	
+															for _p,_support in pairs(draft.support) do													--iterate through support in draft sortie
 																if 	type(_support) == "table" then
 																	for _a,support in pairs(_support) do
 																		if 	type(support) == "table" then
@@ -381,7 +431,7 @@ function createATO_table(draftPriority)
 																			if not needSupport[support.name] then needSupport[support.name] = 0 end
 																			if not availSupport[support.name] then availSupport[support.name] = 0 end
 
-																			needSupport[support.name] =  needSupport[support.name] + support.number																	--add number of support aircraft from same unit
+																			needSupport[support.name] =  needSupport[support.name] + support.number												--add number of support aircraft from same unit
 																			availSupport[support.name] =  AcftAvail[support.name].unassigned
 
 																		end
@@ -389,11 +439,11 @@ function createATO_table(draftPriority)
 																end
 															end
 
-															-- --TODO encore utile ça?												
+															-- --TODO encore utile ça?
 															-- for Sname,_ in pairs(needSupport) do
 															-- 	if needSupport[Sname] - (needSupport[Sname] * 0.25)  > availSupport[Sname] then
 
-															-- 		support_available = false																									--not enough support available
+															-- 		support_available = false															--not enough support available
 
 															-- 		local sujet = draft.id.." BOMBARDIER NECESSITANT ESCORTE()support_available if needSupport[Sname] - (needSupport[Sname] * 0.15) > availSupport[Sname]"
 															-- 		local cause = { [1] =  needSupport[Sname] - (needSupport[Sname] * 0.25), [2] = availSupport[Sname], }
@@ -447,8 +497,8 @@ function createATO_table(draftPriority)
 
 											-- end
 
-											if support.support_requirement and mission_ini.strikeOnlyWithEscorte and 
-											(support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask) 
+											if support.support_requirement and mission_ini.strikeOnlyWithEscorte and
+											(support.number >= 2 and dispoTmp[support.name].unassigned < 2 and draft.task ~= supportTask)
 											and not MPOverride_C and not passPackmax_C
 											and supportTask ~= "Escort Jammer"
 											 then
@@ -470,14 +520,14 @@ function createATO_table(draftPriority)
 													.." need:"..tostring(support.number)
 													.." dispo:"..tostring(dispoTmp[support.name].unassigned)
 
-												support_available = false																									--not enough support available
+												support_available = false																		--not enough support available
 
 												local sujet = support.id.." type: "..support.type.." we don't accept a "..txt_nb.." aircraft as escort "..supportName
 												local cause = { "support.number: ",support.number, "unassigned:" , tostring(dispoTmp[support.name].unassigned), " available: ", tostring(dispoTmp[support.name].aircraft_available), "supportName: ", tostring(supportName), " task: ", tostring(draft.task) , " supportTask: ", tostring(supportTask) }
 
 												-- rejectDraft(draft, sujet, cause)
 												rejectDraft(draft, sujet, cause, SafeGetLine())
-												
+
 
 											else
 												escortDiagnostic.accepted[#escortDiagnostic.accepted + 1] =
@@ -489,7 +539,7 @@ function createATO_table(draftPriority)
 											end
 
 										end
-										
+
 
 										local function validateEscortAvailability()
 
@@ -518,7 +568,7 @@ function createATO_table(draftPriority)
 																}
 
 																rejectDraft(draft, sujet, cause, SafeGetLine())
-																
+
 																local details = {
 																	aircraft_need = support.number or -1,
 																	aircraft_disponible = AcftAvail[support.name].unassigned,
@@ -710,18 +760,37 @@ function createATO_table(draftPriority)
 										end
 
 										--add new package to ATO
-										-- if support_available and draft.number > 0 then																		--continue if no support is required or enough support is available to create package
+										-- if support_available and draft.number > 0 then										--continue if no support is required or enough support is available to create package
 										if support_available and request_Main_Nb > 0 then
 
 											local pack_n = #ATO[side]
 
+											--MP_SAME_PACK : un vol principal MP sur une cible deja servie par un package MP (meme tache)
+											--rejoint ce package au lieu d'en creer un nouveau ; ses supports ont deja ete ajoutes par le 1er draft.
+											local mpMergeKey = nil
+											local mpMerged = false
+											if draft.main_overideMP then
+												mpMergeKey = tostring(side).."|"..tostring(draft.target_name).."|"..tostring(draft.task)
+												local existingPack = mpPackByTarget[mpMergeKey]
+												if existingPack and ATO[side][existingPack] and ATO[side][existingPack].main then
+													mpMerged = true
+												end
+											end
+
+											if mpMerged then
+												pack_n = mpPackByTarget[mpMergeKey] - 1		--compense le pack_n = pack_n + 1 plus bas
+												if Debug.debug then
+													debugLog(draft.id.." AtoG MP_SAME_PACK rejoint le package "..tostring(pack_n + 1).." cle: "..mpMergeKey)
+												end
+											else
+
 											ATO[side][pack_n + 1] = {
-												["main"] = {},																			--package main body
-												["Escort"] = {},																		--Fighter escort
-												["SEAD"] = {},																			--SEAD escort
-												["Escort Jammer"] = {},																	--jammer escort
-												["Flare Illumination"] = {},															--illumination flare
-												["Laser Illumination"] = {},															--laser illumination
+												["main"] = {},													--package main body
+												["Escort"] = {},												--Fighter escort
+												["SEAD"] = {},													--SEAD escort
+												["Escort Jammer"] = {},											--jammer escort
+												["Flare Illumination"] = {},									--illumination flare
+												["Laser Illumination"] = {},									--laser illumination
 												["Strike"] = {},
 												["Anti-ship Strike"] = {},
 											}
@@ -731,6 +800,10 @@ function createATO_table(draftPriority)
 												ATO[side][pack_n + 1]["CSAR"] = {}
 												-- debugLog(draft.id.." AtoG passe C_04c")
 											end
+
+											if mpMergeKey then mpPackByTarget[mpMergeKey] = pack_n + 1 end
+
+											end	--fin if mpMerged / else
 
 											pack_n = pack_n + 1
 
@@ -748,7 +821,7 @@ function createATO_table(draftPriority)
 												end
 
 												local assigned
-												while arg_Assign > 0 do																		--loop as long as there are aircraft to assign
+												while arg_Assign > 0 do												--loop as long as there are aircraft to assign
 													assigned = nil -- reset obligatoire à chaque itération sinon une ancienne valeur peut survivre et provoquer des break ou tailles de flights incohérents
 
 													local debugA = ""
@@ -758,12 +831,12 @@ function createATO_table(draftPriority)
 													if arg_Entry.flights then
 														local flightsize = math.ceil(draft.target.firepower.max / draft.loadout.firepower)	--how many aircraft should be in each flight
 														debugA = "assign: "..arg_Assign.." >=? flightsize: "..flightsize
-														if arg_Assign >= flightsize then													--if there are more aircraft left to assign than the size of one flight
-															assigned = flightsize														--assign one full flight
+														if arg_Assign >= flightsize then							--if there are more aircraft left to assign than the size of one flight
+															assigned = flightsize									--assign one full flight
 															debugA = debugA .." ||if assign >= flightsize: assigned: "..assigned
-														else																			--if there are less aircraft left to assign than size of one flight
+														else														--if there are less aircraft left to assign than size of one flight
 															assigned = arg_Assign
-															debugA = debugA .." ||else assigned: "..assigned												--assign whatever is left
+															debugA = debugA .." ||else assigned: "..assigned										--assign whatever is left
 														end
 
 														if arg_Entry.task == "CAP" then
@@ -774,15 +847,15 @@ function createATO_table(draftPriority)
 															assigned = 1
 														end
 
-														arg_Entry.flights = arg_Entry.flights - 1												--one less flight to assign
+														arg_Entry.flights = arg_Entry.flights - 1											--one less flight to assign
 
 														debugA = debugA .." ||result entry.flights: "..arg_Entry.flights
 
 													elseif arg_Entry.task == "Escort Jammer" or arg_Entry.task == "Flare Illumination" or arg_Entry.task == "Laser Illumination" then		--for tasks with single aircraft
-														assigned = 1																	--assign one aircraft per flight	
+														assigned = 1												--assign one aircraft per flight
 													elseif arg_Entry.task == "Transport" then
 														-- local mpTask_Check_t = getMultiPlaneTask(side, draft.name, draft.type, arg_Entry.task)
-														
+
 														-- if multiPlaneSet and multiPlaneSet[side] and multiPlaneSet[side][draft.type]  and multiPlaneSet[side][draft.name][arg_Entry.task] then
 														if mpTask_Check then
 															assigned = arg_Assign
@@ -791,43 +864,43 @@ function createATO_table(draftPriority)
 														end
 
 													elseif arg_Entry.task == "Intercept" then
-														if arg_Assign >= 4 then																--if more than 2 aircraft are to be assigned
-															assigned = 4																--assign flight of 2 aircaft
-														-- if assign >= 2 then																--if more than 2 aircraft are to be assigned
+														if arg_Assign >= 4 then											--if more than 2 aircraft are to be assigned
+															assigned = 4											--assign flight of 2 aircaft
+														-- if assign >= 2 then											--if more than 2 aircraft are to be assigned
 														-- 	assigned = 2
 														else
-															assigned = 2																--else assign flight of 1 aicraft
+															assigned = 2											--else assign flight of 1 aicraft
 														end
 													--TODO revoir ça, pourquoi etre obligé de faire cela alors que ça devrait marcher comme les autres AWACS, pas seulement les S-3B et Hawkey?
 													-- elseif arg_Entry.task == "AWACS" or arg_Entry.task == "Refueling" or arg_Entry.task == "AFAC" or arg_Entry.task == "Transport" then	--for bombers
-													-- 	assigned = 1	
+													-- 	assigned = 1
 													-- elseif (entry.type == "S-3B" or entry.type == "F-117A" or entry.type == "B-1B" or entry.type == "B-52H" or entry.type == "Tu-22M3" or entry.type == "Tu-95MS" or entry.type == "Tu-142" or entry.type == "Tu-160" or entry.type == "MiG-25RBT")
-													-- and entry.task ~= "Runway Attack" then	--for bombers	
+													-- and entry.task ~= "Runway Attack" then	--for bombers
 													elseif (Data_divers[arg_Entry.type] and Data_divers[arg_Entry.type].flyingAlone) and arg_Entry.task ~= "Runway Attack" then	--for bombers
-														assigned = 1																	--assigne one aircraft per flight
+														assigned = 1												--assigne one aircraft per flight
 													elseif arg_Entry.task == "Reconnaissance" then											--for recon
-														if arg_Assign == 1 then																--if there is one aircraft left to assign
-															assigned = 1																--assigne one aircraft per flight
-														elseif arg_Assign >= 4 then															--if more than 4 aircraft are to be assigned
-															assigned = 4																--assign flight of 4 aircaft
-														elseif arg_Assign == 3 then															--if more than 3 aircraft are to be assigned
-															assigned = 3																--assign flight of 3 aircaft
+														if arg_Assign == 1 then											--if there is one aircraft left to assign
+															assigned = 1											--assigne one aircraft per flight
+														elseif arg_Assign >= 4 then											--if more than 4 aircraft are to be assigned
+															assigned = 4											--assign flight of 4 aircaft
+														elseif arg_Assign == 3 then											--if more than 3 aircraft are to be assigned
+															assigned = 3											--assign flight of 3 aircaft
 														else
-															assigned = 2																--else assign flight of 2 aicraft
+															assigned = 2											--else assign flight of 2 aicraft
 														end
 													elseif (arg_Entry.task == "SAR" or arg_Entry.task == "CSAR") and not arg_Entry.main_overideMP then											--for recon
 														debugE = debugE.." _C_ AtoG SAR/CSAR assigned 1, override_MP_C: "..arg_Entry.target_name
 														assigned = 1
-													else																			--for everything else
+													else											--for everything else
 														debugE = debugE .. " _D_ else BEFORE assigned: if assigned and assign == 1? "..arg_Assign
 
-														if assigned and arg_Assign == 1 then												--if there is one aircraft left to assign and there was already a previous flight assigned, stop assigning (do not add leftover single-ships)
+														if assigned and arg_Assign == 1 then										--if there is one aircraft left to assign and there was already a previous flight assigned, stop assigning (do not add leftover single-ships)
 															break
-														elseif arg_Assign >= 4 then															--if more than 4 aircraft are to be assigned
-															assigned = 4																--assign flight of 4 aircaft
+														elseif arg_Assign >= 4 then											--if more than 4 aircraft are to be assigned
+															assigned = 4											--assign flight of 4 aircaft
 															debugE = debugE .." _E_ || elseif assign >= 4 then"
-															else
-															assigned = arg_Assign															--else assign flight size of what is left
+														else
+															assigned = arg_Assign											--else assign flight size of what is left
 														end
 														debugE = debugE .. " _F_ || elseAFTER assigned: "..assigned
 													end
@@ -839,7 +912,7 @@ function createATO_table(draftPriority)
 													if assigned > 4 then				--never more than 4 aircraft per flight
 														assigned = 4				--cap flight at 4 aircraft
 													-- else
-													-- 	assigned = arg_Assign															--else assign flight size of what is left
+													-- 	assigned = arg_Assign											--else assign flight size of what is left
 													end
 
 													--ATTENTION, le code plus bas est débile, et crée des flights de 6 (par exemple)
@@ -849,7 +922,7 @@ function createATO_table(draftPriority)
 													-- 	end
 													-- end
 
-													--CORRECTION (bug 1) : ce plafonnement (stock du squad + part par tache TASKCAP) etait fait APRES la construction
+													--CORRECTION (bug 1) : ce plafonnement (stock du squad + part par tache PRORATA) etait fait APRES la construction
 													--et l'insertion du vol dans l'ATO : flight.number et flight.firepower gardaient la valeur d'avant plafond, et si
 													--assigned tombait a 0 le vol restait dans l'ATO sans qu'aucun avion soit decompte (plus d'avions en vol que de stock).
 													--On plafonne maintenant AVANT de creer le vol, et on ne cree aucun vol si assigned <= 0.
@@ -862,15 +935,35 @@ function createATO_table(draftPriority)
 													--Pourquoi: si ce squad a une répartition par tâche (tasksCoef), on plafonne "assigned" à ce qu'il
 													--reste pour CETTE tâche précise, même si le pool global AcftAvail n'est pas épuisé -- sinon la
 													--première tâche traitée peut engloutir tout le squad avant que les autres n'aient leur part.
-													local taskForCap = (arg_Role == "main") and draft.task or arg_Role
+													local taskForProrata = (arg_Role == "main") and draft.task or arg_Role
 													local assigned_avant_clamp = assigned
 
-													--CORRECTION (bug 16) : meme exception ici pour le vol principal d'une demande multijoueur (voir plus haut)
-													if AcftAvail[arg_Entry.name].taskCap and AcftAvail[arg_Entry.name].taskCap[taskForCap] ~= nil and not (arg_Role == "main" and draft.main_overideMP) then
+													--MP_OVERDRIVE : demande multijoueur (vol principal ou support demande par le client) -> pas de plafond par la part
+													--prorata, mais les avions pris sont comptes dans prorataUsed (voir MP_Overdrive plus haut).
+													--Le stock reel est toujours respecte : 'assigned' ne depasse jamais AcftAvail[squad].unassigned (limite en amont).
+													local mpOverdrive = MP_Overdrive(side, draft, arg_Role, arg_Entry)
 
-														AcftAvail[arg_Entry.name].taskUsed = AcftAvail[arg_Entry.name].taskUsed or {}
-														local usedSoFar = AcftAvail[arg_Entry.name].taskUsed[taskForCap] or 0
-														local cap = AcftAvail[arg_Entry.name].taskCap[taskForCap]
+													if mpOverdrive then
+
+														AcftAvail[arg_Entry.name].prorataUsed = AcftAvail[arg_Entry.name].prorataUsed or {}
+														local usedSoFar = AcftAvail[arg_Entry.name].prorataUsed[taskForProrata] or 0
+														AcftAvail[arg_Entry.name].prorataUsed[taskForProrata] = usedSoFar + assigned
+
+														if Debug.debug then
+															debugLog(draft.id.." AtoG MP_OVERDRIVE squad: "..tostring(arg_Entry.name)
+																.." arg_Role: "..tostring(arg_Role)
+																.." taskForProrata: "..tostring(taskForProrata)
+																.." part_prorata: "..tostring(AcftAvail[arg_Entry.name].prorataTask and AcftAvail[arg_Entry.name].prorataTask[taskForProrata])
+																.." deja_utilise_avant: "..tostring(usedSoFar)
+																.." assigned (non plafonne): "..tostring(assigned)
+																.." deja_utilise_apres: "..tostring(AcftAvail[arg_Entry.name].prorataUsed[taskForProrata]))
+														end
+
+													elseif AcftAvail[arg_Entry.name].prorataTask and AcftAvail[arg_Entry.name].prorataTask[taskForProrata] ~= nil then
+
+														AcftAvail[arg_Entry.name].prorataUsed = AcftAvail[arg_Entry.name].prorataUsed or {}
+														local usedSoFar = AcftAvail[arg_Entry.name].prorataUsed[taskForProrata] or 0
+														local cap = AcftAvail[arg_Entry.name].prorataTask[taskForProrata]
 														local remaining = cap - usedSoFar
 
 														if remaining <= 0 then
@@ -879,29 +972,29 @@ function createATO_table(draftPriority)
 															assigned = remaining
 														end
 
-														AcftAvail[arg_Entry.name].taskUsed[taskForCap] = usedSoFar + assigned
+														AcftAvail[arg_Entry.name].prorataUsed[taskForProrata] = usedSoFar + assigned
 
 														if Debug.debug then	--CORRECTION (bug 11) : ce debugLog n'etait pas protege par Debug.debug (log ecrit meme hors debug)
-														debugLog(draft.id.." AtoG TASKCAP squad: "..tostring(arg_Entry.name)
-															.." arg_Role: "..tostring(arg_Role)
-															.." taskForCap: "..tostring(taskForCap)
-															.." cap: "..tostring(cap)
-															.." deja_utilise_avant: "..tostring(usedSoFar)
-															.." assigned_avant_clamp: "..tostring(assigned_avant_clamp)
-															.." assigned_final: "..tostring(assigned)
-															.." deja_utilise_apres: "..tostring(AcftAvail[arg_Entry.name].taskUsed[taskForCap]))
+															debugLog(draft.id.." AtoG PRORATA squad: "..tostring(arg_Entry.name)
+																.." arg_Role: "..tostring(arg_Role)
+																.." taskForProrata: "..tostring(taskForProrata)
+																.." cap: "..tostring(cap)
+																.." deja_utilise_avant: "..tostring(usedSoFar)
+																.." assigned_avant_clamp: "..tostring(assigned_avant_clamp)
+																.." assigned_final: "..tostring(assigned)
+																.." deja_utilise_apres: "..tostring(AcftAvail[arg_Entry.name].prorataUsed[taskForProrata]))
 														end
 
 													else
-														--Pourquoi: si on arrive ICI, le plafond n'a PAS été consulté du tout pour cet appel
-														--(pas de taskCap pour ce squad, ou taskForCap ne correspond à aucune clé de taskCap)
+														--Pourquoi: si on arrive ICI, la part prorata n'a PAS été consultée du tout pour cet appel
+														--(pas de prorataTask pour ce squad, ou taskForProrata ne correspond à aucune clé de prorataTask)
 														---> assigned part sans aucune limite par tâche, uniquement limité par le pool global.
 														if Debug.debug then	--CORRECTION (bug 11) : idem, protege par Debug.debug
-														debugLog(draft.id.." AtoG TASKCAP_SKIPPED squad: "..tostring(arg_Entry.name)
-															.." arg_Role: "..tostring(arg_Role)
-															.." taskForCap: "..tostring(taskForCap)
-															.." assigned_sans_plafond: "..tostring(assigned)
-															.." taskCap_existe: "..tostring(AcftAvail[arg_Entry.name].taskCap ~= nil))
+															debugLog(draft.id.." AtoG PRORATA_SKIPPED squad: "..tostring(arg_Entry.name)
+																.." arg_Role: "..tostring(arg_Role)
+																.." taskForProrata: "..tostring(taskForProrata)
+																.." assigned_sans_plafond: "..tostring(assigned)
+																.." prorataTask_existe: "..tostring(AcftAvail[arg_Entry.name].prorataTask ~= nil))
 														end
 													end
 
@@ -914,7 +1007,7 @@ function createATO_table(draftPriority)
 														debugLog(draft.id.." AtoG passe C_11 |||BEFORE insert/create ATO table|||  _A_" ..debugA.." \r\n _E_ "..debugE.." \r\n assigned "..assigned)
 													end
 
-													local flight = {																	--build ATO flight entry
+													local flight = {												--build ATO flight entry
 														name = arg_Entry.name,
 														playable = arg_Entry.playable,
 														type = arg_Entry.type,
@@ -922,7 +1015,7 @@ function createATO_table(draftPriority)
 														callsign = arg_Entry.callsign,
 														callsignId = arg_Entry.callsignId,
 														helicopter = arg_Entry.helicopter,
-														number = assigned,																--number of aircraft in flight
+														number = assigned,											--number of aircraft in flight
 														country = arg_Entry.country,
 														livery = arg_Entry.livery,
 														sidenumber = arg_Entry.sidenumber,
@@ -933,7 +1026,7 @@ function createATO_table(draftPriority)
 														skill = arg_Entry.skill,
 														task = arg_Entry.task,
 														loadout = arg_Entry.loadout,
-														route = {},																		--route is a table and connot be copied as a whole
+														route = {},												--route is a table and connot be copied as a whole
 														target = DeepCopy(arg_Entry.target),
 														target_name = arg_Entry.target_name,
 														firepower = assigned * arg_Entry.loadout.firepower,
@@ -944,7 +1037,7 @@ function createATO_table(draftPriority)
 														threatsGround = draft.threatsGround,
 														threatsAir = draft.threatsAir,
 													}
-													for r = 1, #arg_Entry.route do															--make copy of route table
+													for r = 1, #arg_Entry.route do												--make copy of route table
 														flight.route[r] = {}
 														for k,v in pairs(arg_Entry.route[r]) do
 															flight.route[r][k] = v
@@ -975,7 +1068,7 @@ function createATO_table(draftPriority)
 														-- if isDebugModeC then
 															debugLog(draft.id.." AtoG passe C_12 ERROR ATO = nil arg_Role "..arg_Role)
 														-- end
-													end--add flight to package role (main, SEAD or escort)											
+													end--add flight to package role (main, SEAD or escort)
 
 			--######################################################################################################################################
 			--######################################################################################################################################
@@ -1017,7 +1110,7 @@ function createATO_table(draftPriority)
 
 													AcftAvail[arg_Entry.name].assigned = AcftAvail[arg_Entry.name].assigned + assigned
 													AcftAvail[arg_Entry.name].unassigned = AcftAvail[arg_Entry.name].unassigned - assigned		--remove assigned aircraft from total number of available aircraft for this unit
-													arg_Assign = arg_Assign - assigned															--continue loop until are aircraft are assigned
+													arg_Assign = arg_Assign - assigned													--continue loop until are aircraft are assigned
 
 													if HO_TRACE and HumainOnlyUnit(HoUnit(arg_Entry.name)) then
 														HoLog("  CONSOMME squad="..tostring(arg_Entry.name).." role="..tostring(arg_Role).." retire="..tostring(assigned).." reste_a_assigner="..tostring(arg_Assign).." | "..HoAcft(arg_Entry.name))
@@ -1035,7 +1128,7 @@ function createATO_table(draftPriority)
 											end
 
 											--********************************************************************************************
-											-- addFlight(draft.number, "main", draft)												--add main body flights to package
+											-- addFlight(draft.number, "main", draft)											--add main body flights to package
 											local draftForFlight = DeepCopy(draft)
 											draftForFlight.number = request_Main_Nb
 
@@ -1060,6 +1153,8 @@ function createATO_table(draftPriority)
 											end
 
 											table.sort(orderedSupportTasks)
+
+											if mpMerged then orderedSupportTasks = {} end		--MP_SAME_PACK : supports deja portes par le 1er draft du package
 
 											for _, taskSupport in ipairs(orderedSupportTasks) do
 												local supportPart = draft.support[taskSupport]
@@ -1112,8 +1207,8 @@ function createATO_table(draftPriority)
 											end
 
 											--remove the firepower applied by package to target from maximum firepower of all other draft sorties to the same target
-											local firepower_applied = 0																	--collect the amount of firepower combined by all main body flights of this package
-											for f = 1, #ATO[side][pack_n].main do														--iterate through all main body flights
+											local firepower_applied = 0																--collect the amount of firepower combined by all main body flights of this package
+											for f = 1, #ATO[side][pack_n].main do													--iterate through all main body flights
 												firepower_applied = firepower_applied + ATO[side][pack_n].main[f].firepower				--sum firepower
 											end
 
@@ -1130,7 +1225,7 @@ function createATO_table(draftPriority)
 											rejectDraft(draft, sujet, cause, SafeGetLine())
 										end
 									else
-										local sujet = draft.id.." AVIONS INSUFFISANT()if draft.number <= available and limitMP then {draft.number, limitMP}"
+										local sujet = draft.id.." AVIONS INSUFFISANT()if draft.number <= available and limitMP {draft.number, limitMP}"
 										local cause = {"draft.number: ", tostring(draft.number), "limitMP: ", tostring(limitMP)}
 										rejectDraft(draft, sujet, cause, SafeGetLine(), "insufficient_aircraft_count")
 									end
@@ -1139,7 +1234,7 @@ function createATO_table(draftPriority)
 									local cause = { [1] = tostring(available_Main * draft.loadout.firepower), [2]  = tostring((draft.target.firepower.packmin - 1) * draft.target.firepower.max), }
 									rejectDraft(draft, sujet, cause, SafeGetLine(), "insufficient_package_firepower")
 								end
-							
+
 							else
 								--available_Main == 0 : c'est le vrai "plus aucun avion", cas le plus parlant pour le joueur.
 								--available_Main > 0  : il reste des avions mais leur puissance de feu cumulee ne suffit pas.

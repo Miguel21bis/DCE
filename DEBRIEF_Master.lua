@@ -445,6 +445,8 @@ dofile("Active/oob_scen.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
 IncludeOnce("DC_UpdateTargetlist.lua")
 IncludeOnce("DEBRIEF_Text.lua")
+IncludeOnce("DEBRIEF_ExportMap.lua")
+
 
 local debriefFilePath = "Debriefing/Debriefing " .. camp.mission .. ".txt"
 

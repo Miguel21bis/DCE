@@ -1146,7 +1146,7 @@ for sideName, units in pairs(oob_air) do
 
 			--Pourquoi: la restriction "une seule tâche par recherche" (basée sur tasksCoef) a été retirée :
 			--elle empêchait un squad de jamais être tenté sur sa tâche à plus faible coefficient, même
-			--quand taskCap lui réserve encore de la place dessus. taskCap (dans addFlight) gère maintenant
+			--quand prorataTask lui réserve encore de la place dessus. prorataTask (dans addFlight) gère maintenant
 			--la répartition équitable au moment de la consommation ; la recherche retente donc toutes les
 			--tâches actives du squad, comme avant tasksCoef.
 			local mainTasksToTry = unit.tasks
@@ -1954,9 +1954,9 @@ for sideName, draftT in pairs(draftSorties) do
 
 					--Pourquoi: la restriction "une seule tâche par recherche" (basée sur tasksCoef) a été retirée :
 					--elle empêchait un squad de jamais être tenté sur sa tâche à plus faible coefficient
-					--(ex: SEAD quand Escort a un coefficient plus haut), même quand taskCap lui réserve
+					--(ex: SEAD quand Escort a un coefficient plus haut), même quand prorataTask lui réserve
 					--encore de la place dessus -- ce qui pouvait rejeter un draft entier faute de candidat
-					--jamais tenté, alors qu'un candidat existait bel et bien. taskCap (dans addFlight) gère
+					--jamais tenté, alors qu'un candidat existait bel et bien. prorataTask (dans addFlight) gère
 					--maintenant la répartition équitable au moment de la consommation ; la recherche retente
 					--donc toutes les tâches actives du squad, comme avant tasksCoef.
 					local tasksToTry = unitSupport.tasks

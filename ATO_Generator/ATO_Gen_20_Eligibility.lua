@@ -51,20 +51,20 @@ function checkWeatherEligibility(draftContext, currentLoadout, isDebugMode)
 				--CORRECTION (bug 6) : hAttack peut etre nil dans le loadout ; "nil > nombre" provoque une erreur Lua qui arrete
 				--toute la generation des que les nuages sont denses (density > 8). On teste donc hAttack avant de le comparer
 				--(meme garde que celle deja utilisee plus haut pour hCruise / hAttack).
-				if currentLoadout.hAttack and currentLoadout.hAttack > cloud_base then																		--attack alt is above cloud base
-					if currentLoadout.adverseWeather == false then																--loadout is not adverse weather capable
+				if currentLoadout.hAttack and currentLoadout.hAttack > cloud_base then													--attack alt is above cloud base
+					if currentLoadout.adverseWeather == false then															--loadout is not adverse weather capable
 						debugLocal = debugLocal .. " /n Strike/Reconnaissance hAttack > cloud_base & adverseWeather == false "
                         addRejectReason(draftContext, "weather")	--CORRECTION (bug 6) : seule cette branche ne comptabilisait pas le rejet meteo (les autres appellent addRejectReason)
-                        weatherEligible = false																					--not eligible for this weather
+                        weatherEligible = false																			--not eligible for this weather
 					end
 				end
 			end
 		end
-		if mission.weather["enable_fog"] == true then															--fog
+		if mission.weather["enable_fog"] == true then														--fog
 			if db_airbases[unit.base].elevation < mission.weather["fog"]["thickness"] then					--base elevation in fog
 				if mission.weather["fog"]["visibility"] < 5000 then												--less than 5000m visibility
 					if currentLoadout.adverseWeather == false then											--loadout is not adverse weather capable
-						weatherEligible = false																--not eligible for this weather
+						weatherEligible = false															--not eligible for this weather
                         debugLocal = debugLocal .. " /n enable_fog & adverseWeather == false "
                     end
 				end
@@ -133,61 +133,61 @@ end
 function computeTOTWindow(draftContext, currentLoadout, Daytime, mission_ini, camp, task, draftId, isDebugModeA2)
 
 	local debug = ""
-	-- local tot_from = 0																						--earliest Time on Target for this loadout
+	-- local tot_from = 0																							--earliest Time on Target for this loadout
 	-- local tot_to = 0
 	draftContext.state.tot_from = 0
 	draftContext.state.tot_to = 0
 
-	if currentLoadout.day and currentLoadout.night then													--loadout is day and night capable
-		draftContext.state.tot_from = 0																						--from mission start
-		draftContext.state.tot_to = mission_ini.mission_duration																		--to mission end
-		if task == "Intercept" or task == "SAR" then																			--for interceptors, tot_to is not limitted by mission duration
+	if currentLoadout.day and currentLoadout.night then															--loadout is day and night capable
+		draftContext.state.tot_from = 0																			--from mission start
+		draftContext.state.tot_to = mission_ini.mission_duration																--to mission end
+		if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 			draftContext.state.tot_to = 999999
 		end
 		debug = debug .. " A: tot_to "..draftContext.state.tot_to
-	elseif currentLoadout.day then																		--loadout is day capable
+	elseif currentLoadout.day then																				--loadout is day capable
 		if Daytime == "night-day" then
-			draftContext.state.tot_from = mission_ini.dawn - camp.time																--from dawn
-			draftContext.state.tot_to = mission_ini.mission_duration																	--to mission end
+			draftContext.state.tot_from = mission_ini.dawn - camp.time														--from dawn
+			draftContext.state.tot_to = mission_ini.mission_duration														--to mission end
 			if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 				draftContext.state.tot_to = mission_ini.dusk - camp.time
 			end
 			debug = debug .. " B1: tot_to "..draftContext.state.tot_to
 		elseif Daytime == "day" then
-			draftContext.state.tot_from = 0																					--from missiom start
-			draftContext.state.tot_to = mission_ini.mission_duration																	--to mission end
+			draftContext.state.tot_from = 0																			--from missiom start
+			draftContext.state.tot_to = mission_ini.mission_duration														--to mission end
 			if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 				draftContext.state.tot_to = mission_ini.dusk - camp.time
 			end
 			debug = debug .. " B2: tot_to "..draftContext.state.tot_to
 		elseif Daytime == "day-night" then
-			draftContext.state.tot_from = 0																					--from mission start
-			draftContext.state.tot_to = mission_ini.dusk - camp.time																	--to dusk
+			draftContext.state.tot_from = 0																			--from mission start
+			draftContext.state.tot_to = mission_ini.dusk - camp.time														--to dusk
 			debug = debug .. " B3: tot_to "..draftContext.state.tot_to
 		end
 
 		debug = debug .. " B FIN: tot_to "..draftContext.state.tot_to
 
-	elseif currentLoadout.night then																		--loadout is night capable
+	elseif currentLoadout.night then																			--loadout is night capable
 		if Daytime == "day-night" then
-			draftContext.state.tot_from = mission_ini.dusk - camp.time																--from dusk
-			draftContext.state.tot_to = mission_ini.mission_duration																	--to mission end
+			draftContext.state.tot_from = mission_ini.dusk - camp.time														--from dusk
+			draftContext.state.tot_to = mission_ini.mission_duration														--to mission end
 			if task == "Intercept" or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 				draftContext.state.tot_to = mission_ini.dawn - camp.time
 			end
 		elseif Daytime == "night" then
-			draftContext.state.tot_from = 0																					--from mission start
-			draftContext.state.tot_to = mission_ini.mission_duration																	--to mission end
+			draftContext.state.tot_from = 0																			--from mission start
+			draftContext.state.tot_to = mission_ini.mission_duration														--to mission end
 			if task == "Intercept"  or task == "SAR" then																		--for interceptors, tot_to is not limitted by mission duration
 				draftContext.state.tot_to = mission_ini.dawn - camp.time
 			end
 		elseif Daytime == "night-day" then
-			draftContext.state.tot_from = 0																					--from mission start
-			draftContext.state.tot_to = mission_ini.dawn - camp.time																	--to dawn
+			draftContext.state.tot_from = 0																			--from mission start
+			draftContext.state.tot_to = mission_ini.dawn - camp.time														--to dawn
 		end
-		
+
 		debug = debug .. " C FIN: tot_to "..draftContext.state.tot_to
-		
+
 	end
 
 	if draftContext.state.tot_to < 0 then
@@ -266,6 +266,8 @@ local SOLO_TASKS = {
 --Pourquoi: un squad avec Escort=5 et CAP=1 doit voir ses avions se répartir ~5/6 Escort, ~1/6 CAP,
 --pas systématiquement 100% sur l'une ou l'autre. Une tâche dont la part arrondie tombe à 0 est
 --simplement absente de la table retournée (pas assez d'avions pour l'ouvrir en paire complète).
+--Le résultat est stocké dans AcftAvail[squad].prorataTask (ex-taskCap) : la part "prorata" de chaque tâche pour les vols de l'IA.
+--(Une demande multijoueur n'est PAS limitée par cette part : voir MP_Overdrive dans ATO_Gen_60_Package.lua)
 local function allocateAircraftByTask(unit, totalAvailable)
 
 	if not unit.tasksCoef or not unit.tasks or totalAvailable <= 0 then
@@ -345,7 +347,7 @@ function prepareUnitContext(draftContext, sideName)
 	if unit.inactive then
 		-- rejectStep(draftContext, "unit", "inactive")
 		rejectStep(draftContext, "unit", "inactive", "inactive", "BLOCK_A", SafeGetLine())
-		
+
 		return false
 	end
 
@@ -387,10 +389,18 @@ function prepareUnitContext(draftContext, sideName)
 	local currentMissionInstance = MissionInstance or 0
 	local currentCampTime = CampTotalTimeH or 0
 
+	--Migration : anciennes sauvegardes (camp_status.lua) qui contiennent encore les clés taskCap / taskUsed
+	--(renommees prorataTask / prorataUsed). On force un recalcul et on supprime les anciennes clés.
+	local legacyProrataKeys = AcftAvail[unit.name].taskCap ~= nil or AcftAvail[unit.name].taskUsed ~= nil
+
 	if AcftAvail[unit.name].unassigned == nil
 		or AcftAvail[unit.name].computedAtCycle ~= currentMissionInstance
 		or AcftAvail[unit.name].computedAtTime ~= currentCampTime
+		or legacyProrataKeys
 	then
+
+		AcftAvail[unit.name].taskCap = nil
+		AcftAvail[unit.name].taskUsed = nil
 
 		local aircraft_serviceable = computeServiceableAircraft(unit, sideName)
 
@@ -414,12 +424,13 @@ function prepareUnitContext(draftContext, sideName)
 		--Pourquoi: répartit une fois pour toutes le stock de ce squad entre ses tâches (tasksCoef),
 		--pour que Part A (tâches principales) et Part B (support/escorte) puisent chacune dans SA part
 		--au lieu de se disputer le même pool global en tout-ou-rien.
-		AcftAvail[unit.name].taskCap = allocateAircraftByTask(unit, aircraft_available)
-		AcftAvail[unit.name].taskUsed = {}
+		--prorataTask[tache] = part (nb d'avions) reservee a cette tache pour l'IA ; prorataUsed[tache] = deja consomme.
+		AcftAvail[unit.name].prorataTask = allocateAircraftByTask(unit, aircraft_available)
+		AcftAvail[unit.name].prorataUsed = {}
 
-		if Debug.debug and AcftAvail[unit.name].taskCap then
-			local txt = "AtoG ALLOCATION_PAR_TACHE (cycle "..tostring(currentMissionInstance)..", t="..tostring(currentCampTime)..") "..unit.name..": "
-			for taskName, count in pairs(AcftAvail[unit.name].taskCap) do
+		if Debug.debug and AcftAvail[unit.name].prorataTask then
+			local txt = "AtoG ALLOCATION_PRORATA (cycle "..tostring(currentMissionInstance)..", t="..tostring(currentCampTime)..") "..unit.name..": "
+			for taskName, count in pairs(AcftAvail[unit.name].prorataTask) do
 				txt = txt..taskName.."="..count.." "
 			end
 			debugLog(txt.."(total: "..aircraft_available..")")
