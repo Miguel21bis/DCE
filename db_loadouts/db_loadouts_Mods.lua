@@ -4,11 +4,12 @@
 
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_Mods.lua"] = "1.3.203"
+versionDCE["db_loadouts/db_loadouts_Mods.lua"] = "1.3.204"
 
 -- modification M66_a		add Runway Attack
 -- modification M65_a		add AirGroundAttackTask Mbot s file
 
+-- V204 - Mig-17F Fuel tanks
 -- V203 - F-111C update
 -- V202 - New UH2 SH2 
 -- V201 - Transport for SH-3D
@@ -1727,6 +1728,14 @@ db_loadouts = {
 				standoff = 40000,
 				stores = {
 					pylons = {
+					[1] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 1,
+					},
+					[2] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 2,
+					},
 					},
 					fuel = 1140,
 					flare = 0,
@@ -1746,6 +1755,14 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
+					[1] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 1,
+					},
+					[2] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 2,
+					},
 					},
 					fuel = 1140,
 					flare = 0,
@@ -1769,6 +1786,14 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
+					[1] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 1,
+					},
+					[2] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 2,
+					},
 					},
 					fuel = 1140,
 					flare = 0,
@@ -1824,6 +1849,14 @@ db_loadouts = {
 				sortie_rate = 6,
 				stores = {
 					pylons = {
+					[1] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 1,
+					},
+					[2] = {
+					["CLSID"] = "PTB400_MIG15",
+					["num"] = 2,
+					},
 					},
 					fuel = 1140,
 					flare = 0,

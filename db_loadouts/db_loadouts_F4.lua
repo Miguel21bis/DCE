@@ -3,9 +3,10 @@
 -------------------------------------------------------------------------------------------------------
 
 if not versionDCE then versionDCE = {} end
-versionDCE["db_loadouts/db_loadouts_F4.lua"] = "1.1.1"
+versionDCE["db_loadouts/db_loadouts_F4.lua"] = "1.1.2"
 
 -- 1.1.1 - Beginning of the versions of this loadouts file dedicated to the F4.
+-- 1.1.2 - HWITC Runway attack 
 
 
 db_loadouts = {
@@ -3934,7 +3935,7 @@ db_loadouts = {
 					[1] = "Turkey",
 				},
 				attributes =  { "Runway" },
-				code_loadout =  { "Crisis", "PG", "WOB" },
+				code_loadout =  { "HWITC", "Crisis", "PG", "WOB" },
 				weaponType = "Bombs",
 				expend = "All",
 				night = true,

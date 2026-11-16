@@ -1,13 +1,13 @@
---ATO_Generator_B_Eval.lua
+--ATO_Gen_01_Eval.lua
 --Sous-module de ATO_Generator : mini moteur d'evaluation de conditions (eval.test / eval.group / eval.attributesCond)
---A charger APRES ATO_Generator_A_Debug.lua (utilise debugLog si disponible) et AVANT ATO_Generator_C_Core.lua
+--Charge par ATO_Generator.lua (point d'entree), APRES ATO_Gen_00_Debug.lua (utilise debugLog si disponible) et AVANT ATO_Gen_Main.lua
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Generator_B_Eval.lua"] = "1.21.137"
+versionDCE["ATO_Gen_01_Eval.lua"] = "1.21.137"
 -------------------------------------------------------------------------------------------------------
 
 if Debug.debug then
-	print("START ATO_Generator_B_Eval.lua "..versionDCE["ATO_Generator_B_Eval.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+	print("START ATO_Gen_01_Eval.lua "..versionDCE["ATO_Gen_01_Eval.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
 -- Déclaration du module

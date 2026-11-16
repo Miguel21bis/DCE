@@ -1,70 +1,30 @@
 --To run the campaign triggers. Evaluate trigger conditions, run trigger actions and append briefing text
 --Initiated by MAIN_NextMission.lua
 ------------------------------------------------------------------------------------------------------- 
-------------------------------------------------------------------------------------------------------- 
--- last modification: M71_c
-if not versionDCE then versionDCE = {} end
-versionDCE["DC_CheckTriggers.lua"] = "1.16.98"
-------------------------------------------------------------------------------------------------------- 
-
-if Debug.debug then
-	print("START DC_CheckTriggers.lua "..versionDCE["DC_CheckTriggers.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-	-- os.execute 'pause'
-end
 
 
---List of Return functions to build conditions:
---Return.Time()												returns time of day in seconds
---Return.Day()												returns day of month
---Return.Month()											returns month as number
---Return.Year()												returns year as number
---Return.Mission()											returns campaign mission number
---Return.DatePassed(y, m, d)								Returns true if campaign date is on or after the given date*
---Return.CampFlag(flag-n)									returns value of campaign flag
---Return.AirUnitActive("UnitName")							returned boolean whether the air unit is active			
---Return.AirUnitReady("UnitName")							returns amount of ready aircraft in unit
---Return.AirUnitAlive("UnitName")							returns amount of ready and damaged aircraft in unit
---Return.AirUnitBase("UnitName")							returns the name of the airbase the unit operats from
---Return.AirUnitPlayer("UnitName")							returns boolean whether the air units is playable
---Return.TargetAlive("TargetName")							returns percentage of alive sub elements in target
---Return.UnitDead(unitname)									(ADD) return vehicle/ship units dead (ADD)
---Return.GroupHidden("GroupName")							returns group hidden status
---Return.GroupProbability("GroupName")						returns group spawn probability value between 0 and 1
---Return.ShipGroupInPoly(GroupName, PolyZonesTable)			(ADD) return boolean whether ship group is in polygon (ADD)
 
---List of Action functions for trigger actions:
---Action.None()
---Action.Text("your briefing text")
---Action.TextPlayMission(arg)																--add trigger text to briefing text of this mission only if it is playable
---Action.SetCampFlag(flag-n, boolean/number)												--
---Action.AddCampFlag(flag-n, number)														--
---Action.AddImage("filname.jpg")															--
---Action.CampaignEnd("win"/"draw"/"loss")													--
---Action.TargetActive("TargetName", boolean)												--
---Action.AirUnitActive("UnitName", boolean)													--
+-- ===== DOCUMENTATION LUE PAR DCE_Manager (lignes --@ au-dessus d'une function) =====
+-- Règles : les lignes commencent par --@ (pas "-- --@"), collées juste au-dessus de la ligne function (sans ligne vide).
+--@doc texte                      une phrase d'explication (plusieurs possibles)
+--@param nom | source=... | texte un par argument ; nom = celui de la parenthèse de la fonction. Champs libres : source= type= min= max= unit=
+--@returns type | texte          pour les Return. : ce que la condition renvoie
+--@example Action.X("a", 1)      exemple prêt à copier (facultatif)
+--@category nom                  thème de la fonction (ex. airUnit -> "Air units") ; un nom nouveau crée un thème
+--@deprecated raison             fonction obsolète : marquée dans les listes de choix
+--@hide                          fonction non proposée
+-- source= : flags, targets, targetNames, bases, units, zones, groups, vehicleGroups, groundGroups, groundUnits, AirUnit,
+--           restrictedNames, restrictedFiles, borderFiles, /Dossier/*.ext, ou liste fixe (true/false, blue/red, a, b, c)
+-- type=percent (0-100 et "%") ; type=number avec min= max= unit= (ex. min=0 | max=1 | unit=m/s)
 
---Action.UnitResuscitateOrKill("UnitName", boolean, value)								--
-
---Action.AirUnitBase("UnitName", "BaseName")												--
---Action.AirUnitPlayer("UnitName", boolean)													--
---Action.AirUnitReinforce("SourceUnitName", "DestinationUnitName", destNumber)				--
---Action.AirUnitRepair()																	--
---Action.GroundUnitRepair()																	-- Repair Ground
---Action.AddGroundTargetIntel("sideName")													--
---Action.GroupHidden("GroupName", boolean)													--
---Action.GroupProbability("GroupName", number 0-1)											--
---Action.GroupMove(GroupName, ZoneName)														-- move vehicle group to refpoint (See the DC_CheckTriggers.lua file for more explanation)
---Action.GroupSlave(GroupName, master, bearing, distance)									-- (ADD)
---Action.ShipMission(GroupName, WPtable, CruiseSpeed, PatrolSpeed, StartTime)				-- assign and run a movement mission to a ship group (See the DC_CheckTriggers.lua file for more explanation)
---Action.TemplateActive(TabFile)															-- Template Active GroundGroup moving front (single file : active template) (if tab file: random activation)
---Action.SetWeather( "weather = { pHigh = 78, etc... }" )									-- modifies conf_mod weather parameters during the campaign
---Action.RestrictedLoadout(file)															-- (ADD) only for players, prohibits certain items, targets the file name Restricted_loadouts/restricted_loadoutnamX.miz
---Action.AuthorizedLoadout(authName)														-- (ADD) Essentially for AIs, allows you to add certain loadouts containing the variable: restrictedCondition = “restricted_loadoutnamX”,
-
---Important notes:
---for condition and action strings: outside with single quotes '', inside with double quotes ""!
+--@doc    Hides or shows a vehicle or ship group.
+--@param  groupname   | source=groundGroups | Name of the group
+--@param  hidden_bool | source=true/false | true = hidden
+--@example Action.GroupHidden("SAM-1", true)
+-- function Action.GroupHidden(groupname, hidden_bool)
 
 local debugKT = false
+if DbgBaseTrace then DbgBaseTrace("DC_CheckTriggers: DEBUT") end	-- DIAG
 
 ----- campaign flags -----
 if camp.flag == nil then
@@ -137,21 +97,33 @@ end
 Return = {}
 
 	--return the time of day in seconds
+	--@doc    Time of day of the mission, in seconds since midnight.
+	--@returns number | Seconds (for example 43200 = 12:00)
+	--@example Return.Time() > 43200
 	function Return.Time()
 		return camp.time
 	end
 
 	--return day of month
+	--@doc    Day of the month of the campaign date.
+	--@returns number | 1 to 31
+	--@example Return.Day() == 15
 	function Return.Day()
 		return camp.date.day
 	end
 
 	--return month as number
+	--@doc    Month of the campaign date.
+	--@returns number | 1 to 12
+	--@example Return.Month() == 7
 	function Return.Month()
 		return camp.date.month
 	end
 
 	--return year
+	--@doc    Year of the campaign date.
+	--@returns number | For example 1965
+	--@example Return.Year() >= 1966
 	function Return.Year()
 		return camp.date.year
 	end
@@ -159,6 +131,13 @@ Return = {}
 	-- Return.DatePassed(year, month, day)
 	-- Returns true if campaign date is on or after the given date
 	-- Safe with time jumps
+	--@doc    True when the campaign date is on or after the given date.
+	--@doc    Safe when the campaign jumps several days at once.
+	--@param  y           | Year, for example 1965
+	--@param  m           | Month, 1 to 12
+	--@param  d           | Day of the month
+	--@returns boolean | true from that date on
+	--@example Return.DatePassed(1965, 7, 20)
 	function Return.DatePassed(y, m, d)
 		local function toInt(year, month, day)
 			return year * 10000 + month * 100 + day
@@ -168,18 +147,40 @@ Return = {}
 			>= toInt(y, m, d)
 	end
 
-
+	--@doc    True while the campaign date is strictly before the given date.
+	--@doc    The opposite of DatePassed: DateBefore(y, m, d) is true exactly when DatePassed(y, m, d) is false.
+	--@param  y        | type=number | min=1900 | Year, for example 1972
+	--@param  m        | type=number | min=1 | max=12 | Month, 1 to 12
+	--@param  d        | type=number | min=1 | max=31 | Day of the month
+	--@returns boolean | true until the day before that date
+	--@example Return.DateBefore(1972, 7, 5)
+	function Return.DateBefore(y, m, d)
+		return dateToInt(camp.date) < dateToInt({ year = y, month = m, day = d })
+	end
+	
 	--return mission number
+	--@doc    Number of the current campaign mission.
+	--@returns number | 1 for the first mission
+	--@example Return.Mission() >= 5
 	function Return.Mission()
 		return camp.mission
 	end
 
 	--return campagn flag
+	--@doc    Value of a campaign flag.
+	--@doc    Flags changed by other triggers in the same mission are not seen yet: the value is the one from the start of the mission.
+	--@param  arg         | source=flags | Flag: a number (802) or a name ("zoneA")
+	--@returns number, boolean or text | The flag value (nil if it was never set)
+	--@example Return.CampFlag(802) == 1
 	function Return.CampFlag(arg)
 		return old_flag[arg]													--return old_flag (unmodified by other campaign trigger in same mission)		
 	end
 
 	--return if air unit is active
+	--@doc    Is this air unit (squadron) active?
+	--@param  name        | source=units | Name of the air unit, as in oob_air
+	--@returns boolean | true if active, false if deactivated
+	--@example Return.AirUnitActive("28 GvIAP")
 	function Return.AirUnitActive(name)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
 			for unit_n,unit in pairs(side) do									--iterate through units in side
@@ -195,6 +196,10 @@ Return = {}
 	end
 
 	--return if target is active
+	--@doc    Is this target active?
+	--@param  targetName  | source=targets | Title of the target (titleName)
+	--@returns boolean | true if the target is active, false if not
+	--@example Return.targetIsActive("Tiyas Airbase")
 	function Return.targetIsActive(targetName)
 		if debugKT then print(" 	 Return.targetIsActive---> : ".." "..tostring(targetName)) end
 		for sidename, targets in pairs(targetlist) do
@@ -213,6 +218,10 @@ Return = {}
 	end
 
 	--return number of ready aircraft for an air unit
+	--@doc    Number of ready aircraft in an air unit.
+	--@param  name        | source=units | Name of the air unit
+	--@returns number | Ready aircraft (0 if the unit is not found)
+	--@example Return.AirUnitReady("28 GvIAP") >= 4
 	function Return.AirUnitReady(name)
 		local found
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
@@ -232,6 +241,10 @@ Return = {}
 	end
 
 	--return number of ready + damaged aircraft for an air unit
+	--@doc    Number of aircraft still alive in an air unit: ready + damaged + reserve.
+	--@param  name        | source=units | Name of the air unit
+	--@returns number | Aircraft alive
+	--@example Return.AirUnitAlive("28 GvIAP") < 6
 	function Return.AirUnitAlive(name)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
 			for unit_n,unit in pairs(side) do									--iterate through units in side
@@ -246,21 +259,35 @@ Return = {}
 		end
 	end
 
-	--return number of ready + damaged + reserve aircraft by side
+		--return number of ready + damaged + reserve aircraft by side
+	--@doc    Total aircraft alive for one side: ready + damaged + reserve of all active air units.
+	--@doc    Negative values in oob_air are counted as 0 (and reported in the log).
+	--@doc    Returns 9999 when the side has no aircraft yet at mission 1 or before.
+	--@param  sideTest    | source=blue/red | Side: "blue" or "red"
+	--@returns number | Aircraft alive
+	--@example Return.totalAirUnitAliveBySide("blue") < 20
 	function Return.totalAirUnitAliveBySide(sideTest)
 		local sum = 0
 
 		for side_name, side in pairs(oob_air) do									--iterate through sides in oob_air
 			if side_name == sideTest then
 				for unit_n,unit in pairs(side) do									--iterate through units in side
-					if not unit.inactive then										--unit found
-						sum = sum + unit.roster.ready
-						if unit.roster.reserve then
-							sum = sum + unit.roster.reserve
+					if not unit.inactive and unit.roster then
+						local ready    = unit.roster.ready    or 0
+						local reserve  = unit.roster.reserve  or 0
+						local damaged  = unit.roster.damaged  or 0
+
+						--valeur negative = incoherence dans oob_air : on la signale et on la compte pour 0
+						if ready < 0 or reserve < 0 or damaged < 0 then
+							AddLog("DcCT ATTENTION effectif negatif, unite "..tostring(unit.name)
+								.." ("..tostring(side_name)..") ready="..tostring(ready)
+								.." reserve="..tostring(reserve).." damaged="..tostring(damaged))
+							print("DcCT ATTENTION effectif negatif, unite "..tostring(unit.name)
+								.." ("..tostring(side_name)..") ready="..tostring(ready)
+								.." reserve="..tostring(reserve).." damaged="..tostring(damaged))
 						end
-						if unit.roster.damaged then
-							sum = sum + unit.roster.damaged
-						end
+
+						sum = sum + math.max(0, ready) + math.max(0, reserve) + math.max(0, damaged)
 					end
 				end
 			end
@@ -274,6 +301,10 @@ Return = {}
 	end
 
 	--return air unit base
+	--@doc    Name of the airbase where the air unit is based.
+	--@param  name        | source=units | Name of the air unit
+	--@returns text | Airbase name
+	--@example Return.AirUnitBase("28 GvIAP") == "Tiyas"
 	function Return.AirUnitBase(name)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
 			for unit_n,unit in pairs(side) do									--iterate through units in side
@@ -285,6 +316,10 @@ Return = {}
 	end
 
 	--return air unit player
+	--@doc    Can players fly this air unit?
+	--@param  name        | source=units | Name of the air unit
+	--@returns boolean | true if playable
+	--@example Return.AirUnitPlayer("28 GvIAP")
 	function Return.AirUnitPlayer(name)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
 			for unit_n,unit in pairs(side) do									--iterate through units in side
@@ -296,6 +331,10 @@ Return = {}
 	end
 
 	--return alive percentage of target
+	--@doc    Percentage of the target that is still alive.
+	--@param  targetName  | source=targets | Title of the target (titleName)
+	--@returns number | 0 to 100 (100 if nothing was destroyed)
+	--@example Return.TargetAlive("Tiyas Airbase") < 50
 	function Return.TargetAlive(targetName)
 		local foundTarget = false
 		for side_name, targets in pairs(targetlist) do								--iterate through sides in targetlist
@@ -321,6 +360,11 @@ Return = {}
 	--bâtiments de la carte (coordonnées) 
 
 	--return alive percentage of target
+	--@doc    Percentage of the structures of a base that are still alive.
+	--@doc    Looks for a target with this title or an airbase with this name. Only elements with the attribute "Structure" are counted.
+	--@param  basename    | source=bases | Airbase name or target title
+	--@returns number | 0 to 100 (100 if there is nothing to count)
+	--@example Return.BaseAlive("Tiyas") < 40
 	function Return.BaseAlive(basename)
 		local foundBase = false
 		local nTotal = 0
@@ -363,10 +407,6 @@ Return = {}
 			end
 		end
 
-		-- if debugKT then
-		-- 	print("DcCT Return.BaseAlive(basename) "..basename.." nElementDead: "..tostring(nElementDead).." nTotal: "..tostring(nTotal))
-		-- end
-
 		-- if foundBase then 
 		if nTotal > 0 then
 			returnValue = (1 - (nElementDead / nTotal)) * 100
@@ -377,15 +417,16 @@ Return = {}
 		end
 
 
-
-		-- print("DcCT Return.BaseAlive(basename) "..basename.." returnValue: "..tostring(returnValue))
-
 		db_airbases[basename].baseAlive = returnValue
 
 		return returnValue
 	end
 
 	--return vehicle/ship units dead
+	--@doc    Is this vehicle or ship unit dead?
+	--@param  unitname    | Name of the unit (not the group), as in oob_ground
+	--@returns boolean | true if dead
+	--@example Return.UnitDead("SAM-1-1")
 	function Return.UnitDead(unitname)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
 			for c = 1, #side do													--iterate through countries in side
@@ -408,6 +449,10 @@ Return = {}
 	end
 
 	--return vehicle/ship group hidden status
+	--@doc    Is this vehicle or ship group hidden (not placed in the mission)?
+	--@param  groupname   | Name of the group, as in oob_ground
+	--@returns boolean | true if hidden
+	--@example Return.GroupHidden("SAM-1")
 	function Return.GroupHidden(groupname)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
 			for c = 1, #side do													--iterate through countries in side
@@ -425,6 +470,10 @@ Return = {}
 	end
 
 	--return vehicle/ship group probability status
+	--@doc    Chance (0 to 1) that this vehicle or ship group appears in the mission.
+	--@param  groupname   | Name of the group, as in oob_ground
+	--@returns number | 0 to 1 (1 if the group has no probability)
+	--@example Return.GroupProbability("SAM-1") < 1
 	function Return.GroupProbability(groupname)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
 			for c = 1, #side do													--iterate through countries in side
@@ -446,6 +495,12 @@ Return = {}
 	end
 
 	--return boolean whether ship group is in polygon
+	--@doc    Is the ship group inside an area?
+	--@doc    1 point: exactly on it. 2 points: on the line between them. 3 points or more: inside the polygon.
+	--@param  GroupName   | source=groups | Name of the ship group
+	--@param  PolyZonesTable | source=zones | Reference points (trigger zones of base_mission.miz) that make the area
+	--@returns boolean | true if inside
+	--@example Return.ShipGroupInPoly("TF-59", { "Zone1", "Zone2", "Zone3" })
 	function Return.ShipGroupInPoly(GroupName, PolyZonesTable)
 		for coal_name,coal in pairs(oob_ground) do												--go through sides(red/blue)	
 			for country_n,country in ipairs(coal) do											--go through countries
@@ -493,6 +548,10 @@ Return = {}
 
 
 		--returns the logistics of a base in weight
+	--@doc    Logistics stock of a base, in kg.
+	--@param  placeName   | source=bases | Airbase name
+	--@returns number | Weight in kg (0 if none)
+	--@example Return.PlaceLogistic("Tiyas") > 5000
 	function Return.PlaceLogistic(placeName)
 		for db_baseName, base_ in pairs(db_airbases) do								--iterate through sides in oob_air		
 			if db_baseName == placeName  then										--unit found
@@ -506,6 +565,11 @@ Return = {}
 	end
 
 	--return alive percentage of target
+	--@doc    Logistics stock of a base as a percentage of an objective.
+	--@param  placeName   | source=bases | Airbase name
+	--@param  weightObjectif | Objective weight in kg
+	--@returns number | Percentage (0 if no stock)
+	--@example Return.LogisticObjectif("Tiyas", 10000) >= 100
 	function Return.LogisticObjectif(placeName, weightObjectif)
 		for db_baseName, base_ in pairs(db_airbases) do								--iterate through sides in oob_air		
 			if db_baseName == placeName  then										--unit found
@@ -518,15 +582,100 @@ Return = {}
 			end
 		end
 	end
+	
+	
+	--------------------------------------------------------------------------------
+	-- Wargame (DCE_Manager) : etat des zones, lu dans Active/wargame_zones.lua
+	-- Fichier reecrit par DCE_Manager juste avant la generation de la mission.
+	--------------------------------------------------------------------------------
+	local wargameCache = { loaded = false, zones = {} }
+
+	local function getWargameZones()
+		if not wargameCache.loaded then
+			wargameCache.loaded = true
+			local chunk = loadfile("Active/wargame_zones.lua")
+			if chunk then
+				local env = {}
+				setfenv(chunk, env)
+				local ok = pcall(chunk)
+				if ok and type(env.wargame_zones_active) == "table" then
+					wargameCache.zones = env.wargame_zones_active
+				end
+			end
+		end
+		return wargameCache.zones
+	end
+
+	--@doc    Side that holds a wargame zone.
+	--@doc    Returns nothing (nil) if the zone does not exist or the wargame has not run yet.
+	--@param  zone        | Name of the wargame zone, for example "CQ95"
+	--@returns text | "blue" or "red"
+	--@example Return.WargameZoneSide("CQ95") == "blue"
+	--@category wargame
+	function Return.WargameZoneSide(zone)
+		local z = getWargameZones()[zone]
+		if z then
+			return z.control
+		end
+	end
+
+	--@doc    Is this wargame zone held by the given side?
+	--@param  zone        | Name of the wargame zone, for example "CQ95"
+	--@param  side        | source=blue/red | Side: "blue" or "red"
+	--@returns boolean | true if that side holds the zone
+	--@example Return.WargameZoneHeldBy("CQ95", "blue")
+	--@category wargame
+	function Return.WargameZoneHeldBy(zone, side)
+		return Return.WargameZoneSide(zone) == side
+	end
+
+	--@doc    Total force of one side inside a wargame zone (0 if nothing there).
+	--@param  zone        | Name of the wargame zone, for example "CQ95"
+	--@param  side        | source=blue/red | Side: "blue" or "red"
+	--@returns number | Force power (for example 50)
+	--@example Return.WargameZoneForce("CQ95", "red") < 20
+	--@category wargame
+	function Return.WargameZoneForce(zone, side)
+		local total = 0
+		local z = getWargameZones()[zone]
+		if z and z.formations then
+			for _, f in pairs(z.formations) do
+				if f.side == side then
+					total = total + (f.forcePower or 0)
+				end
+			end
+		end
+		return total
+	end
+
+	--@doc    Number of wargame zones held by one side.
+	--@param  side        | source=blue/red | Side: "blue" or "red"
+	--@returns number | Count of zones
+	--@example Return.WargameSideZones("red") <= 5
+	--@category wargame
+	function Return.WargameSideZones(side)
+		local n = 0
+		for _, z in pairs(getWargameZones()) do
+			if z.control == side then
+				n = n + 1
+			end
+		end
+		return n
+	end
 
 ----- functions to buld trigger actions -----
 Action = {}
 
 	--void action
+	--@hide
 	function Action.None()
 	end
 
-	--add briefing text
+	--@doc    Adds a paragraph to the briefing. The same text is never added twice.
+	--@category Briefing 
+	--@param  text  | Text added to the briefing
+	--@param  clear | source=true/false | Not used: the engine does the same thing either way
+	--@example Action.Text("Several SAM sites have been added to the list.", false)
 	function Action.Text(text, clear)
 		--n'ajoute pas le texte s'il existe deja
 
@@ -554,12 +703,12 @@ Action = {}
 		end
 	end
 
-	--add briefing text
-	function Action.TextPlayMission(arg)
-		Briefing_text_playable = Briefing_text_playable .. arg .. " \n \n"		--add trigger text to briefing text of this mission only if it is playable
-	end
-
 	--add briefing picture
+	--@doc    Adds a picture to the briefing of one side or of both.
+	--@category Briefing 
+	--@param  filename    | source=/Images/*.* | Picture file, from the Images folder of the campaign
+	--@param  side        | source=blue/red/all | Which side sees it. Empty = both
+	--@example Action.AddImage("map1.jpg", "blue")
 	function Action.AddImage(filename, side)
 		if side == "blue"  then
 			table.insert(BriefingImagesB, filename)									--add filename to briefing images table, will be added to mission file when this gets created
@@ -574,32 +723,132 @@ Action = {}
 	end
 
 	--set campagn flag to value
+	--@category Flag
+	--@doc    Gives a value to a campaign flag.
+	--@param  n           | source=flags | Flag: a number (802) or a name ("zoneA")
+	--@param  value       | Number, true/false or text
+	--@example Action.SetCampFlag(802, 1)
 	function Action.SetCampFlag(n, value)
 		camp.flag[n] = value
 	end
 
 	--add or subtract to campaign flag
+	--@category Flag
+	--@doc    Adds a number to a campaign flag (a negative number subtracts).
+	--@doc    The flag must already have a value, or the engine stops.
+	--@param  n           | source=flags | Flag: a number (802) or a name ("zoneA")
+	--@param  add         | Number to add
+	--@example Action.AddCampFlag(802, 1)
 	function Action.AddCampFlag(n, add)
 		camp.flag[n] = camp.flag[n] + add
 	end
+	
+	
+	--send a reserve formation to a wargame zone
+	--@category wargame
+	--@doc    Sends a formation from the reserve to a wargame zone, at full strength.
+	--@doc    It arrives on the next wargame turn if the zone is friendly and not full, otherwise it waits.
+	--@doc    Use the exact formation name and zone name from the wargame editor, without accents.
+	--@param  formation   | Name of the formation in the reserve, for example "Secteur-30"
+	--@param  zone        | Name of the zone that receives it, for example "CQ95"
+	--@example Action.WargameDeploy("Secteur-30", "CQ95")
+	function Action.WargameDeploy(formation, zone)
+		-- meme nettoyage que DCE_Manager : tout ce qui n'est pas lettre ou chiffre devient _
+		local function cle(s)
+			return (string.gsub(tostring(s or ""), "[^%w]", "_"))
+		end
+		camp.flag["wg_deploy__" .. cle(formation) .. "__" .. cle(zone)] = true
+	end
+
+	--land a wave plan on a wargame beach
+	--@category wargame
+	--@doc    Launches a landing plan (a LANDING box drawn in the wargame editor). ONE trigger starts the whole plan:
+	--@doc    the waves land one after the other, in the order of their Wave numbers, with no other trigger.
+	--@doc    A wave that attacks an enemy beach is judged like a fight: it arrives with a strength proportional to the force ratio.
+	--@doc    If it fails it tries again next turn while it still has a chance, then it is abandoned and the next wave goes.
+	--@doc    The beach is the one drawn on the plan, unless you give another zone (for example when the forces change).
+	--@param  plan        | Name of the landing plan, for example "LANDING_1"
+	--@param  zone        | Optional. Beach to attack instead of the one of the plan, for example "Secteur-26"
+	--@param  gap         | Optional. Turns between two waves (default: the setting of wargame_balance.lua)
+	--@example Action.WargameLand("LANDING_1")
+	--@example Action.WargameLand("LANDING_1", "Secteur-26", 2)
+	function Action.WargameLand(plan, zone, gap)
+		-- meme nettoyage que DCE_Manager : tout ce qui n'est pas lettre ou chiffre devient _
+		local function cle(s)
+			return (string.gsub(tostring(s or ""), "[^%w]", "_"))
+		end
+		local name = "wg_land__" .. cle(plan)
+		if zone ~= nil and zone ~= "" then
+			name = name .. "__" .. cle(zone)
+		elseif gap ~= nil then
+			name = name .. "__default"
+		end
+		if gap ~= nil then
+			name = name .. "__" .. math.floor(tonumber(gap) or 0)
+		end
+		camp.flag[name] = true
+	end
 
 	--end campaign
+	--@doc    Ends the campaign with this result. The engine stops and asks to press a key.
+	--@category Campaign , Briefing
+	--@param  arg         | source=win/draw/loss | Result of the campaign
+	--@example Action.CampaignEnd("win")
 	function Action.CampaignEnd(arg)
 		EndCampaign = arg
 		camp.endCampaign = arg
-		if debugKT then print(" 	Action.CampaignEnd(arg)---> : "..tostring(arg)) end
+
+		--quel trigger provoque la fin ? la boucle des triggers memorise sa cle dans DbgCurrentTrigger
+		local trig = camp_triggers[DbgCurrentTrigger]
+		local trigName = "inconnu (appel hors de la boucle des triggers)"
+		local trigCond = "inconnue"
+		if trig then
+			trigName = tostring(trig.name or DbgCurrentTrigger)
+			trigCond = tostring(trig.condition)
+		end
+		camp.endTrigger = trigName
+
+		--les chiffres qui servent aux conditions de victoire/defaite, tels qu'ils sont a cet instant
+		local lines = {}
+		table.insert(lines, "FIN DE CAMPAGNE : "..tostring(arg))
+		table.insert(lines, "Trigger a l origine de la fin : "..trigName)
+		table.insert(lines, "Condition (vraie) : "..trigCond)
+		table.insert(lines, "Date "..tostring(camp.date.day).."."..tostring(camp.date.month).."."..tostring(camp.date.year)..", mission "..tostring(camp.mission)..", passe de generation "..tostring(MissionInstance))
+
+		for _, side in ipairs({"blue", "red"}) do
+			local g = GroundTarget and GroundTarget[side]
+			if g then
+				table.insert(lines, "GroundTarget["..side.."] : "..tostring(g.percent).."% ("..tostring(g.alive).." cibles vivantes sur "..tostring(g.total)..")")
+			end
+		end
+
+		if GroundZoneTarget then
+			for side, zones in pairs(GroundZoneTarget) do
+				for zoneName, z in pairs(zones) do
+					table.insert(lines, "GroundZoneTarget["..side.."]["..tostring(zoneName).."] : "..tostring(z.percent).."% ("..tostring(z.alive).." / "..tostring(z.total)..")")
+				end
+			end
+		end
+
+		table.insert(lines, "Avions en vie : blue "..tostring(Return.totalAirUnitAliveBySide("blue")).." / red "..tostring(Return.totalAirUnitAliveBySide("red")))
 
 		print()
 		print("********************ATTENTION******************")
-		print(" 	Action.CampaignEnd(arg)---> : "..tostring(arg))
-		print(" 	Action.CampaignEnd(arg)---> : "..tostring(Briefing_text))
-		print("********************ATTENTION******************")
+		for _, line in ipairs(lines) do
+			print(" "..line)
+			AddLog(line)
+		end
 		print("*************** Attention, take into account that the campaign is over, press to see the rest..****************")
 		print("********************ATTENTION******************") os.execute 'pause'
 	end
 
 	--set target active/inactive
 	local targetFound = false
+	--@doc    Activates or deactivates a target.
+	--@category Target
+	--@param  targetName  | source=targets | Title of the target (titleName)
+	--@param  state       | source=true/false | true = active, false = inactive
+	--@example Action.TargetActive("Tiyas Airbase", true)
 	function Action.TargetActive(targetName, state)
 		for sidename, targets in pairs(targetlist) do
 			for targetN, target in pairs(targets) do
@@ -620,6 +869,11 @@ Action = {}
 	end
 
 	--set target priority
+	--@doc    Changes the priority of a target.
+	--@category Target
+	--@param  targetName  | source=targets | Title of the target (titleName)
+	--@param  priority    | New priority (a number)
+	--@example Action.TargetPriority("Tiyas Airbase", 5)
 	function Action.TargetPriority(targetName, priority)
 		for sidename, targets in pairs(targetlist) do
 			for targetN, target in pairs(targets) do
@@ -631,7 +885,13 @@ Action = {}
 		end
 	end
 
-	--set target priority
+
+	--@doc    Changes the weather settings of the campaign (conf_mod weather).
+	--@doc    Text with the values to change: "weather = { pHigh = 78, refTemp = 30 }". Settings not written keep their value.
+	--@doc    Read by the engine: pHigh (becomes trend), refTemp, trend, variance, instability, windActivity, winDirection. pLow and weatherChangeRate are not read.
+	--@category Weather
+	--@param  new_Weather | Text "weather = { ... }" (the Weather editor writes it for you)
+	--@example Action.SetWeather("weather = { pHigh = 78, refTemp = 30 }")
 	function Action.SetWeather(new_Weather)
 		local weather
 		loadstring(new_Weather)()
@@ -656,6 +916,11 @@ Action = {}
 
 
 	--set unit active/inactive
+	--@doc    Activates or deactivates an air unit (squadron).
+	--@category AirUnit
+	--@param  unitName    | source=units | Name of the air unit
+	--@param  state       | source=true/false | true = active, false = inactive
+	--@example Action.AirUnitActive("28 GvIAP", false)
 	function Action.AirUnitActive(unitName, state)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
 			for unit_n,unit in pairs(side) do									--iterate through units in side
@@ -671,6 +936,10 @@ Action = {}
 	end
 
 	--set unit active/inactive
+	--@doc    Kills a helicopter unit of oob_ground (a rescue helicopter for example).
+	--@hide
+	--@param  pedroName   | Name of the helicopter unit
+	--@example Action.KillPedro("Pedro-1")
 	function Action.KillPedro(pedroName)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
 			for c = 1, #side do													--iterate through countries in side
@@ -692,9 +961,15 @@ Action = {}
 
 	--Miguel21 modification M40.g : Template Active GroundGroup moving front (f: sideBase)
 	--set side base
-	function Action.SideBase(NewSide, baseName)
+	--@doc    Gives an airbase (and its target) to the other side.
+	--@doc    Used for a moving front: the base changes side in db_airbases and in the target list.
+	--@category AirBase
+	--@param  newSide     | source=blue/red | New side of the base
+	--@param  baseName    | source=bases | Airbase name
+	--@example Action.SideBase("blue", "Tiyas")
+	function Action.SideBase(newSide, baseName)
 
-		if NewSide == "blue" then
+		if newSide == "blue" then
 			OldSide = "red"
 		else
 			OldSide = "blue"
@@ -702,7 +977,7 @@ Action = {}
 
 		for db_baseName, base in pairs(db_airbases) do							--iterate through sides in db_airbases
 			if db_baseName == baseName then										--unit found
-				base.side = NewSide												--set new airbase for unit
+				base.side = newSide												--set new airbase for unit
 			end
 		end
 
@@ -710,7 +985,7 @@ Action = {}
 		--attention, les camps sont inversé, c'est le camp du target, ou la targetlist d'un camp (trouc de ouf)
 		for side_name, targets in pairs(targetlist) do													--Iterate through all side
 			for targetN, target in pairs(targets) do												--Iterat through all targets
-				if target.titleName and target.titleName == baseName and NewSide  == side_name then
+				if target.titleName and target.titleName == baseName and newSide  == side_name then
 					targetlist[OldSide][baseName] = targetlist[side_name][baseName]			--integration de ce target dans le camp oppos�				
 					targetlist[side_name][baseName] = nil										--suppression de ce target de l'ancien camp		
 				end
@@ -722,7 +997,7 @@ Action = {}
 			if country.static then															--country has ships
 				for group_n, _group in ipairs(country.static.group) do							--go through groups
 					if  string.find(_group.name, baseName) then
-						table.insert(oob_ground[NewSide][1].static.group, _group )
+						table.insert(oob_ground[newSide][1].static.group, _group )
 						table.remove(oob_ground[OldSide][country_n].static.group, group_n)
 					end
 				end
@@ -776,6 +1051,11 @@ Action = {}
 	end
 
 	--activates or deactivates a base and the units stationed on it 
+	--@doc    Activates or deactivates a base and the air units stationed on it.
+	--@category AirBase
+	--@param  baseName    | source=bases | Airbase name
+	--@param  activeBase  | source=true/false | true = active, false = inactive
+	--@example Action.ActivateBaseAndItsUnits("Tiyas", false)
 	function Action.ActivateBaseAndItsUnits(baseName, activeBase)
 		local inactive
 		local baseMutation
@@ -857,12 +1137,18 @@ Action = {}
 		-- bouger un squad en indiquant seulement la base de destination
 		-- 'Action.AirUnitBase("28 GvIAP", {"Tiyas","Damascus Airbase"})',
 
+	--@doc    Moves an air unit to another base.
+	--@doc    The destination is one base name, or a list with one name (a longer list is read by moveToAnotherBaseOrDeactivate).
+	--@category AirUnit
+	--@param  unitName    | source=units | Name of the air unit
+	--@param  tab_baseName | source=bases | Destination airbase
+	--@example Action.AirUnitBase("28 GvIAP", "Tiyas")
 	function Action.AirUnitBase(unitName, tab_baseName)
 
 		local function AirUnitBaseInternal(arg2_unitName, arg2_baseDestination)
 			if type(arg2_baseDestination) ~= "string" then
-				print("DcCT AirUnitBase ERROR unitName: "..tostring(arg2_unitName).." the destination database is a table")
-				_affiche(arg2_baseDestination, "DcCT baseDestination") os.execute 'pause'
+				-- print("DcCT AirUnitBase ERROR unitName: "..tostring(arg2_unitName).." the destination database is a table")
+				-- _affiche(arg2_baseDestination, "DcCT baseDestination") os.execute 'pause'
 			end
 
 			for side_name, air in pairs(oob_air) do
@@ -900,6 +1186,14 @@ Action = {}
 		-- 'Action.moveToAnotherBaseOrDeactivate("28 GvIAP", {"Tiyas","Damascus Airbase"})',
 
 
+	--@doc    Tries the bases of the list in order and moves the air unit to the first one that can take it.
+	--@doc    A base can take it if it is on the same side, at least 20% alive and (planes only) a runway at least 50% alive.
+	--@doc    If no base can take it, the unit is deactivated and a text is added to the briefing.
+	--@category AirUnit
+	--@param  unitName    | source=units | Name of the air unit
+	--@param  baseAlternative | source=bases | Bases to try, in order (one name or a list)
+	--@returns boolean | true if the unit was moved
+	--@example Action.moveToAnotherBaseOrDeactivate("28 GvIAP", { "Tiyas", "Damascus Airbase" })
 	function Action.moveToAnotherBaseOrDeactivate(unitName, baseAlternative)
 		if debugKT then print(" ->START function Action.moveToAnotherBaseOrDeactivate unitName  "..unitName) end
 		local transfertOk = false
@@ -1001,6 +1295,11 @@ Action = {}
 
 
 	--set unit playable
+	--@doc    Makes an air unit playable or not.
+	--@category AirUnit
+	--@param  unitName    | source=units | Name of the air unit
+	--@param  state       | source=true/false | true = players can fly it
+	--@example Action.AirUnitPlayer("28 GvIAP", true)
 	function Action.AirUnitPlayer(unitName, state)
 		for side_name,side in pairs(oob_air) do									--iterate through sides in oob_air
 			for unit_n,unit in pairs(side) do									--iterate through units in side
@@ -1013,6 +1312,12 @@ Action = {}
 
 
 	--send reinforcement aircraft from one unit to another
+	--@doc    Sends reinforcement aircraft from one air unit to another (the destination must have room).
+	--@category AirUnit
+	--@deprecated use AirUnitRepair with variable "reserve" in oob_air_init table
+	--@param  sourceName  | source=units | Air unit that gives the aircraft
+	--@param  destName    | source=units | Air unit that receives them
+	--@example Action.AirUnitReinforce("28 GvIAP", "31 GvIAP")
 	function Action.AirUnitReinforce(sourceName, destName)						--(sourceName, destName, destNumber) destNumber => deprecated
 		
 		local sourceUnit
@@ -1165,6 +1470,10 @@ Action = {}
 	end
 
 	--repair damaged aircraft in all air units
+	--@doc    Repairs damaged aircraft: each damaged aircraft has a 10% chance to be repaired.
+	--@category AirUnit
+	--@param  arg         | source=blue/red/all | Side to repair. Empty = both sides
+	--@example Action.AirUnitRepair("blue")
 	function Action.AirUnitRepair(arg)
 		local s = {}
 		if arg == "blue" then														--repair only blue side
@@ -1214,16 +1523,30 @@ Action = {}
 	end
 
 
+	--@doc    Sets the date of the mission.
+	--@category Time
+	--@param  arg      | type=day/month/year | Day, month and year to set 
+	--@example Action.SetDate(day=15, month=7, year=1967)
+	function Action.SetDate(arg_day, arg_month, arg_year)
+
+		UpdateConfMod(nil, {day=arg_day, month=arg_month, year=arg_year})
+
+	end
+
 	if Debug.AfficheSol then
 		print("DC CT GroundTarget BLUE: "..GroundTarget["blue"].percent)
 		print("DC CT GroundTarget RED: "..GroundTarget["red"].percent)
 	end
 
 
+	--@doc    Brings back to life, or kills, the elements of a target.
+	--@doc    true: revives up to the given percentage of its elements (only if the target is damaged). false: kills all its elements.
+	--@category Target
+	--@param  targettName | source=targetnames | Name of the target (the key in targetlist_init.lua, not the title)
+	--@param  liveOrKill  | source=true/false | true = revive, false = kill
+	--@param  liveValue   | type=percent |Percentage of the elements to revive (0 to 100). Only used with true
+	--@example Action.UnitResuscitateOrKill("Tiyas", true, 50)
 	function Action.UnitResuscitateOrKill(targettName, liveOrKill, liveValue)
-
-		-- print()
-		-- print("DcCT UnitResuscitateOrKill A0 check Target:  ... "..tostring(targettName) )
 
 		for side_name, targets in pairs(targetlist) do
 
@@ -1236,52 +1559,12 @@ Action = {}
 
 			for targetN, target in pairs(targets) do
 
-				-- print("DcCT UnitResuscitateOrKill A1 target.name:  ... "..tostring(target.name).." ==? "..tostring(targettName) )
-
 				if target.name == targettName then
 					foundTarget = true
 					local attribut
 
-					-- print("DcCT UnitResuscitateOrKill A2 found Target:  ... "..tostring(targettName) )
-
 					--dans le cas d'un ressucitage :
 					if liveOrKill == true then
-
-
-						-- if target.attributes then 
-						-- 	for attributN, attributName in pairs(target.attributes) do
-						-- 		-- print("DcCT A    attributName ... "..tostring(attributName) )
-						-- 		attributName = string.lower(attributName)
-
-						-- 		if Attribut2Target[attributName] then
-						-- 			attribut = Attribut2Target[attributName]
-						-- 			-- print("DcCT B    ASSIGN attribut ... "..tostring(attribut) )
-						-- 			break
-						-- 		end
-						-- 	end
-						-- 	if not attribut then
-						-- 		for attributN, attributName in pairs(target.attributes) do
-						-- 			-- print("DcCT C    attributName ... "..tostring(attributName) )
-						-- 			attributName = string.lower(attributName)
-
-						-- 			for key , correspondanceName in pairs(Attribut2Target) do
-						-- 				-- print("DcCT D    attributName ... "..tostring(attributName) )
-
-						-- 				if string.match(correspondanceName, attributName) then
-						-- 					attribut = correspondanceName
-						-- 					-- print("DcCT E    FOUND attribut ... "..tostring(attribut) )
-						-- 					break
-						-- 				end
-						-- 			end
-
-						-- 		end
-						-- 	end
-						-- end	
-						-- if not attribut then
-						-- 	attribut = "generic"	
-						-- end
-
-						-- print("DcCT UnitResuscitateOrKill A attribut ... "..tostring(attribut) )
 
 						-- if attribut ~= "runway" and target.alive < 100  then
 						if target.alive < 100  then
@@ -1425,6 +1708,8 @@ Action = {}
 
 
 	-- Miguel21 modification M19.f : Repair Ground
+	--@doc    Repairs All ground targets: some destroyed elements come back.
+	--@category Ground
 	function Action.GroundUnitRepair()
 
 		for side_name, targets in pairs(targetlist) do
@@ -1640,6 +1925,10 @@ Action = {}
 	end
 
 	--add ground target intel updates to briefing
+	--@doc    Adds to the briefing the state of the damaged ground targets of one side ("Intel Update"). Only in the first mission instance.
+	--@category Briefing
+	--@param  side        | source=blue/red | Side whose targets are described
+	--@example Action.AddGroundTargetIntel("red")
 	function Action.AddGroundTargetIntel(side)
 		if MissionInstance == 1 then											--ground target intel updates are only added in first mission instance (to avoid duplication)
 			for targetN, target in pairs(targetlist[side]) do				--iterate through targets in side
@@ -1675,6 +1964,11 @@ Action = {}
 	end
 
 	--change vehicle/ship group hidden status
+	--@doc    Hides or shows a vehicle or ship group.
+	--@category Ground, Ships
+	--@param  groupname   | source=groundGroups | Name of the group, as in oob_ground
+	--@param  hidden_bool | source=true/false | true = hidden
+	--@example Action.GroupHidden("SAM-1", true)
 	function Action.GroupHidden(groupname, hidden_bool)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
 			for c = 1, #side do													--iterate through countries in side
@@ -1694,6 +1988,12 @@ Action = {}
 
 	--change vehicle/ship group probability status
 	--due to the way stats are reset for a new playrun upon completing a FirstMission, groups probability changed by trigger in first mission will not be carried over to second mission! Repeat trigger on second mission or use the trigger from mission 2 on only for flawless function.
+	--@doc    Changes the chance that a vehicle or ship group appears in the mission.
+	--@doc    Not carried over to the second mission when the first mission is completed.
+	--@category Ground, Ships
+	--@param  groupname   | source=groundGroups | Name of the group, as in oob_ground
+	--@param  prob_val    | type=probability | min=0.0 | max=1.0 | Chance from 0 to 1
+	--@example Action.GroupProbability("SAM-1", 0.5)
 	function Action.GroupProbability(groupname, prob_val)
 		for sidename,side in pairs(oob_ground) do								--iterate through sides in ground OOB
 			for c = 1, #side do													--iterate through countries in side
@@ -1713,13 +2013,20 @@ Action = {}
 
 	--move vehicle group to refpoint
 	--due to the way stats are reset for a new playrun upon completing a FirstMission, groups moved by trigger in first mission will not be carried over to second mission! Repeat trigger on second mission or use the trigger from mission 2 on only for flawless function.
-	function Action.GroupMove(GroupName, ZoneName)
+	--@deprecated Use the wargame theatre editor to move groups.
+	--@category Ground
+	--@doc    Moves a vehicle group (and all its units) to a reference point.
+	--@doc    Not carried over to the second mission when the first mission is completed.
+	--@param  groupName   | Name of the vehicle group
+	--@param  ZoneName    | source=zones | Reference point (trigger zone of base_mission.miz)
+	--@example Action.GroupMove("Silkworm C", "Silkworm C2")
+	function Action.GroupMove(groupName, zoneName)
 		for coal_name,coal in pairs(oob_ground) do								--go through sides(red/blue)	
 			for country_n,country in ipairs(coal) do							--go through countries
 				if country.vehicle then											--country has vehicles
 					for group_n,group in ipairs(country.vehicle.group) do		--go through groups
-						if GroupName == group.name then							--ship group found
-							local newPoint = Refpoint[ZoneName]					--x-y coordinates of new group position
+						if groupName == group.name then							--ship group found
+							local newPoint = Refpoint[zoneName]					--x-y coordinates of new group position
 							local dx = group.x - newPoint.x						--delta x
 							local dy = group.y - newPoint.y						--delta y
 							group.x = newPoint.x								--new group position
@@ -1739,12 +2046,21 @@ Action = {}
 
 	--move vehicle group relative to another group
 	--due to the way stats are reset for a new playrun upon completing a FirstMission, groups moved by trigger in first mission will not be carried over to second mission! Repeat trigger on second mission or use the trigger from mission 2 on only for flawless function.
-	function Action.GroupSlave(GroupName, master, bearing, distance)
+	--@deprecated Use the wargame theatre editor to move groups.
+	--@category Ground
+	--@doc    Places a vehicle group relative to another group (the master).
+	--@doc    Not carried over to the second mission when the first mission is completed.
+	--@param  groupName   | Name of the group to move
+	--@param  master      | Name of the group it follows
+	--@param  bearing     | Direction in degrees
+	--@param  distance    | Distance in metres
+	--@example Action.GroupSlave("Silkworm B - AA", "Silkworm B", 310, 310)
+	function Action.GroupSlave(groupName, master, bearing, distance)
 		for coal_name,coal in pairs(oob_ground) do								--go through sides(red/blue)	
 			for country_n,country in ipairs(coal) do							--go through countries
 				if country.vehicle then											--country has vehicles
 					for group_n,group in ipairs(country.vehicle.group) do		--go through groups
-						if GroupName == group.name then							--ship group found
+						if groupName == group.name then							--ship group found
 
 							--find master group and get master  x-y coordinates
 							for m_coal_name,m_coal in pairs(oob_ground) do									--go through sides(red/blue)	
@@ -1786,6 +2102,17 @@ Action = {}
 	--CruiseSpeed is the speed in m/s at which the ship group will follow the route.
 	--PatrolSpeed is the speed in m/s at which the ship group will randomly patrol a polygon at the end of the route. Ships won't patrol at the end of the route if the PatrolSpeed is nil or zero or if the last waypoint is a single point only (no polygon).
 	--StartTime is the campaign time in seconds (time since campaign start) at which the mission was assigned. It is used to control progress along the route across multiple missions of the campaign. If nil, then current campaign time us used automatically.
+	
+	
+	--@doc    Gives a movement mission to a ship group. See the comments above this function for the details.
+	--@doc    WPtable: a list of zones is one area. A list of lists gives alternatives: the engine picks one list at random. 1 point = fixed, 2 points = between them, 3 or more = random spots in the polygon.
+	--@category Ships
+	--@param  groupName   | source=groups | Name of the ship group (from base_mission.miz or oob_ground)
+	--@param  wpTable     | source=zones | Reference points (trigger zones of base_mission.miz), as one list or a list of alternatives
+	--@param  cruiseSpeed | Speed in m/s while moving. Empty = default (carriers use their own maximum)
+	--@param  patrolSpeed | Speed in m/s while patrolling in the last area. Empty = no patrol
+	--@param  startTime   | Ignored by the engine (the current campaign time is used)
+	--@example Action.ShipMission("TF-59", { { "Zone1", "Zone2" } }, 10, 5)
 	function Action.ShipMission(groupName, wpTable, cruiseSpeed, patrolSpeed, startTime)
 
 		-- print("/r/n DcCT_ShipMission A  groupName "..groupName)
@@ -1834,6 +2161,11 @@ Action = {}
 		end
 	end
 
+	--@category AirUnit
+	--@doc    only for players, prohibits certain items, targets the file name Restricted_loadouts/restricted_loadoutnamX.miz
+	--@category AirUnit, Loadout
+	--@param  file | source=/Restricted_loadouts/restricted_loadoutnamX.miz | restricted_loadoutnamX.miz comprend tous les loadouts interdits, formaté par DCS
+	--@example Action.RestrictedLoadout("restricted_loadoutnamstart.miz")
 	function Action.RestrictedLoadout(file)
 		local payloadRestricted = {}
 		local restrictedPath = "Restricted_loadouts/" .. file
@@ -1892,6 +2224,13 @@ Action = {}
 	end
 
 
+	--@doc    Autorise les loadouts dont la variable restrictedCondition vaut ce nom.
+	--@doc    Sert surtout aux IA : sans cette action, ces loadouts peuvent etre interdits.
+	--@doc    les fichiers db_loadouts...lua doivent avoir cette variable : restrictedCondition
+	--@category AirUnit, Loadout
+	--@example    restrictedCondition = "restricted_loadoutnam3",
+	--@param  authName | source=restrictedName | Nom de la variable dans db_Loadout...lua
+	--@example Action.AuthorizedLoadout("restricted_loadoutnam3")
 	function Action.AuthorizedLoadout(authName)
 
 		if not camp.AuthorizedLoadout then
@@ -1901,21 +2240,26 @@ Action = {}
 	end
 
 	--TemplateActive
-	function Action.TemplateActive(TabFile)
-		if debugKT then print("	--> function Action.TemplateActive "..tostring( TabFile)) end
+	--@doc    Activates a ground template (.stm) from the Templates folder: new ground groups, moving front.
+	--@doc    With a list of files, one is picked at random.
+	--@category Ground, Ship, Template
+	--@param  tabFile     | source=/Templates/*.stm | Template file, or a list of files
+	--@example Action.TemplateActive("front_1.stm")
+	function Action.TemplateActive(tabFile)
+		if debugKT then print("	--> function Action.TemplateActive "..tostring( tabFile)) end
 
 		local file
 
 		--cherche la valeur UnitID la plus haute
 		local CurrentUnitId = 0
 		local CurrentGroupId = 0
-	
+
 		-- local function findGroup(Group_name, category)
 		local function findGroup(groupName, sideName, countryId, category)
-			for O_sideName, O_countries in pairs(oob_ground) do																--iterate through sides
+			for O_sideName, O_countries in pairs(oob_ground) do							--iterate through sides
 				if O_sideName == sideName  then
-					for O_country_n, O_country in pairs(O_countries) do															--iterate through countries
-						if O_country.id == countryId and O_country[category] and O_country[category].group then																			--country has vehicles
+					for O_country_n, O_country in pairs(O_countries) do						--iterate through countries
+						if O_country.id == countryId and O_country[category] and O_country[category].group then		--country has vehicles
 							for g = 1, #O_country[category].group do
 								if O_country[category].group[g].name  == groupName then
 									return true
@@ -1929,11 +2273,11 @@ Action = {}
 
 		local function movedXY(Unit, Category)
 			local foundInGround = false
-			for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
-				for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
-					if Ocountry[Category] then																			--country has vehicles
+			for Oside_name, Oside in pairs(oob_ground) do							--iterate through sides
+				for Ocountry_n, Ocountry in pairs(Oside) do						--iterate through countries
+					if Ocountry[Category] then							--country has vehicles
 						for g = 1, #Ocountry[Category].group do
-							for u = 1, #Ocountry[Category].group[g].units do											--iterate through units								
+							for u = 1, #Ocountry[Category].group[g].units do			--iterate through units
 								if Ocountry[Category].group[g].units[u].name == Unit.name then
 
 									if not Ocountry[Category].group[g].units[u].dead then
@@ -1960,9 +2304,9 @@ Action = {}
 
 		function SetRouteXY(Groupname, Category, Route )
 			local foundInGround = false
-			for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
-				for Ocountry_n, Ocountry in pairs(Oside) do															--iterate through countries
-					if Ocountry[Category] then																			--country has vehicles
+			for Oside_name, Oside in pairs(oob_ground) do							--iterate through sides
+				for Ocountry_n, Ocountry in pairs(Oside) do						--iterate through countries
+					if Ocountry[Category] then							--country has vehicles
 						for g = 1, #Ocountry[Category].group do
 							if Ocountry[Category].group[g].name == Groupname then
 								Ocountry[Category].group[g].route = Route
@@ -1991,10 +2335,10 @@ Action = {}
 			end
 		end
 
-		if type(TabFile) == "table" then
-			file =  TabFile[math.random(1, #TabFile)]
+		if type(tabFile) == "table" then
+			file =  tabFile[math.random(1, #tabFile)]
 		else
-			file = TabFile
+			file = tabFile
 		end
 
 		dofile("Templates/"..file)
@@ -2045,31 +2389,48 @@ Action = {}
 									unit.unitId = GenerateIDUnit(unitname, unit.type)
 
 									if unit.category == "Heliports" then
-										db_airbases[groupData.name] = {
-											["airdromeId"] = unit.unitId,
-											["side"] = sideName,
-											["LimitedParkNb"] = 4,
-											["x"] = unit.x,
-											-- ["TACAN"] = "40X",
-											["divert"] = false,
-											["inactive"] = false,
-											["elevation"] = groupData.route.points[1].alt,
-											-- ["code"] = 
-											-- {
-											-- 	["ICAO"] = "LOND",
-											-- },
-											["baseAlive"] = 100,
-											["runwayAlive"] = 100,
-											["ATC_frequency"] = 
-											{
-												[1] = unit.heliport_frequency,
-											},
-											["y"] = unit.y,
-											["name"] = groupData.name,
-											
-										}
+
+										local oldEntry = db_airbases[groupData.name]
+
+										if type(oldEntry) == "table" and oldEntry.wargameFarp then
+											--FARP pilote par le wargame (DCE_Manager) : on complete l'entree existante,
+											--on n'efface pas wargameFarp / wargamePlan / wargameBeach / x / y / inactive / side
+											oldEntry.airdromeId = unit.unitId
+											oldEntry.helipadId = unit.unitId
+											if oldEntry.name == nil then oldEntry.name = groupData.name end
+											if oldEntry.LimitedParkNb == nil then oldEntry.LimitedParkNb = 4 end
+											if oldEntry.divert == nil then oldEntry.divert = false end
+											if oldEntry.baseAlive == nil then oldEntry.baseAlive = 100 end
+											if oldEntry.runwayAlive == nil then oldEntry.runwayAlive = 100 end
+											if oldEntry.elevation == nil then oldEntry.elevation = groupData.route.points[1].alt end
+											if oldEntry.ATC_frequency == nil then oldEntry.ATC_frequency = unit.heliport_frequency end		--chaine, comme les autres entrees (WargameFarpSync la rend ensuite unique)
+										else
+											db_airbases[groupData.name] = {
+												["airdromeId"] = unit.unitId,
+												["side"] = sideName,
+												["LimitedParkNb"] = 4,
+												["x"] = unit.x,
+												-- ["TACAN"] = "40X",
+												["divert"] = false,
+												["inactive"] = false,
+												["elevation"] = groupData.route.points[1].alt,
+												-- ["code"] =
+												-- {
+												-- 	["ICAO"] = "LOND",
+												-- },
+												["baseAlive"] = 100,
+												["runwayAlive"] = 100,
+												["ATC_frequency"] =
+												{
+													[1] = unit.heliport_frequency,
+												},
+												["y"] = unit.y,
+												["name"] = groupData.name,
+
+											}
+										end
 									end
-									
+
 								end
 							end
 
@@ -2114,15 +2475,20 @@ Action = {}
 						end
 					end
 				end
-				
+
 			end
 		end
 	end
 
 
-	function Action.TemplateDeactivate(TabFile)
+	--@doc    Deactivates the ground groups of a template (.stm) from the Templates folder.
+	--@doc    With a list of files, one is picked at random.
+	--@category Ground, Ship, Template
+	--@param  tabFile     | source=/Templates/*.stm | Template file, or a list of files
+	--@example Action.TemplateDeactivate("front_1.stm")
+	function Action.TemplateDeactivate(tabFile)
 
-		if debugKT then print("	--> function Action.TemplateDeactivate "..tostring( TabFile)) end
+		if debugKT then print("	--> function Action.TemplateDeactivate "..tostring( tabFile)) end
 
 		-- local function findGroup(Group_name, category)
 		-- 	for Oside_name, Oside in pairs(oob_ground) do																--iterate through sides
@@ -2150,10 +2516,10 @@ Action = {}
 
 		local file
 
-		if type(TabFile) == "table" then
-			file =  TabFile[math.random(1, #TabFile)]
+		if type(tabFile) == "table" then
+			file =  tabFile[math.random(1, #tabFile)]
 		else
-			file = TabFile
+			file = tabFile
 		end
 
 		dofile("Templates/"..file)
@@ -2195,6 +2561,10 @@ Action = {}
 	end
 
 
+	--@doc    Loads the border (front line) from a .miz file of the Files folder.
+	--@category Boarder
+	--@param  file        | source=/Files/*.miz | Mission file in the Files folder of the campaign
+	--@example Action.LoadFileBorder("border_2.miz")
 	function Action.LoadFileBorder(file)
 
 		-- print("DcCT LoadFileBorder "..tostring(file))
@@ -2228,6 +2598,11 @@ Action = {}
 	end
 
 	--return alive percentage of target
+	--@doc    Adds to the briefing the airlift objective of a base, as a percentage of a weight.
+	--@category Logistic
+	--@param  placeName   | source=bases | Airbase name
+	--@param  weightObjectif | type=number | unit=Kg
+	--@example Action.LogisticObjectif("Tiyas", 10000)
 	function Action.LogisticObjectif(placeName, weightObjectif)
 		for db_baseName, base_ in pairs(db_airbases) do								--iterate through sides in oob_air		
 			if db_baseName == placeName  then										--unit found
@@ -2241,6 +2616,25 @@ Action = {}
 					AirLiftObjectif[placeName.."_"..weightObjectif] = liftText
 				end
 			end
+		end
+	end
+
+	-- DIAG landing : enveloppe les fonctions qui peuvent passer une base a inactive (trace + pile d'appel)
+	if DbgBaseTrace then
+		local origActivateUnits = Action.ActivateBaseAndItsUnits
+		Action.ActivateBaseAndItsUnits = function(baseName, activeBase)
+			DbgBaseTrace("AVANT Action.ActivateBaseAndItsUnits("..tostring(baseName)..","..tostring(activeBase)..")", baseName, true)
+			local result = origActivateUnits(baseName, activeBase)
+			DbgBaseTrace("APRES Action.ActivateBaseAndItsUnits", baseName)
+			return result
+		end
+
+		local origActivateTargets = ActivateBaseAndAssociatedTargets
+		ActivateBaseAndAssociatedTargets = function(baseName, active)
+			DbgBaseTrace("AVANT ActivateBaseAndAssociatedTargets("..tostring(baseName)..","..tostring(active)..")", baseName, true)
+			local result = origActivateTargets(baseName, active)
+			DbgBaseTrace("APRES ActivateBaseAndAssociatedTargets", baseName)
+			return result
 		end
 	end
 ----- run campaign triggers -----
@@ -2260,17 +2654,644 @@ if not BriefingImagesR then
 BriefingImagesR = { }                             --global table to hold information about briefing images to be added to miz mission file
 end
 
--- if camp.pendingBriefing then
--- 	Briefing_text = camp.Briefing_text .. Briefing_text																--briefing text to be added this mission instance
--- 	camp.Briefing_text = nil																		--reset pending briefing text
--- end
+----- WARGAME : pose / retrait automatique des FARP (DCE_Manager) -----
+-- Source de verite : db_airbases["FARP-<plage>"] avec wargameFarp = true (ecrit par DCE_Manager).
+--   inactive == false -> le FARP doit exister dans oob_ground (template "farp" du camp de l'entree)
+--   inactive ~= false -> le FARP ne doit pas exister (groupes retires, airdromeId/helipadId vides)
+-- Le camp (side) de l'entree ne change jamais. x, y = position du premier heliport du template.
+-- Les groupes poses sont marques group.wargameFarp = "<cle db_airbases>" : c'est ce marqueur
+-- qui permet de les retrouver, de les deplacer ou de les retirer (DC_UpdateWargame ne les touche pas).
+-- Idempotent : peut etre appele plusieurs fois par mission sans effet de bord.
+-- Le template est cherche dans le catalogue Init/Wargame/wargame_templates.lua (entree type = "farp"
+-- du bon camp), puis charge depuis Init/Wargame/Templates_<camp>/<fichier>.
 
-Briefing_text_playable = ""														--briefing text to be added only if this mission instance results in a playable mission
+local function wfLog(msg)
+	print(msg)
+	AddLog(msg)
+end
+
+--lit le catalogue; retourne la liste des entrees farp {side=, key=, entry=}
+--Le catalogue est ecrit par DCE_Manager dans Init/Wargame/DCE_Generated/ ; on essaie aussi Init/Wargame/ (ancien emplacement).
+--Lecture "a la main" (io.open + loadstring) pour pouvoir dire POURQUOI le catalogue n'est pas lisible
+--(fichier absent / BOM UTF-8 / erreur de syntaxe), et accepter un fichier commencant par un BOM.
+local function wfFarpCatalog()
+	local list = {}
+	local paths = {
+		"Init/Wargame/DCE_Generated/wargame_templates.lua",
+		"Init/Wargame/wargame_templates.lua",
+	}
+
+	local path, text
+	for _, p in ipairs(paths) do
+		local file = io.open(p, "rb")
+		if file then
+			path = p
+			text = file:read("*a")
+			file:close()
+			break
+		end
+	end
+
+	if not path then
+		wfLog("DcCT WargameFarp ERREUR: catalogue absent, cherche dans : "..table.concat(paths, " , "))
+		return list
+	end
+
+	if string.sub(text, 1, 3) == "\239\187\191" then		--BOM UTF-8 : Lua 5.1 ne sait pas le sauter
+		text = string.sub(text, 4)
+	end
+
+	local chunk, loadErr = loadstring(text, "@"..path)
+	if not chunk then
+		wfLog("DcCT WargameFarp ERREUR: catalogue illisible (syntaxe): "..tostring(loadErr))
+		return list
+	end
+
+	local env = {}
+	setfenv(chunk, env)
+	local ok, err = pcall(chunk)
+	if not ok then
+		wfLog("DcCT WargameFarp ERREUR: catalogue en erreur: "..tostring(err))
+		return list
+	end
+
+	--parcours recursif (profondeur limitee) : le nom exact de la table du catalogue n'a pas d'importance
+	local function scan(tbl, key, depth)
+		if type(tbl) ~= "table" or depth > 4 then return end
+
+		if type(tbl.type) == "string" and string.lower(tbl.type) == "farp" and (tbl.side == "blue" or tbl.side == "red") then
+			table.insert(list, { side = tbl.side, key = key, entry = tbl })
+			return
+		end
+
+		for k, v in pairs(tbl) do
+			scan(v, k, depth + 1)
+		end
+	end
+
+	for k, v in pairs(env) do
+		scan(v, k, 1)
+	end
+
+	return list
+end
+
+
+--nom(s) de fichier .stm possibles pour l'entree du catalogue (le nom exact est celui de l'entree)
+local function wfTemplateCandidates(item)
+	local e = item.entry
+	local names = {}
+	local function add(n)
+		if type(n) == "string" and n ~= "" then
+			table.insert(names, n)
+			if not string.find(string.lower(n), "%.stm$") then
+				table.insert(names, n..".stm")
+			end
+		end
+	end
+	add(e.file) add(e.fileName) add(e.stm) add(e.template) add(e.templateFile) add(e.name)
+	if type(item.key) == "string" then add(item.key) end
+	return names
+end
+
+--charge un .stm; retourne la table staticTemplate ou nil
+--DIAG : logue pourquoi un chargement echoue (fichier absent / erreur de lecture / variable staticTemplate absente)
+local function wfLoadTemplate(side, fileName)
+	local path = "Init/Wargame/Templates_"..side.."/"..fileName
+	local f = io.open(path, "rb")
+	if not f then
+		wfLog("DcCT WargameFarp DIAG fichier absent : "..path)
+		return nil
+	end
+	f:close()
+
+	staticTemplate = nil
+	local ok, err = pcall(dofile, path)
+	local loaded = staticTemplate
+	staticTemplate = nil
+
+	if not ok then
+		wfLog("DcCT WargameFarp DIAG erreur a la lecture de "..path.." : "..tostring(err))
+		return nil
+	end
+	if type(loaded) ~= "table" then
+		wfLog("DcCT WargameFarp DIAG "..path.." lu sans erreur mais la variable staticTemplate est de type "..type(loaded))
+		return nil
+	end
+	if type(loaded.coalition) ~= "table" or type(loaded.coalition[side]) ~= "table" or type(loaded.coalition[side].country) ~= "table" then
+		wfLog("DcCT WargameFarp DIAG "..path.." : staticTemplate.coalition."..side..".country absent")
+		return nil
+	end
+	return loaded
+end
+
+
+--parcourt tous les groupes de oob_ground portant le marqueur wargameFarp = key
+--action(sideName, countryTable, category, groupList, index, group)
+local function wfEachFarpGroup(key, action)
+	for sideName, countries in pairs(oob_ground) do
+		for _, country in pairs(countries) do
+			if type(country) == "table" then
+				for category, class in pairs(country) do
+					if type(class) == "table" and class.group then
+						for i = #class.group, 1, -1 do
+							if class.group[i].wargameFarp == key then
+								action(sideName, country, category, class.group, i, class.group[i])
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+--decale un groupe (et ses unites, et sa route) de dx, dy
+local function wfShiftGroup(group, dx, dy)
+	if type(group.x) == "number" then group.x = group.x + dx end
+	if type(group.y) == "number" then group.y = group.y + dy end
+	for _, unit in ipairs(group.units or {}) do
+		if type(unit.x) == "number" then unit.x = unit.x + dx end
+		if type(unit.y) == "number" then unit.y = unit.y + dy end
+	end
+	if group.route and group.route.points then
+		for _, point in pairs(group.route.points) do
+			if type(point.x) == "number" then point.x = point.x + dx end
+			if type(point.y) == "number" then point.y = point.y + dy end
+		end
+	end
+end
+
+--retrouve (ou cree) la liste de groupes oob_ground[side] pour un country de template et une categorie
+local function wfGroupList(side, templateCountry, category)
+	local countryN
+	local maxN = 0
+	for n, country in pairs(oob_ground[side]) do
+		if type(n) == "number" and n > maxN then maxN = n end
+		if type(country) == "table" and country.name == templateCountry.name then
+			countryN = n
+		end
+	end
+
+	if not countryN then
+		countryN = maxN + 1
+		oob_ground[side][countryN] = {
+			["id"] = templateCountry.id,
+			["name"] = templateCountry.name,
+		}
+	end
+
+	if not oob_ground[side][countryN][category] then
+		oob_ground[side][countryN][category] = { ["group"] = {} }
+	end
+
+	return oob_ground[side][countryN][category].group
+end
+
+--tous les unitId deja pris dans la mission (mission, oob_ground, warehouses, autres entrees db_airbases)
+--exceptKey : l'entree db_airbases du FARP lui-meme n'est pas comptee
+local function wfUsedUnitIds(exceptKey)
+	local used = {}
+
+	local function mark(v)
+		v = tonumber(v)
+		if v then used[v] = true end
+	end
+
+	--meme structure side > country > categorie > group > units pour mission.coalition et oob_ground
+	local function scan(coal)
+		if type(coal) ~= "table" then return end
+		for _, side in pairs(coal) do
+			if type(side) == "table" then
+				local countries = side.country or side
+				for _, country in pairs(countries) do
+					if type(country) == "table" then
+						for _, class in pairs(country) do
+							if type(class) == "table" and class.group then
+								for _, group in pairs(class.group) do
+									for _, unit in pairs(group.units or {}) do
+										mark(unit.unitId)
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	scan(mission and mission.coalition)
+	scan(oob_ground)
+
+	if type(warehouses) == "table" then
+		for _, section in pairs({ warehouses.warehouses, warehouses.airports }) do
+			if type(section) == "table" then
+				for k in pairs(section) do mark(k) end
+			end
+		end
+	end
+
+	for name, b in pairs(db_airbases) do
+		if name ~= exceptKey and type(b) == "table" then
+			mark(b.airdromeId)
+			mark(b.helipadId)
+		end
+	end
+
+	--compteurs de FUNC_Ids (format inconnu : on reserve cles et valeurs numeriques, sans risque)
+	if type(AllIdUnit) == "table" then
+		for k, v in pairs(AllIdUnit) do
+			mark(k)
+			mark(v)
+		end
+	end
+
+	return used
+end
+
+--choisit un unitId libre dans toute la mission (GenerateIDUnit tant que l'id est deja pris)
+local function wfPickUnitId(used, name, unitType)
+	for i = 1, 500 do
+		local id = GenerateIDUnit(name, unitType)
+		if type(id) == "number" and not used[id] then
+			used[id] = true
+			return id
+		end
+	end
+
+	--secours : plus grand id connu + 1
+	local maxId = 0
+	for k in pairs(used) do
+		if k > maxId then maxId = k end
+	end
+	used[maxId + 1] = true
+	return maxId + 1
+end
+
+--frequence (nombre, "129.600", table, Hz...) -> entier en kHz (129600), ou nil
+local function wfFreqKey(f)
+	if type(f) == "table" then f = f[1] end
+	local n = tonumber(f)
+	if not n or n <= 0 then return nil end
+	if n > 100000 then n = n / 1000000 end		--donnee en Hz
+	return math.floor(n * 1000 + 0.5)
+end
+
+--frequences deja prises : autres entrees db_airbases et autres heliports de la mission/oob_ground
+local function wfUsedFrequencies(exceptKey)
+	local used = {}
+
+	local function markAny(f)
+		if type(f) == "table" then
+			for _, v in pairs(f) do
+				local k = wfFreqKey(v)
+				if k then used[k] = true end
+			end
+		else
+			local k = wfFreqKey(f)
+			if k then used[k] = true end
+		end
+	end
+
+	for name, b in pairs(db_airbases) do
+		if name ~= exceptKey and type(b) == "table" then
+			markAny(b.ATC_frequency)
+		end
+	end
+
+	local function scan(coal)
+		if type(coal) ~= "table" then return end
+		for _, side in pairs(coal) do
+			if type(side) == "table" then
+				local countries = side.country or side
+				for _, country in pairs(countries) do
+					if type(country) == "table" then
+						for _, class in pairs(country) do
+							if type(class) == "table" and class.group then
+								for _, group in pairs(class.group) do
+									for _, unit in pairs(group.units or {}) do
+										if unit.category == "Heliports" and unit.name ~= exceptKey then
+											markAny(unit.heliport_frequency)
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	scan(mission and mission.coalition)
+	scan(oob_ground)
+
+	return used
+end
+
+--garantit une frequence propre a ce FARP (differente de toutes les autres), ecrite a 2 endroits :
+--  db_airbases.ATC_frequency (chaine "129.800", comme les autres entrees) et heliport_frequency de l'unite.
+--Ordre de preference : la frequence deja portee par l'entree, puis celle du template, puis la premiere libre 128.000-131.900
+local function wfEnsureFrequency(key, base, unit)
+	local used = wfUsedFrequencies(key)
+	local candidates = { base.ATC_frequency, unit and unit.heliport_frequency }
+	local chosen
+
+	for i = 1, 2 do
+		local k = wfFreqKey(candidates[i])
+		if k and not used[k] then
+			chosen = k
+			break
+		end
+	end
+
+	if not chosen then
+		for k = 128000, 131900, 100 do
+			if not used[k] then
+				chosen = k
+				break
+			end
+		end
+	end
+
+	if not chosen then
+		wfLog("DcCT WargameFarp ERREUR: plus de frequence libre pour "..tostring(key))
+		return
+	end
+
+	local freqStr = string.format("%.3f", chosen / 1000)
+
+	if type(base.ATC_frequency) == "string" and wfFreqKey(base.ATC_frequency) == chosen
+		and (not unit or wfFreqKey(unit.heliport_frequency) == chosen) then
+		return			--deja coherent, on ne touche a rien
+	end
+
+	wfLog("DcCT WargameFarp frequence "..tostring(key).." : "..tostring(wfFreqKey(base.ATC_frequency) and base.ATC_frequency or "-").." -> "..freqStr)
+	base.ATC_frequency = freqStr
+	if unit then unit.heliport_frequency = freqStr end
+end
+
+--complete l'entree db_airbases d'un FARP actif a partir de son heliport reel (oob_ground)
+--airdromeId = helipadId = unitId de l'heliport = cle du warehouse
+local function wfCompleteBase(key, base, heliUnit, heliGroup)
+	base.airdromeId = heliUnit.unitId
+	base.helipadId = heliUnit.unitId
+	if base.name == nil then base.name = key end
+	if base.LimitedParkNb == nil then base.LimitedParkNb = 4 end
+	if base.divert == nil then base.divert = false end
+	if base.baseAlive == nil then base.baseAlive = 100 end
+	if base.runwayAlive == nil then base.runwayAlive = 100 end
+	if base.elevation == nil and heliGroup and heliGroup.route and heliGroup.route.points and heliGroup.route.points[1] then
+		base.elevation = heliGroup.route.points[1].alt
+	end
+	wfEnsureFrequency(key, base, heliUnit)
+end
+
+--pose le template farp de ce camp sur l'entree db_airbases[key]; retourne true, ou false + raison
+local function wfInstallFarp(key, base)
+	local side = base.side
+
+	if type(base.x) ~= "number" or type(base.y) ~= "number" then
+		return false, "x, y absents dans db_airbases"
+	end
+
+	--1) le template du camp, via le catalogue
+	local loaded, fileUsed
+	local found = false
+	for _, item in ipairs(wfFarpCatalog()) do
+		if item.side == side then
+			found = true
+			for _, fileName in ipairs(wfTemplateCandidates(item)) do
+				loaded = wfLoadTemplate(side, fileName)
+				if loaded and loaded.coalition and loaded.coalition[side] and loaded.coalition[side].country then
+					fileUsed = fileName
+					break
+				end
+				loaded = nil
+			end
+			if loaded then break end
+		end
+	end
+
+	if not found then
+		return false, "aucune entree type = farp pour le camp "..tostring(side).." dans le catalogue"
+	end
+	if not loaded then
+		return false, "template farp illisible (Init/Wargame/Templates_"..tostring(side).."/)"
+	end
+
+	--2) copie de travail + premier heliport du template = point de reference
+	local tmp = DeepCopy(loaded.coalition[side].country)
+	local refUnit, refGroup
+
+	for _, country in pairs(tmp) do
+		if type(country) == "table" then
+			for category, class in pairs(country) do
+				if type(class) == "table" and class.group then
+					for _, group in ipairs(class.group) do
+						for _, unit in ipairs(group.units or {}) do
+							if not refUnit and unit.category == "Heliports" then
+								refUnit = unit
+								refGroup = group
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	if not refUnit then
+		return false, "le template "..tostring(fileUsed).." ne contient aucun heliport (category = Heliports)"
+	end
+
+	local dx = base.x - refUnit.x
+	local dy = base.y - refUnit.y
+	local usedIds = wfUsedUnitIds(key)							--ids deja pris dans toute la mission
+	local suffix = string.gsub(tostring(base.wargameBeach or key), "[^%w]", "_")
+
+	--3) noms uniques par FARP, decalage, ids, puis insertion dans oob_ground
+	for _, country in pairs(tmp) do
+		if type(country) == "table" then
+			for category, class in pairs(country) do
+				if type(class) == "table" and class.group then
+					local groupList = wfGroupList(side, country, category)
+
+					for _, group in ipairs(class.group) do
+						if group == refGroup then
+							group.name = key						--le groupe heliport porte le nom de l'entree db_airbases
+						else
+							group.name = group.name.."-"..suffix
+						end
+
+						wfShiftGroup(group, dx, dy)
+
+						for _, unit in ipairs(group.units or {}) do
+							if unit == refUnit then
+								unit.name = key
+							else
+								unit.name = unit.name.."-"..suffix
+							end
+							unit.unitId = wfPickUnitId(usedIds, unit.name, unit.type)	--unique dans toute la mission (l'id de l'heliport = cle du warehouse)
+						end
+
+						group.groupId = GenerateIDGroup(group.name)
+						group.taskSelected = true					--convention reprise de Action.TemplateActive
+						group.wargameFarp = key
+						table.insert(groupList, group)
+					end
+				end
+			end
+		end
+	end
+
+	--4) db_airbases : on complete l'entree du Manager (ids, valeurs manquantes, frequence propre), on n'ecrase rien
+	wfCompleteBase(key, base, refUnit, refGroup)
+
+	wfLog("DcCT WargameFarp pose "..key.." ("..tostring(side)..") template "..tostring(fileUsed).." airdromeId "..tostring(base.airdromeId))
+	return true
+end
+
+local function WargameFarpSync()
+	if type(db_airbases) ~= "table" or type(oob_ground) ~= "table" then
+		return
+	end
+
+	--ordre alphabetique : attribution des frequences reproductible d'une mission a l'autre
+	local keys = {}
+	for key, base in pairs(db_airbases) do
+		if type(base) == "table" and base.wargameFarp then table.insert(keys, key) end
+	end
+	table.sort(keys)
+
+	for _, key in ipairs(keys) do
+		local base = db_airbases[key]
+
+		if base.side ~= "blue" and base.side ~= "red" then
+			wfLog("DcCT WargameFarp ERREUR: "..tostring(key).." n'a pas de side blue/red, ignore")
+
+		else
+			--combien de groupes de ce FARP sont deja dans oob_ground, et ou est son heliport
+			local nGroups = 0
+			local heliUnit, heliGroup
+			wfEachFarpGroup(key, function(sideName, country, category, groupList, i, group)
+				nGroups = nGroups + 1
+				for _, unit in ipairs(group.units or {}) do
+					if unit.category == "Heliports" then
+						heliUnit = unit
+						heliGroup = group
+					end
+				end
+			end)
+
+			if base.inactive == false then
+				--le FARP doit exister
+				if nGroups == 0 then
+					local ok, reason = wfInstallFarp(key, base)
+					if not ok then
+						--echec : on ne laisse jamais un FARP actif sans groupes (les helicos iraient s'y poser)
+						base.inactive = true
+						base.airdromeId = nil
+						base.helipadId = nil
+						wfLog("DcCT WargameFarp ERREUR: pose impossible de "..key.." : "..tostring(reason))
+					end
+
+				elseif heliUnit and (math.abs(heliUnit.x - base.x) > 1 or math.abs(heliUnit.y - base.y) > 1) then
+					--le point a ete deplace dans le Manager : on decale le FARP, les ids (donc le warehouse) restent
+					local dx = base.x - heliUnit.x
+					local dy = base.y - heliUnit.y
+					wfEachFarpGroup(key, function(sideName, country, category, groupList, i, group)
+						wfShiftGroup(group, dx, dy)
+					end)
+					wfLog("DcCT WargameFarp deplace "..key.." de "..math.floor(dx)..", "..math.floor(dy))
+				end
+
+				--FARP deja pose : db_airbases suit toujours l'heliport reel (le Manager reecrit l'entree a chaque tour)
+				if heliUnit then
+					wfCompleteBase(key, base, heliUnit, heliGroup)
+				end
+
+			else
+				--le FARP ne doit pas exister
+				if nGroups > 0 then
+					wfEachFarpGroup(key, function(sideName, country, category, groupList, i, group)
+						table.remove(groupList, i)
+					end)
+					wfLog("DcCT WargameFarp retrait "..key.." ("..nGroups.." groupe(s))")
+				end
+				base.airdromeId = nil
+				base.helipadId = nil
+			end
+		end
+	end
+end
+
+--CONTROLE FINAL des ids (appele par MAIN_NextMission apres la renumerotation des doublons, avant l'ecriture de
+--Active/db_airbases.lua) : pour chaque entree db_airbases dont une piste (Heliports) existe dans la mission,
+--airdromeId (et helipadId s'il existe, toujours pour un FARP du wargame) = unitId reel de l'heliport.
+--Verifie aussi que le warehouse de cet id existe. Ne renumerote JAMAIS rien : il corrige db_airbases, pas la mission.
+function WargameFarpCheckIds()
+	if type(db_airbases) ~= "table" or type(mission) ~= "table" or type(mission.coalition) ~= "table" then
+		return
+	end
+
+	--heliports de la mission, trouves par nom de groupe ou nom d'unite
+	local heli = {}
+	for _, side in pairs(mission.coalition) do
+		for _, country in pairs(side.country or {}) do
+			if type(country) == "table" then
+				for _, class in pairs(country) do
+					if type(class) == "table" and class.group then
+						for _, group in pairs(class.group) do
+							for _, unit in pairs(group.units or {}) do
+								if unit.category == "Heliports" and type(unit.unitId) == "number" then
+									if heli[group.name] == nil then heli[group.name] = unit end
+									if heli[unit.name] == nil then heli[unit.name] = unit end
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	for key, base in pairs(db_airbases) do
+		local unit = type(base) == "table" and heli[key]
+
+		if unit then
+			if base.airdromeId ~= unit.unitId then
+				wfLog("DcCT WargameFarp CheckIds "..tostring(key).." airdromeId "..tostring(base.airdromeId).." -> "..tostring(unit.unitId))
+				base.airdromeId = unit.unitId
+			end
+
+			if (base.helipadId ~= nil or base.wargameFarp) and base.helipadId ~= unit.unitId then
+				wfLog("DcCT WargameFarp CheckIds "..tostring(key).." helipadId "..tostring(base.helipadId).." -> "..tostring(unit.unitId))
+				base.helipadId = unit.unitId
+			end
+
+			--le warehouse de la piste est indexe par ce meme id
+			if type(warehouses) == "table" and type(warehouses.warehouses) == "table" and warehouses.warehouses[unit.unitId] == nil then
+				if type(Data_warehouses) == "table" then
+					warehouses.warehouses[unit.unitId] = DeepCopy(Data_warehouses)
+					wfLog("DcCT WargameFarp CheckIds warehouse cree pour "..tostring(key).." ("..tostring(unit.unitId)..")")
+				else
+					wfLog("DcCT WargameFarp CheckIds ATTENTION: pas de warehouse pour "..tostring(key).." ("..tostring(unit.unitId)..")")
+				end
+			end
+		end
+	end
+end
+
+WargameFarpSync()		--pose / retire les FARP du wargame AVANT les triggers de campagne
 
 --go through campaign triggers
 for triggerName, trigger in pairs(camp_triggers) do								--iterate through triggers
 
 	if debugKT then print("DcCT 00 trigger_name: "..tostring(triggerName).." trigger.name: "..tostring(trigger.name)) end
+
+	DbgCurrentTrigger = triggerName	-- DIAG
 
 	if trigger.active then														--trigger is active
 
@@ -2322,25 +3343,15 @@ for triggerName, trigger in pairs(camp_triggers) do								--iterate through tri
 	end
 end
 
+DbgCurrentTrigger = nil	-- DIAG
+if DbgBaseTrace then DbgBaseTrace("DC_CheckTriggers: apres les triggers de campagne") end	-- DIAG
+
 --Compatible avec les sauts temporels
 for side_name, side in pairs(oob_air) do
     
     if side_name ~= "neutral" then
         -- local interval = campMod.RepairOption[side_name]["airUnit"][3] * 3600
 		local interval = campMod.RepairOption[side_name]["airUnit"][3]
-
-		-- _affiche( camp.automaticReinforce,"A0 automaticReinforce: ")
-
-		-- if debugKT then print("DcCT A automaticReinforce side_name : "..tostring(side_name)) end
-		-- if debugKT then print("DcCT B CampTotalTimeS: "..tostring(CampTotalTimeS)
-		-- .." >=? " ..tostring(camp.automaticReinforce[side_name])
-		-- .." + " ..tostring(interval)
-		-- .." ( " ..camp.automaticReinforce[side_name] + interval
-		-- .." ) " 
-		-- ) 
-		-- os.execute 'pause'
-		
-		-- end
 
 
 		--ATTENTION while est necessaire pour les sauts temporel, pour rattraper toutes les occurences de ravitaillement loupé
@@ -2445,7 +3456,7 @@ for baseName, base in pairs(db_airbases) do
 
 	--base détruite
 
-	if base.side then
+	if base.side and not base.wargameFarp then
 
 		local baseDeathPoint = campMod.RepairOption[base.side]["airbase"][1]
 		local runwayDeathPoint = campMod.RepairOption[base.side]["runway"][2]
@@ -2564,16 +3575,9 @@ if camp.endCampaign  then
 		end
 	end
 
-
-		-- if side == "blue"  then
-		-- 	table.insert(BriefingImagesB, filename)									--add filename to briefing images table, will be added to mission file when this gets created
-		-- elseif side == "red"  then
-		-- 	table.insert(BriefingImagesR, filename)
-		-- elseif side == "all" or side == "" or side == nil then
-		-- 	table.insert(BriefingImagesB, filename)
-		-- 	table.insert(BriefingImagesR, filename)
-		-- end	
 end
+
+if DbgBaseTrace then DbgBaseTrace("DC_CheckTriggers: FIN (apres boucle des bases)") end	-- DIAG
 
 --pour que certaines fonctions ne s'active qu'une fois
 CheckTriggersOnce = true

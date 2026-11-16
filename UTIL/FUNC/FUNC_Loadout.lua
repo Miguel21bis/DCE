@@ -308,6 +308,59 @@ function LoadAllLoadouts(subFolder)
 end
 
 
+-- Inscrit le code loadout dans la ligne "code_loadout = ..." de Init/camp_init.lua,
+-- uniquement si cette ligne existe et n'a pas deja ce code. Ne touche a rien d'autre.
+function SaveCodeLoadoutToCampInit(code)
+	local path = "Init/camp_init.lua"
+	local f = io.open(path, "r")
+	if not f then return false end
+
+	local lines, changed, found = {}, false, false
+	for line in f:lines() do
+		if not found and line:match("^%s*code_loadout%s*=") then
+			found = true
+			local newLine = setValueOnLine(line, code)
+			if newLine ~= line then
+				line = newLine
+				changed = true
+			end
+		end
+		lines[#lines + 1] = line
+	end
+	f:close()
+
+	if not found then
+		AddLog("SaveCodeLoadoutToCampInit : ligne code_loadout absente de "..path.." (lancer BAT_FirstMission ou BAT_SkipMission pour la creer)")
+		return false
+	end
+	if not changed then return true end
+
+	local out = io.open(path, "w")
+	if not out then return false end
+	out:write(table.concat(lines, "\n"))
+	out:close()
+	return true
+end
+
+
+-- Lit le code_loadout declare dans Init/camp_init.lua, sans executer le fichier
+-- (evite d'ecraser la variable globale camp). Renvoie nil si absent ou vide.
+function ReadCodeLoadoutFromCampInit()
+	local f = io.open("Init/camp_init.lua", "r")
+	if not f then return nil end
+	local code = nil
+	for line in f:lines() do
+		if line:match("^%s*code_loadout%s*=") then
+			code = line:match('^%s*code_loadout%s*=%s*"([^"]*)"')
+			break
+		end
+	end
+	f:close()
+	if code and code ~= "" then return code end
+	return nil
+end
+
+
 function BuildLoadout()
 
 	if not camp.AuthorizedLoadout then
@@ -349,8 +402,22 @@ function BuildLoadout()
 
 
 	-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
-	-- if (not ( campConfMod and campConfMod.code_loadout) and campaigns_code_loadout )then
-	if (campaigns_code_loadout )then
+	-- ordre de priorite :
+	-- 1) camp.code_loadout (camp_status, copie de camp_init au lancement de la campagne)
+	-- 2) code_loadout de Init/camp_init.lua (campagne deja lancee dont camp_status n'a pas le champ)
+	-- 3) sinon (anciennes campagnes) : detection par le titre avec campaigns_code_loadout, comme avant
+	if not camp.code_loadout or camp.code_loadout == "" then
+		local initCode = ReadCodeLoadoutFromCampInit()
+		if initCode then
+			camp.code_loadout = initCode
+		end
+	end
+
+	if camp.code_loadout and camp.code_loadout ~= "" then
+		if campaigns_code_loadout and not campaigns_code_loadout[camp.code_loadout] then
+			AddLog("Note for the Campaign Maker : code_loadout |"..tostring(camp.code_loadout).."| declared in camp_init but not found in campaigns_code_loadout")
+		end
+	elseif (campaigns_code_loadout )then
 		local bestMatch = nil
 		local bestMatchCount = 0
 
@@ -392,11 +459,16 @@ function BuildLoadout()
 
 		-- campConfMod.code_loadout = bestMatch
 		camp.code_loadout = bestMatch
+
+		-- retrocompatibilite : on inscrit le code detecte dans Init/camp_init.lua (une seule fois)
+		if bestMatch then
+			SaveCodeLoadoutToCampInit(bestMatch)
+		end
 	end
 
 
 	if Debug.debug then
-		print("UtilF camp.title |"..camp.title.."| campConfMod.code_loadout |"..tostring(camp.code_loadout) )
+		print("UtilF camp.title |"..camp.title.."| camp.code_loadout |"..tostring(camp.code_loadout) )
 	end
 
 	-- helper: vérifie si le loadout est autorisé par restrictedCondition
@@ -512,14 +584,241 @@ function BuildLoadout()
 		local test_loadouts = DeepCopy(LoadoutsList)
 		test_loadouts = makeStrutureLoadout(test_loadouts)
 
-		local test_str = "db_loadouts = " .. TableSerializationLoadout(test_loadouts, 0, 0)						--make a string	
+		local test_str = "db_loadouts = " .. TableSerializationLoadout(test_loadouts, 0, 0)					--make a string	
 		local testFile = io.open("Debug/loadouts_clean.lua", "w") or error("Failed to open debug file")
-		testFile:write(test_str)															--save new data
+		testFile:write(test_str)											--save new data
 		testFile:close()
 
 
 	end
 end
+
+
+
+function BuildLoadout()
+
+	if not camp.AuthorizedLoadout then
+		camp.AuthorizedLoadout = {}
+	end
+	local addLoadoutsTag = false
+	-- campaigns_code_loadout = { 
+		-- ["Cyprus"] =		"Cyprus Incident",
+		-- ["Crisis"] = 		"Crisis in PG",
+		-- ["PG"] = 			"Over PG",
+		-- ["Caucasus"] = 		"Over Caucasus",
+		-- ["TF"] = 			"TF-71",             
+		-- ["TF80s"] = 		"TF-71-80s",           
+		-- ["TF80sRED"] = 		"TF-71-Fishbed-80s",   
+		-- ["IPW71"] = 		"India Pak War 71",    
+		-- ["HWITC"] = 		"Hot War in the Cold",
+		-- ["IIW"] = 			"Iran Iraq War",
+	-- }   
+
+
+
+	if campMod.selectLoadout == "init" then
+		require("Init/db_loadouts")
+	else
+		-- charge le loadout central en premier pour avoir la table de code_loadout
+		-- Charge toute la base
+		db_loadouts = LoadAllLoadouts("db_loadouts")
+	end
+
+	-- Fonction pour compter les mots dans une chaîne
+	local function word_count(input)
+		local count = 0
+		for word in string.gmatch(input, "%S+") do
+			count = count + 1
+		end
+		return count
+	end
+
+
+
+	-- cherche le code a appliquer au loadout, pour charger le bon..loadout ^^
+	-- 1) camp.code_loadout deja renseigne (camp_init.lua) : on l'utilise tel quel, pas de detection
+	-- 2) sinon (anciennes campagnes) : detection par le titre, comme avant
+	if camp.code_loadout and camp.code_loadout ~= "" then
+		if campaigns_code_loadout and not campaigns_code_loadout[camp.code_loadout] then
+			AddLog("Note for the Campaign Maker : code_loadout |"..tostring(camp.code_loadout).."| declared in camp_init but not found in campaigns_code_loadout")
+		end
+	elseif (campaigns_code_loadout )then
+		local bestMatch = nil
+		local bestMatchCount = 0
+
+
+		-- Parcourir la table des codes
+		for codeName, prefix_s in pairs(campaigns_code_loadout) do
+			if type(prefix_s) == "table" then
+				-- Plusieurs mots-clés à vérifier
+				local matchCount = 0
+				for _, prefix in ipairs(prefix_s) do
+					if string.find(string.lower(camp.title), string.lower(prefix)) then
+						matchCount = matchCount + 1
+					end
+				end
+				-- Mise à jour du meilleur match
+				if matchCount > bestMatchCount then
+					bestMatch = codeName
+					bestMatchCount = matchCount
+				end
+			else
+				-- Un seul mot-clé à vérifier
+				if string.find(string.lower(camp.title), string.lower(prefix_s)) then
+					local number_of_words = word_count(prefix_s)
+					if number_of_words > bestMatchCount then
+						bestMatch = codeName
+						bestMatchCount = 1
+					elseif prefix_s == camp.title then
+						bestMatch = codeName
+						bestMatchCount = 100
+					end
+
+					if bestMatchCount < 1 then -- Priorité pour les correspondances plus spécifiques
+						bestMatch = codeName
+						bestMatchCount = 1
+					end
+				end
+			end
+		end
+
+		-- campConfMod.code_loadout = bestMatch
+		camp.code_loadout = bestMatch
+
+		-- retrocompatibilite : on inscrit le code detecte dans Init/camp_init.lua (une seule fois)
+		if bestMatch then
+			SaveCodeLoadoutToCampInit(bestMatch)
+		end
+	end
+
+
+	if Debug.debug then
+		print("UtilF camp.title |"..camp.title.."| camp.code_loadout |"..tostring(camp.code_loadout) )
+	end
+
+	-- helper: vérifie si le loadout est autorisé par restrictedCondition
+	local function allowed_by_restriction(loadData)
+		if not loadData.restrictedCondition then
+			return true
+		end
+		if type(loadData.restrictedCondition) == "string" then
+			for _, campAuth in pairs(camp.AuthorizedLoadout) do
+				if string.lower(tostring(loadData.restrictedCondition)) == string.lower(tostring(campAuth)) then
+					return true
+				end
+			end
+			return false
+		end
+		if not camp.AuthorizedLoadout then
+			return true
+		end
+		for _, conditionName in pairs(loadData.restrictedCondition) do
+			for _, campAuth in pairs(camp.AuthorizedLoadout) do
+				if string.lower(tostring(conditionName)) == string.lower(tostring(campAuth)) then
+					return true
+				end
+			end
+		end
+		return false
+	end
+
+	-- helper: vérifie si le code_loadout correspond à la configuration de la campagne
+	local function codes_match(value, campaign_code)
+		if not value.code_loadout or value.code_loadout == "" then
+			return true
+		end
+		if not campaign_code or campaign_code == "" then
+			return true
+		end
+		-- accepter une chaîne ou une table
+		if type(value.code_loadout) == "string" then
+			return string.lower(value.code_loadout) == string.lower(campaign_code) or string.lower(value.code_loadout) == "all"
+		end
+		if type(value.code_loadout) == "table" then
+			for _, code in pairs(value.code_loadout) do
+				if string.lower(tostring(code)) == string.lower(campaign_code) or string.lower(tostring(code)) == "all" then
+					return true
+				end
+			end
+		end
+		return false
+	end
+
+	-- helper: vérifie si 
+	local function plane_match(planeLoadout)
+
+		for sideName, squads in pairs(oob_air) do
+			for squadN, squad in pairs(squads) do
+				if string.lower(squad.type) == string.lower(planeLoadout) then
+					return true
+				end
+			end
+		end
+		return false
+	end
+
+	local function add_loadout(plane, taskName, loadoutName, value)
+		LoadoutsList[plane] = LoadoutsList[plane] or {}
+		LoadoutsList[plane][taskName] = LoadoutsList[plane][taskName] or {}
+		LoadoutsList[plane][taskName][loadoutName] = value
+	end
+
+	for plane, planeTab in pairs(db_loadouts) do
+		if plane_match(plane) then
+			for taskName, loadout in pairs(planeTab) do
+				for loadoutName, loadData in pairs(loadout) do
+					if codes_match(loadData, camp.code_loadout) then
+						if allowed_by_restriction(loadData) then
+							add_loadout(plane, taskName, loadoutName, loadData)
+						end
+					end
+				end
+			end
+		end
+	end
+
+
+	if campaigns_code_loadout and not addLoadoutsTag then
+		for planeType, plane  in pairs(LoadoutsList) do
+			for taskName, loadouts in pairs(plane) do
+				for loadoutName, loadout  in pairs(loadouts) do
+					-- print("UtilF "..plane.." "..taskName.." "..loadoutName)
+					if loadout and loadout.code_loadout and loadout.code_loadout ~= "" then
+						for code_loadout_number, code in ipairs(loadout.code_loadout) do
+							if not campaigns_code_loadout[code]  then	--and not string.lower(code) == "all"
+
+								if  string.lower(code) ~= "all"  then
+
+									local bugTxt = ""..planeType.." ||| "..taskName.." ||| "..loadoutName.." ||| "..code.." not found in campaigns_code_loadout****************"
+									AddLog("Note for the Campaign Maker"..bugTxt)
+								end
+							else
+								-- print("UtilF camp.code_loadout "..camp.code_loadout.." found")						
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+
+	LoadoutsList = loadoutPylon(LoadoutsList)
+
+	if Debug.debug then
+		local test_loadouts = DeepCopy(LoadoutsList)
+		test_loadouts = makeStrutureLoadout(test_loadouts)
+
+		local test_str = "db_loadouts = " .. TableSerializationLoadout(test_loadouts, 0, 0)					--make a string	
+		local testFile = io.open("Debug/loadouts_clean.lua", "w") or error("Failed to open debug file")
+		testFile:write(test_str)											--save new data
+		testFile:close()
+
+
+	end
+end
+
+
 
 
 

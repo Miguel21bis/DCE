@@ -1,13 +1,13 @@
---ATO_Generator_A_Debug.lua
+--ATO_Gen_00_Debug.lua
 --Sous-module de ATO_Generator : logs de debug, tracking structure des rejets et des echecs de generation (squad / player)
---A charger AVANT ATO_Generator_B_Eval.lua et ATO_Generator_C_Core.lua (ceux-ci utilisent debugLog/rejectStep/etc en globale)
+--Charge par ATO_Generator.lua (point d'entree), AVANT ATO_Gen_01_Eval.lua et ATO_Gen_Main.lua (ceux-ci utilisent debugLog/rejectStep/etc en globale)
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Generator_A_Debug.lua"] = "1.21.137"
+versionDCE["ATO_Gen_00_Debug.lua"] = "1.21.137"
 -------------------------------------------------------------------------------------------------------
 
 if Debug.debug then
-	print("START ATO_Generator_A_Debug.lua "..versionDCE["ATO_Generator_A_Debug.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
+	print("START ATO_Gen_00_Debug.lua "..versionDCE["ATO_Gen_00_Debug.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
 -- Mettre a false pour couper l'affichage console de chaque echec joueur
@@ -121,7 +121,7 @@ RejectReasonInfo = {
 	insufficient_aircraft         = { priority = 50, texte = "Insufficient aircraft generated for this request." },
 	unknown                        = { priority = 0,  texte = "Cause undetermined." },
 	
-	--rejets remontes par rejectDraft() dans createATO_table (ATO_Generator_C_Core.lua) :
+	--rejets remontes par rejectDraft() dans createATO_table (ATO_Gen_Main.lua) :
 	--un 3e circuit, distinct de rejectStep/SquadGenerationStatus, qui intervient plus tard
 	--dans la construction du package (apres qu'un loadout ait ete juge eligible).
 	insufficient_aircraft_count   = { priority = 90, texte = "Not enough aircraft to fill this tasking." },
@@ -148,6 +148,12 @@ GeneratorPass = (GeneratorPass or 0) + 1
 
 -- Réinitialiser le fichier au démarrage
 local function initDebugLogs()
+    --CORRECTION (bug 11) : avant, le fichier de log etait cree/vide a chaque chargement meme avec Debug.debug = false
+    --(ecriture disque inutile en jeu normal, et ecrase le log d'une session precedente). Sans debug, on ne touche pas au fichier.
+    if not Debug.debug then
+        return
+    end
+
     -- On ne vide le fichier qu'au TOUT PREMIER chargement du process.
     -- Sinon, comme ce fichier est rejoue a chaque tentative de generation,
     -- on ne garderait que les logs de la derniere passe (et donc jamais ceux
@@ -231,7 +237,7 @@ function isPlayerRelatedDraft(draft)
 		return true
 	end
 
-	--Filet de securite solo : dans createATO_table (ATO_Generator_C_Core.lua), l'objet "draft"
+	--Filet de securite solo : dans createATO_table (ATO_Gen_Main.lua), l'objet "draft"
 	--manipule (draftSortiesEntry) ne porte ni .unit ni .player/.client, seulement .name (nom du
 	--squad). En solo, le squad du joueur est connu via playerInfo.squadBAT (deja utilise par
 	--ExplainPlayerRejectionSP) : on s'en sert ici pour reconnaitre le draft du joueur a ce stade.
@@ -614,15 +620,21 @@ function computeRejectScore(draftContext)
 
 	local score = 0
 
-	for reason, count in pairs(draftContext.rejectStats) do
+	for rejectKey, count in pairs(draftContext.rejectStats) do
+
+		--CORRECTION (bug 5) : rejectStep() range les stats sous la cle "etape|raison" (ex: "range|range_too_short"),
+		--mais l'ancien code comparait cette cle entiere a "range", "weather"... : aucune comparaison ne reussissait,
+		--le score restait toujours 0 et Main ne gardait que le PREMIER rejet (bestScore initial = -1, 0 > -1 une seule fois).
+		--On extrait donc la raison (partie apres "|") et on compare aux VRAIS codes utilises par rejectStep().
+		local reason = string.match(rejectKey, "|(.+)$") or rejectKey
 
 		if reason == "no_loadoutEligible" then
 			score = score + count * 100
 
-		elseif reason == "range" then
+		elseif reason == "range_too_short" or reason == "support_no_range" then
 			score = score + count * 80
 
-		elseif reason == "weather" then
+		elseif reason == "no_weatherEligible" or reason == "weather_not_eligible" then
 			score = score + count * 60
 
 		elseif reason == "loadout_day_only" then
@@ -657,10 +669,10 @@ function addRejectReason(draftContext, reason)
 		draftContext.rejectCount = {}
 	end
 
-	--évite les doublons simples
-	if not draftContext.rejectReasons[reason] then
-		draftContext.rejectReasons[reason] = true
-	end
+	--CORRECTION (bug 13) : l'ancien code ecrivait ici draftContext.rejectReasons[reason] = true (cle texte),
+	--alors que rejectStep() utilise la MEME table comme liste d'entrees {step, reason, data, ...}.
+	--Deux usages dans une seule table : risque de collision et de confusion a la lecture. Le compteur
+	--rejectCount[reason] ci-dessous suffit a savoir qu'une raison est survenue ; on n'ecrit plus de cle texte dans rejectReasons.
 
 	--compteur détaillé
 	if not draftContext.rejectCount[reason] then
@@ -671,9 +683,21 @@ function addRejectReason(draftContext, reason)
 end
 
 -- Report uniquement des MAIN tasks demandées par joueur
-local function playerRejectReason(draftContext, reason, rejectReason)
+--CORRECTION (bug 12) : cette fonction etait 'local' et n'etait appelee nulle part (PlayerMainTaskFailure restait vide,
+--"echecs MAIN demandees" = 0 dans printGeneratorSummary). De plus elle lisait draftContext.draft qui n'existe pas
+--(le contexte EST le draft). Elle est maintenant globale, lit les champs reels du contexte (side, unit.type, task)
+--et est appelee par ATO_Gen_Main.lua quand une tache MAIN demandee par un joueur n'a pas genere de sortie.
+function playerRejectReason(draftContext, reason, rejectReason)
 
-	local draft = draftContext.draft
+	local draft = nil
+
+	if draftContext and draftContext.side and draftContext.task and (draftContext.unitType or (draftContext.unit and draftContext.unit.type)) then
+		draft = {
+			side = draftContext.side,
+			type = draftContext.unitType or draftContext.unit.type,
+			task = draftContext.task,
+		}
+	end
 
 	if draft and draft.type and draft.task and draft.side then
 

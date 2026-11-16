@@ -269,6 +269,22 @@ for sideName, packs in pairs(ATO) do
 				earliest = earliest + mainFlight.standoff / mainFlight.vAttack		--earliest TOT to make sure that aircraft always spawn 10 minutes ahead of IP at mission start
 			end
 
+						--wargame airlift : pour un vol Transport, le TOT vise l'atterrissage final (derniere WP).
+			--Il doit donc laisser le temps de voler TOUTE la route (base > Load > Drop > base),
+			--sinon le vol devient "air start" en plein milieu de la route (Taxi et Departure supprimes).
+			if mainFlight.task == "Transport" and mainFlight.route then
+				local isAirlift = false
+				local routeLen = 0
+				for w = 1, #mainFlight.route do
+					if mainFlight.route[w].id == "Load" then isAirlift = true end
+					if w > 1 then routeLen = routeLen + GetDistance(mainFlight.route[w - 1], mainFlight.route[w]) end
+				end
+				local vRef = (mainFlight.loadout and mainFlight.loadout.vCruise) or mainFlight.vCruise
+				if isAirlift and vRef and vRef > 0 then
+					earliest = earliest + routeLen / (vRef * 0.9)			--0.9 = meme vitesse mini que le calcul des ETA en amont
+				end
+			end
+			
 			-- local latest = pack[p].main[1].tot_to 
 			local latest = mainFlight.tot_to + mission_ini.startup_time_player 															--latest TOT
 			-- local latest = pack[p].main[1].tot_to + mission_ini.mission_duration
@@ -504,6 +520,12 @@ for sideName, packs in pairs(ATO) do
 
 				if flight[f].loadout.vCruise then main_vCruise = flight[f].loadout.vCruise end
 				if flight[f].loadout.vAttack then main_vAttack = flight[f].loadout.vAttack end
+
+				-- AJOUT : pas de vAttack (Transport, helico, escorte de Transport...) -> on prend vCruise
+				if not main_vAttack then
+					print("AtoT: pas de vAttack pour "..tostring(flight[f].type).." task="..tostring(flight[f].task).." role="..tostring(role).." -> vCruise utilise")
+					main_vAttack = main_vCruise
+				end
 
 				--flight TOT for packages continously covering a station
 				if flight[f].task == "AWACS" or flight[f].task == "Refueling" or flight[f].task == "AFAC" then		--flight is part of a package that continously covers a station
@@ -830,12 +852,12 @@ for sideName, packs in pairs(ATO) do
 
 				--Air starts
 
-				local airstart = 0															--if TOT causes a take off before mission start, flight becomes air start and this variable gets the number of the spawn WP
+				local airstart = 0							--if TOT causes a take off before mission start, flight becomes air start and this variable gets the number of the spawn WP
 				local deltaETA = 0
 				
-				for w = target_wp - 1, 1, -1 do													--iterate through waypoints backwards
+				for w = target_wp - 1, 1, -1 do							--iterate through waypoints backwards
 
-					-- if flight[f].route[w].eta < 0 and not (flight[f].client or flight[f].player) then		--ETA before mission start
+					--ETA before mission start
 					if ( flight[f].route[w].eta < 0 ) and not (flight[f].client or flight[f].player) then
 						
 						deltaETA = flight[f].route[1].eta
@@ -852,29 +874,26 @@ for sideName, packs in pairs(ATO) do
 
 							flight[f].route[w].name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline)
 							flight[f].route[w].id = "Spawn"
-							flight[f].route[w].alt = flight[f].route[w].alt
+							--v1.7.73 : le Spawn prend l'altitude du WP suivant (avant : alt = alt, donc l'altitude du WP au sol, ex. 7 m)
+							flight[f].route[w].alt = flight[f].route[w + 1].alt
 							flight[f].route[w].eta = 0											--ETA of WP is at mission start
-							-- flight[f].route[w].speed = speed									--set NEWSPEED
 						
-						else																	--else move the spawn point to new location
+						else							--else move the spawn point to new location
 							
 							local offset_WP = GetOffsetPoint(flight[f].route[w + 1], heading, dist)
-
-							-- x = flight[f].route[w + 1].x + math.cos(math.rad(h)) * dist,
-							-- y = flight[f].route[w + 1].y + math.sin(math.rad(h)) * dist,
 
 							flight[f].route[w] = {
 								name = "Create Spawn Wp in AtoTiming "..flight[f].route[w].id.." "..tostring(debug.getinfo(1).currentline),
 								x = offset_WP.x,
 								y = offset_WP.y,
-								eta = 0,														--ETA of WP is at mission start
-								id = "Spawn",													--WP is spawn point
+								eta = 0,												--ETA of WP is at mission start
+								id = "Spawn",											--WP is spawn point
 								alt = flight[f].route[w + 1].alt,
 								speed = flight[f].route[w + 1].speed,													--set NEWSPEED
 							}
 						end
 
-						airstart = w															--store the number of the spawn WP (WPs ahead will be removed)
+						airstart = w											--store the number of the spawn WP (WPs ahead will be removed)
 						break
 
 					end

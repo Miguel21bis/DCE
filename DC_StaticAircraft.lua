@@ -1,12 +1,15 @@
 --To add unused ready aircraft as uncontrolled static aircraft to mission
 --Initiated by Main_NextMission.lua
-------------------------------------------------------------------------------------------------------- 
+-------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_StaticAircraft.lua"] = "1.3.13"
-------------------------------------------------------------------------------------------------------- 
+versionDCE["DC_StaticAircraft.lua"] = "1.4.0"
+-------------------------------------------------------------------------------------------------------
 if Debug.debug then
 	print("START DC_StaticAircraft.lua "..versionDCE["DC_StaticAircraft.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
+
+-- Places de parking laissées volontairement vides sur chaque base (évite les pbs de comptage, de petit parking, etc.)
+local STATIC_PARK_MARGIN = 2
 
 --Count all aircraft assigned in ATO
 local count = {}
@@ -15,7 +18,7 @@ for side_name, side in pairs(ATO) do										--Iterate through sides in ATO
 	for pack_n, pack in pairs(side) do										--Iterate through packages
 		for role_name, role in pairs(pack) do								--Iterate throug roles
 			for flight_n, flight in pairs(role) do							--Iterate through flights
-			-- print("DcSA "..side_name.." "..pack_n.." "..role_name.." "..flight_n)	
+			-- print("DcSA "..side_name.." "..pack_n.." "..role_name.." "..flight_n)
 			if count[flight.name] then									--Unit already has a count entry
 					count[flight.name] = count[flight.name] + flight.number	--Sum number
 				else														--Unit has no count entry
@@ -29,10 +32,10 @@ end
 
 --Function to add a number of uncontrolled aircraft per unit to mission
 local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
-			
-	-- print("DcSA Passe base "..tostring(base).." : ") 
+
+	-- print("DcSA Passe base "..tostring(base).." : ")
 	for u = 1, number do													--Repeat for each unasisgned aircraft
-		
+
 		local DCE_FreqPackage = GetFrequencyNG(side, "static", nil, unit.type, nil, "FreqPackage", nil)
 
 		local group = {														--Define group to spawn
@@ -51,7 +54,7 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 						["airdromeId"] = db_airbases[unit.base].airdromeId,
 						["alt_type"] = "BARO",
 						["formation_template"] = "",
-						["properties"] = 
+						["properties"] =
 						{
 							["vnav"] = 1,
 							["scale"] = 0,
@@ -62,12 +65,12 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 						["ETA"] = 0,
 						["y"] = db_airbases[unit.base].y,
 						["x"] = db_airbases[unit.base].x,
-						["speed"] = 0,														--138.88888888889,
+						["speed"] = 0,										--138.88888888889,
 						["ETA_locked"] = true,
-						["task"] = 
+						["task"] =
 						{
 							["id"] = "ComboTask",
-							["params"] = 
+							["params"] =
 							{
 								["tasks"] = {}
 							},
@@ -79,7 +82,7 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 			['hidden'] = true,
 			['units'] = {
 				[1] = {
-					["alt"] = 0,														--1490
+					["alt"] = 0,											--1490
 					["heading"] = 0,
 					["callsign"] = "123",
 					["psi"] = 0,
@@ -95,16 +98,16 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 						["chaff"] = 0,
 						["gun"] = 0,
 					},
-					["AddPropAircraft"] = 
+					["AddPropAircraft"] =
 						{
 					},
-					["speed"] = 0,															--138.88888888889
+					["speed"] = 0,											--138.88888888889
 					["unitId"] = GenerateIDUnit("DcSA ".."Static " .. unit.name .. " " .. u .. "-1", unit.type),
 					["alt_type"] = "BARO",
 					["skill"] = unit.skill,
 					["hardpoint_racks"] = true,
 					--["parking"] = 1,
-					
+
 				},
 			},
 			['radioSet'] = false,
@@ -112,39 +115,39 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 			['communication'] = true,
 			['x'] = db_airbases[unit.base].x,
 			['y'] = db_airbases[unit.base].y,
-			['start_time'] = 1,																--0
-			['task'] = "Nothing",															--intercept
+			['start_time'] = 1,												--0
+			['task'] = "Nothing",											--intercept
 			['uncontrolled'] = true,
 		}
 
-		if parkingId then					
-			local findParkId = GetParkingId( parkingId, base)						
+		if parkingId then
+			local findParkId = GetParkingId( parkingId, base)
 			if findParkId then
 				-- print("DcSA Passe "..unit.type.." base: "..tostring(base).." parking_id: "..tostring(findParkId).." type: "..unit.type)
 				group.units[1]["parking_id"] = findParkId
 			else
 				-- print("DcSA Passe NO PARKING A return "..unit.type)
 				return
-			end	
+			end
 		else
 
 		end
-		
+
 		if unit.sidenumber and unit.sidenumber[1] and unit.sidenumber[2] then											--squadron has sidenumbers defined
 			group.units[1]["onboard_num"] = GetSidenumber(unit.name, unit.sidenumber[1])			--get new sidenumber
-		else																											--squadron has no sidenumbers defined
+		else																								--squadron has no sidenumbers defined
 			group.units[1]["onboard_num"] = "0" .. math.random(1, 99)													--us a random number
 		end
-		
+
 		--multiple skins for aircraft
-		if type(group.units[1]["livery_id"]) == "table" then															--if skin is a table
+		if type(group.units[1]["livery_id"]) == "table" then														--if skin is a table
 			if  #group.units[1]["livery_id"] ~= 0 then
 				group.units[1]["livery_id"] = group.units[1]["livery_id"][math.random(1, #group.units[1]["livery_id"])]		--chose a random skin from table
 			else
 				group.units[1]["livery_id"] = ""
 			end
 		end
-		
+
 		--add group to mission
 		for c = 1, #mission.coalition[side].country do
 			if mission.coalition[side].country[c].name == unit.country then
@@ -169,7 +172,32 @@ local function AddUncontrolledAircraft(side, unit, number, parkingId, base)
 end
 
 
+-- Places de parking libres d'une base pour les statics :
+--   LimitedParkNb (db_airbases) - pic d'avions présents en même temps (TabLPark[base].NbPlaneTot, calculé par ATO_FlightPlan) - marge
+-- Retourne le nombre de statics que l'on peut ajouter sur cette base (jamais négatif) ; 0 si la base n'a pas de LimitedParkNb
+local function StaticBudget(baseName)
+	local base = db_airbases[baseName]
+	local limit = tonumber(base.LimitedParkNb)
+	if not limit then
+		return 0																			--pas de LimitedParkNb dans db_airbases : aucun static sur cette base
+	end
+
+	local pic = 0
+	if TabLPark and TabLPark[baseName] and TabLPark[baseName].NbPlaneTot then
+		pic = TabLPark[baseName].NbPlaneTot											--aucun vol sur cette base : pic = 0
+	end
+
+	local budget = limit - pic - STATIC_PARK_MARGIN
+	if budget < 0 then budget = 0 end
+	return budget
+end
+
+
 --Count unassigned aircraft and add them to mission as idle at airbase
+-- étape 1 : pour chaque base, la liste des escadrilles et leur nombre d'avions non utilisés
+local staticByBase = {}															--[baseName] = { squads = { {side=, unit=, wanted=, given=}, ... } }
+local baseOrder = {}															--ordre stable des bases (même mission pour une même graine)
+
 for side,unit in pairs(oob_air) do												--Iterate through sides in oob_air
 	for n = 1, #unit do															--iterate through units
 		if unit[n].inactive ~= true then										--unit is active
@@ -182,39 +210,46 @@ for side,unit in pairs(oob_air) do												--Iterate through sides in oob_air
 							break												--End count iteration
 						end
 					end
-					
+
 					if unassigned == nil then									--If unassigned is still nil (unit has no aircraft in ATO)
 						unassigned = unit[n].roster.ready						--All ready aircraft are unassigned
 					end
-					if unassigned > 12 then										--if more than 12
-						unassigned = 12 + math.floor((unassigned - 12) * 0.5)	--amount above 12 is halfed
-					end
-					
-					--TabLPark[flight[f].base][timmingParking]
-					-- cherche le nombre maximum d avion en meme tps sur la base
-					-- pour trouver le nb de place disponible pour les avions static
-					if db_airbases[unit[n].base].LimitedParkNb and TabLPark[unit[n].base] then
-						local nb = 0
-						-- for mn , value in pairs(TabLPark[unit[n].base]) do
-						-- 	if type(value) == "number" and value > nb then
-						-- 		nb = value
-						-- 	end
-						-- end
-						if TabLPark[unit[n].base].NbPlaneTot then
-							nb = TabLPark[unit[n].base].NbPlaneTot
-						end
-					
-						-- local NbParkPossible  = db_airbases[unit[n].base].LimitedParkNb - nb
-						local NbParkPossible = db_airbases[unit[n].base].LimitedParkNb - nb
 
-						if unassigned > NbParkPossible then
-							unassigned = NbParkPossible
+					if unassigned > 0 then
+						local baseName = unit[n].base
+						if not staticByBase[baseName] then
+							staticByBase[baseName] = { squads = {} }
+							baseOrder[#baseOrder + 1] = baseName
 						end
+						table.insert(staticByBase[baseName].squads, { side = side, unit = unit[n], wanted = unassigned, given = 0 })
 					end
-					
-					AddUncontrolledAircraft(side, unit[n], unassigned, unit[n].parking_id, unit[n].base)			--Add uncontrolled aircraft for this unit
 				end
 			end
+		end
+	end
+end
+
+-- étape 2 : pour chaque base, répartition des places libres entre les escadrilles (un avion par escadrille à chaque tour),
+-- puis ajout des statics dans la mission
+for _, baseName in ipairs(baseOrder) do
+	local squads = staticByBase[baseName].squads
+	local budget = StaticBudget(baseName)
+
+	local progress = true
+	while budget > 0 and progress do											--s'arrête quand il n'y a plus de place ou plus d'avion à placer
+		progress = false
+		for _, squad in ipairs(squads) do
+			if budget > 0 and squad.given < squad.wanted then
+				squad.given = squad.given + 1
+				budget = budget - 1
+				progress = true
+			end
+		end
+	end
+
+	for _, squad in ipairs(squads) do
+		if squad.given > 0 then
+			AddUncontrolledAircraft(squad.side, squad.unit, squad.given, squad.unit.parking_id, baseName)		--Add uncontrolled aircraft for this unit
 		end
 	end
 end
@@ -268,7 +303,7 @@ for _, side in pairs(mission.coalition) do
 			for n = #country.static.group, 1, -1 do
 				local staticGroup = country.static.group[n]
 				local linkUnit = staticGroup.route and staticGroup.route.points[1].linkUnit
-				
+
 				if linkUnit and shipIndex[linkUnit] then
 					local linkedShip = shipIndex[linkUnit]
 					if (linkedShip.group.probability and linkedShip.group.probability < 1) or linkedShip.unit.dead then

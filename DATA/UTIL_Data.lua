@@ -1393,12 +1393,14 @@ Data_divers = {
 	},
 
 	["Mirage-F1CE"] = {
+		playable = true,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
 		inherited_All_Mod_From = "Mirage-F1C",
 		refuellingReceptacleType = "drogue",
 	},
 	["Mirage-F1EE"] = {
+		playable = true,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
 		inherited_All_Mod_From = "Mirage-F1C",
@@ -1414,6 +1416,7 @@ Data_divers = {
 		
 	},
 	["Mirage-F1BE"] = {
+		playable = true,
 		inheritedFrom = "Mirage-F1",	--copy radio frequency, failures ...
 		folderModName = "Mirage-F1",
 		inherited_All_Mod_From = "Mirage-F1B",
@@ -3481,6 +3484,7 @@ Data_warehouses =
 	},
 	["speed"] = 16.666666,
 	["dynamicSpawn"] = false,
+	["dynamicCargo"] = true,
 	["unlimitedAircrafts"] = true,
 	["unlimitedFuel"] = true,
 	["size"] = 100,
@@ -3492,7 +3496,6 @@ Data_warehouses =
 		["InitFuel"] = 100,
 	},
 	["coalition"] = "blue",
-	["dynamicCargo"] = false,
 	["OperatingLevel_Eqp"] = 10,
 	["gasoline"] = 
 	{
@@ -3862,250 +3865,315 @@ local function getDcsRootFromExe()
     return root
 end
 
-function DataCompilation_DataDiscoveryA2()
 
-    local path_camp = os.getenv('pathSavedGames') or camp.path
-  
-	local path_dcs = os.getenv("pathDCS") or getDcsRootFromExe() or camp.path_dcs
 
-    for planeType, planeData in pairs(Data_divers) do
-        if AircraftInCampaign[planeType] and planeData.folderModName then
+-- Appel sans argument : comportement historique (modules de la campagne uniquement).
+-- Appel avec opts (utilisé par DCEM_Function) :
+--   opts.allModules      = true  -> tous les modules de Data_divers qui ont un folderModName
+--                                   (sans dépendre de AircraftInCampaign / camp / AddLog)
+--   opts.radioOnly       = true  -> ne touche ni Tasks ni Failures, seulement HumanRadio / panelRadio
+--   opts.pathDCS         = "C:/.../DCS World/"      (sinon pathDCS env, exe luae, camp.path_dcs)
+--   opts.pathSavedGames  = "C:/.../Saved Games/DCS/" (sinon pathSavedGames env, camp.path)
+--   opts.stats           = {}    -> rempli : dcsRoot, savedGames, scanned, files, missing
+--   opts.detail          = {}    -> rempli : detail[planeType] = texte de diagnostic (chemin, fichier lu, avions trouvés)
+function DataCompilation_DataDiscoveryA2(opts)
 
-			-- if Debug.debug then print("DataDiscoveryA2 for aircraft: "..planeType) end
+	opts = opts or {}
+	local allModules = (opts.allModules == true)
+	local radioOnly  = (opts.radioOnly == true)
+	local stats      = opts.stats
+	local detail     = opts.detail
 
-            local folderModName = planeData.folderModName
+	local function log(msg)
+		if type(AddLog) == "function" then AddLog(msg) end
+	end
 
-            if type(folderModName) == "string" then
+	local function withSlash(p)
+		if type(p) == "string" and p ~= "" and not p:find("[/\\]$") then
+			return p .. "/"
+		end
+		return p
+	end
 
-                -- local fullPath
-                local modRoot
+	local path_camp = withSlash(opts.pathSavedGames or os.getenv('pathSavedGames') or (camp and camp.path))
+	local path_dcs  = withSlash(opts.pathDCS or os.getenv("pathDCS") or getDcsRootFromExe() or (camp and camp.path_dcs))
 
-				-- Construire le chemin CoreMods
-				local fullPath = path_dcs .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
+	if stats then
+		stats.dcsRoot    = path_dcs or false
+		stats.savedGames = path_camp or false
+		stats.scanned    = 0
+		stats.files      = 0
+		stats.missing    = 0
+	end
 
-				if planeData.add_aircraftFileName then
-					fullPath = path_dcs .. "CoreMods/aircraft/" .. folderModName .. "/"..planeData.add_aircraftFileName	
+	-- charge un fichier Lua dans un environnement donné : Lua 5.1 (setfenv) comme Lua 5.4 (paramètre env de loadfile)
+	local function loadWithEnv(path, env)
+		if setfenv then
+			local f, err = loadfile(path)
+			if not f then return nil, err end
+			setfenv(f, env)
+			return f
+		end
+		return loadfile(path, "t", env)
+	end
+
+	-- plusieurs types d'avion partagent le même entry.lua (F14, A-10, L-39 ...) :
+	-- on ne le charge qu'une fois, le résultat (la liste des add_aircraft) est gardé ici
+	local cache = {}
+	local cacheInfo = {}
+
+	local function isWantedAircraft(aircraft, wanted)
+		local name = aircraft.Name or aircraft.self_ID
+		if not name or not wanted then
+			return false
+		end
+		return wanted == name
+	end
+
+	-- charge un entry.lua dans un environnement bac à sable, renvoie la liste des add_aircraft
+	local function loadEntry(fullPath, modRoot, planeType)
+
+		if cache[fullPath] then return cache[fullPath] end
+
+		local env = {}
+
+		-- Lua standard
+		env.pairs    = pairs
+		env.ipairs   = ipairs
+		env.next     = next
+		env.tonumber = tonumber
+		env.tostring = tostring
+		env.type     = type
+		env.unpack   = unpack or table.unpack
+		env.select   = select
+
+		env.math   = math
+		env.string = string
+		env.table  = table
+
+		env.assert = assert
+		env.error  = error
+		env.pcall  = pcall
+		env.print  = print
+
+		env.Transport        = "Transport"
+		env.Reconnaissance   = "Reconnaissance"
+		env.Refueling 		= "Refueling"
+		env.AWACS 			= "AWACS"
+
+		env.AFAC              = "AFAC"
+		env.CAP              = "CAP"
+		env.CAS              = "CAS"
+		env.GroundAttack     = "Ground Attack"
+		env.RunwayAttack     = "Runway Attack"
+		env.Intercept        = "Intercept"
+		env.AntishipStrike   = "Antiship Strike"
+		env.PinpointStrike	 = "Pinpoint Strike"
+		env.Escort           = "Escort"
+		env.FighterSweep     = "Fighter Sweep"
+		env.SEAD             = "SEAD"
+		env.Training         = "Training"
+		-- env.Airborne         = "Airborne"
+		env.Airborne         = "Transport"
+		env.MODULATION_AM	= "AM"
+		env.MODULATION_FM	= "FM"
+		env.MODULATION_AM_AND_FM = "AM AND FM"
+
+		-- DCS helpers connus
+		env._ = function(s) return s end
+		env.current_mod_path = modRoot
+		env.__DCS_VERSION__  = "OFFLINE"
+		env.__DEBUG__        = false
+
+		--code original
+		env.db_path = (path_dcs or "") .. "Scripts/Database"
+		env.aircraft_task = function(task)
+			return task
+		end
+
+		-- add_aircraft DOIT rester réel
+		local collected = {}
+		env.add_aircraft = function(def)
+			if type(def) ~= "table" then
+				return
+			end
+			table.insert(collected, def)
+		end
+
+		-- dofile sandboxé
+		env.dofile = function(path)
+			local f = loadWithEnv(path, env)
+			if not f then
+				return nil
+			end
+			local ok, res = pcall(f)
+			if not ok then
+				return nil
+			end
+			return res
+		end
+
+		-- fallback universel
+		setmetatable(env, {
+			__index = function(t, k)
+				local v = make_stub()
+				rawset(t, k, v)
+				return v
+			end
+		})
+
+		-- chargement entry.lua
+		local info = { loaded = false, err = nil }
+		local chunk, loadErr = loadWithEnv(fullPath, env)
+		if chunk then
+			local ok, err = pcall(chunk)
+			info.loaded = true
+			if not ok then
+				info.err = tostring(err)
+				log("ERROR loading entry.lua for "..tostring(planeType)..": "..tostring(err))
+			end
+			if stats then stats.files = stats.files + 1 end
+		else
+			info.err = tostring(loadErr)
+			log("ERROR: entry.lua not found for "..tostring(planeType).." at path: "..tostring(fullPath))
+			if stats then stats.missing = stats.missing + 1 end
+		end
+
+		cache[fullPath] = collected
+		cacheInfo[fullPath] = info
+		return collected
+	end
+
+	local function discoverPlane(planeType, planeData)
+
+		local folderModName = planeData.folderModName
+		if type(folderModName) ~= "string" then return end
+
+		if stats then stats.scanned = stats.scanned + 1 end
+
+		local fullPath, modRoot
+
+		-- Construire le chemin CoreMods
+		if path_dcs then
+			fullPath = path_dcs .. "CoreMods/aircraft/" .. folderModName .. "/entry.lua"
+
+			if planeData.add_aircraftFileName then
+				fullPath = path_dcs .. "CoreMods/aircraft/" .. folderModName .. "/"..planeData.add_aircraftFileName
+			end
+
+			if planeData.overridePATH then
+				fullPath = path_dcs .. "CoreMods/aircraft/" .. planeData.overridePATH
+			end
+
+			-- Vérifier si le fichier existe dans le premier chemin (CoreMods/aircraft/)
+			local f0 = io.open(fullPath, "r")
+			if f0 then
+				modRoot = path_dcs .. "CoreMods/aircraft/" .. folderModName
+				f0:close()
+			end
+		end
+
+		if not modRoot then
+			-- Si non trouvé, basculer vers Mods (Saved Games)
+			if not path_camp then
+				if allModules then
+					log("DataDiscoveryA2: aucun chemin pour "..tostring(planeType).." (path_dcs/path_camp absents)")
+					if stats then stats.missing = stats.missing + 1 end
+					return
 				end
+				error(string.format(
+					"\n[ERREUR CONTEXTE] Impossible de basculer vers Saved Games pour l'appareil '%s'.\n" ..
+					"-> path_camp est NIL.\n" ..
+					"-> path_dcs actuel: %s\n" ..
+					"-> folderModName: %s",
+					tostring(planeType), tostring(path_dcs), tostring(folderModName)
+				))
+			end
 
-				if planeData.overridePATH then
-					fullPath = path_dcs .. "CoreMods/aircraft/" .. planeData.overridePATH
-				end
+			fullPath = path_camp .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
+			modRoot  = path_camp .. "Mods/aircraft/" .. folderModName
+		end
 
-				-- Vérifier si le fichier existe dans le premier chemin (par exemple, CoreMods/aircraft/)
-				local f0 = io.open(fullPath, "r")
-				-- if Debug.debug then print("DataDiscovery_B1 test entry.lua : "..fullPath) end
-				if f0 then
-					modRoot  = path_dcs .. "CoreMods/aircraft/" .. folderModName
-					f0:close()
-				else
-					-- Si non trouvé, basculer vers Mods (Saved Games)
-					if not path_camp then
-						error(string.format(
-							"\n[ERREUR CONTEXTE] Impossible de basculer vers Saved Games pour l'appareil '%s'.\n" ..
-							"-> path_camp est NIL.\n" ..
-							"-> path_dcs actuel: %s\n" ..
-							"-> folderModName: %s",
-							tostring(planeType), tostring(path_dcs), tostring(folderModName)
-						))
+		if planeData.override_PATH_File then
+			fullPath =  modRoot .."/" .. planeData.override_PATH_File
+		end
+
+		--  collected contient TOUS les avions du module
+		local collected = loadEntry(fullPath, modRoot, planeType)
+		local matched = false
+
+		for _, aircraft in ipairs(collected) do
+
+			local dst = Data_divers[planeType]
+			local wanted = dst.inherited_All_Mod_From or planeType
+
+			if wanted then
+				if isWantedAircraft(aircraft, wanted) then
+					matched = true
+
+					if aircraft.Tasks and not radioOnly then
+						dst.Tasks = aircraft.Tasks
 					end
 
-					
-
-
-					fullPath = path_camp .. "Mods/aircraft/" .. folderModName .. "/entry.lua"
-					modRoot  = path_camp .. "Mods/aircraft/" .. folderModName
-
-				end
-
-				if planeData.override_PATH_File then
-					fullPath =  modRoot .."/" .. planeData.override_PATH_File
-				end 
-
-
-                -- if Debug.debug then print("DataDiscovery_B2 entry.lua : "..fullPath) end
-
-                local env = {}
-
-				-- Lua standard
-				env.pairs    = pairs
-				env.ipairs   = ipairs
-				env.next     = next
-				env.tonumber = tonumber
-				env.tostring = tostring
-				env.type     = type
-				env.unpack   = unpack
-				env.select   = select
-
-				env.math   = math
-				env.string = string
-				env.table  = table
-
-				env.assert = assert
-				env.error  = error
-				env.pcall  = pcall
-				env.print  = print
-
-				env.Transport        = "Transport"
-				env.Reconnaissance   = "Reconnaissance"
-				env.Refueling 		= "Refueling"
-				env.AWACS 			= "AWACS"
-
-				env.AFAC              = "AFAC"
-				env.CAP              = "CAP"
-				env.CAS              = "CAS"
-				env.GroundAttack     = "Ground Attack"
-				env.RunwayAttack     = "Runway Attack"
-				env.Intercept        = "Intercept"
-				env.AntishipStrike   = "Antiship Strike"
-				env.PinpointStrike	 = "Pinpoint Strike"
-				env.Escort           = "Escort"
-				env.FighterSweep     = "Fighter Sweep"
-				env.SEAD             = "SEAD"
-				env.Training         = "Training"
-				-- env.Airborne         = "Airborne"
-				env.Airborne         = "Transport"
-				env.MODULATION_AM	= "AM"
-				env.MODULATION_FM	= "FM"
-				env.MODULATION_AM_AND_FM = "AM AND FM"
-
-				-- DCS helpers connus
-				env._ = function(s) return s end
-				env.current_mod_path = modRoot
-				env.__DCS_VERSION__  = "OFFLINE"
-				env.__DEBUG__        = false
-
-				--code original
-				env.db_path = path_dcs .. "Scripts/Database"
-				env.aircraft_task = function(task)
-					return task
-				end
-
-				-- add_aircraft DOIT rester réel
-				local collected = {}
-				env.add_aircraft = function(def)
-					if type(def) ~= "table" then
-						-- if Debug.debug then  print("  [add_aircraft IGNORED] invalid def:", type(def)) end
-						return
-					end
-					table.insert(collected, def)
-				end
-
-				-- dofile sandboxé
-				env.dofile = function(path)
-					local f = loadfile(path)
-					if not f then
-						-- if Debug.debug then  print("  [IGNORED dofile] "..tostring(path)) end
-						return nil
-					end
-					setfenv(f, env)
-					local ok, res = pcall(f)
-					if not ok then
-						-- if Debug.debug then  print("  [DOFILE ERROR] "..tostring(res)) end
-						return nil
-					end
-					return res
-				end
-
-				-- fallback universel
-				setmetatable(env, {
-					__index = function(t, k)
-						local v = make_stub()
-						rawset(t, k, v)
-						return v
-					end
-				})
-
-				-- chargement entry.lua
-				local chunk = loadfile(fullPath)
-				if chunk then
-					setfenv(chunk, env)
-					local ok, err = pcall(chunk)
-					if not ok then
-						-- if Debug.debug then  print("  [ENTRY ERROR] "..tostring(err)) os.execute 'pause' end
-						AddLog("ERROR loading entry.lua for "..tostring(planeType)..": "..tostring(err))
-						-- os.execute 'pause'
-					end
-				else
-					-- if Debug.debug then print("  [MISSING entry.lua] for "..tostring(planeType) .." in fullPath : "..tostring(fullPath)) os.execute 'pause' end
-					AddLog("ERROR: entry.lua not found for "..tostring(planeType).." at path: "..tostring(fullPath))
-					
-				end
-
-				local function isWantedAircraft(aircraft, wanted)
-					local name = aircraft.Name or aircraft.self_ID
-
-					-- if Debug.debug then  print("  -> isWantedAircraft A2 name "..tostring(name).." wanted: "..tostring(wanted)) end
-
-					if not name or not wanted then
-						return false
+					if aircraft.HumanRadio then
+						dst.HumanRadio = aircraft.HumanRadio
 					end
 
-					return wanted == name
-				end
+					if aircraft.panelRadio then
+						dst.panelRadio = aircraft.panelRadio
+					end
 
-
-				--  collected contient TOUS les avions du module
-				for _, aircraft in ipairs(collected) do
-
-					local dst = Data_divers[planeType]
-					local wanted = dst.inherited_All_Mod_From or planeType
-
-					-- if Debug.debug then  print("  -> collected A planeName "..tostring(planeType).." aircraft.Name: "..tostring(aircraft.Name).." wanted: "..tostring(wanted)) end
-
-					if wanted then
-						-- FILTRE COMPATIBLE LUA 5.1
-						if isWantedAircraft(aircraft, wanted) then
-
-							if aircraft.Tasks then
-								dst.Tasks = aircraft.Tasks
-								-- _affiche(aircraft.Tasks, "  -> A2 Tasks found ")
-								-- if Debug.debug then print("  -> A2 Tasks found ") end
-								
-							end
-
-							if aircraft.HumanRadio then
-								dst.HumanRadio = aircraft.HumanRadio
-								-- _affiche(aircraft.HumanRadio, "  -> HumanRadio found ")
-								-- if Debug.debug then print("  -> A3 HumanRadio found ") end
-								
-							end
-							if aircraft.panelRadio then
-								dst.panelRadio = aircraft.panelRadio
-								-- print("  -> panelRadio found ")
-								-- _affiche(aircraft.panelRadio, "  -> panelRadio found ")
-								-- if Debug.debug then print("  -> A4 panelRadio found ") end
-								
-							end
-							
-							-- FAILURES
-							local failures = extractFailuresA2(aircraft)
-							if failures then
-								Failures[planeType] = failures
-								dst.Failures = failures
-							end
-
-							-- extraction plus tard
-							
-							-- print("  -> A2 aircraft captured "..planeType)
-							
-
-							-- local file_str = "dst = " .. TableSerialization(Data_divers[planeType], 0)			--make a string
-							-- local file_File = io.open("Debug/Data_Divers_GetMods_"..planeType..".lua", "w") or error("Failed to open debug EWR_UtilDebug file")
-							-- file_File:write(file_str)																	--save new data
-							-- file_File:close()
-
+					-- FAILURES
+					if not radioOnly then
+						local failures = extractFailuresA2(aircraft)
+						if failures then
+							Failures[planeType] = failures
+							dst.Failures = failures
 						end
-					else
-						-- print("  -> collected A planeName "..tostring(planeType).." wanted: "..tostring(wanted))
-						AddLog("WARNING: collected aircraft "..tostring(aircraft.Name or aircraft.self_ID).." does not match wanted "..tostring(wanted).." for planeType "..tostring(planeType))
-						-- os.execute 'pause'
 					end
-				end
 
-            end
-        end
-    end
+				end
+			else
+				log("WARNING: collected aircraft "..tostring(aircraft.Name or aircraft.self_ID).." does not match wanted "..tostring(wanted).." for planeType "..tostring(planeType))
+			end
+		end
+
+		if detail then
+			local names = {}
+			for _, aircraft in ipairs(collected) do
+				local n = aircraft.Name or aircraft.self_ID
+				names[#names + 1] = (type(n) == "string") and n or "?"
+			end
+			local info = cacheInfo[fullPath] or {}
+			detail[planeType] = "entry=" .. tostring(fullPath)
+				.. " | fichier=" .. (info.loaded and "lu" or "ABSENT/illisible")
+				.. " | erreur=" .. tostring(info.err)
+				.. " | avions=[" .. table.concat(names, ",") .. "]"
+				.. " | cherche=" .. tostring(planeData.inherited_All_Mod_From or planeType)
+				.. " | trouve=" .. tostring(matched)
+				.. " | racineDCS=" .. tostring(path_dcs)
+		end
+	end
+
+	for planeType, planeData in pairs(Data_divers) do
+		if allModules or (AircraftInCampaign and AircraftInCampaign[planeType]) then
+			if planeData.folderModName then
+				if allModules then
+					-- un module qui pose problème ne doit pas empêcher la lecture des autres
+					local ok, err = pcall(discoverPlane, planeType, planeData)
+					if not ok then
+						log("DataDiscoveryA2 erreur sur "..tostring(planeType)..": "..tostring(err))
+						if detail then detail[planeType] = "ERREUR: " .. tostring(err) end
+					end
+				else
+					discoverPlane(planeType, planeData)
+				end
+			end
+		end
+	end
 end
+
+
 
 
 --rempli la table TaskByPlane avec les Tasks qui ne sont rempli que dans Data_divers

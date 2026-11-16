@@ -289,6 +289,61 @@ end
 	-- Ecran N°0 Choix next mission
 print("Reset the campaign and generate a new first mission.\n")
 
+-- [K] Nettoyage de Init/camp_triggers_init.lua : audit, puis confirmation avant toute modification
+local function CleanTriggersMenu()
+	print("\n--- Clean Init/camp_triggers_init.lua ---")
+	print("Removes every trigger that uses a group / unit / static missing from Init/base_mission.miz,")
+	print("or that uses a template (TemplateActive / TemplateDeactivate). Active/ is not touched.\n")
+
+	IncludeOnce("UTIL_CleanTriggers.lua")
+	if not CleanTriggersInit then
+		print("UTIL_CleanTriggers.lua not found, nothing done.\n")
+		return
+	end
+
+	--étape 1 : audit, rien n'est écrit
+	local ok, nb, noms = CleanTriggersInit(false)
+	if not ok then
+		print("\nAudit failed, nothing changed. See Debug/CleanTriggers_report.txt\n")
+		return
+	end
+	if nb == 0 then
+		print("\nNothing to remove, camp_triggers_init.lua is already clean.\n")
+		return
+	end
+
+	print("\n" .. nb .. " trigger(s) would be removed:")
+	for _, nom in ipairs(noms) do
+		print("   - " .. nom)
+	end
+	print("\n(details: Debug/CleanTriggers_report.txt)")
+
+	--étape 2 : confirmation explicite
+	local rep
+	repeat
+		if DCEM_MachineMode then
+			print("##DCEM_PROMPT##cleantriggers")
+		end
+		io.write("\nRemove them now ? A backup .bak_ is made first. (y/n): ")
+		rep = string.lower(io.stdin:read() or "n")
+		if rep ~= "y" and rep ~= "n" then
+			print("\nInvalid entry.")
+		end
+	until rep == "y" or rep == "n"
+
+	if rep == "n" then
+		print("\nCancelled, file not modified.\n")
+		return
+	end
+
+	local ok2, nb2 = CleanTriggersInit(true)
+	if ok2 then
+		print("\nDone: " .. nb2 .. " trigger(s) removed. Backup next to the file (camp_triggers_init.lua.bak_...).\n")
+	else
+		print("\nERROR, file NOT modified (or restored). See Debug/CleanTriggers_report.txt\n")
+	end
+end
+
 local input
 local choix1
 
@@ -332,6 +387,8 @@ repeat
 			-- print()
 			print(" [T] Multiplayer by Target")
 			print(" [N] Multiplayer by NATO package")
+			print()
+			print(" [K] Clean Init/camp_triggers_init.lua (campaign maker)")
 			print()
 			-- print(" [O] Tools / CampaignMaker")
 			-- print()
@@ -782,6 +839,10 @@ repeat
 		elseif choix1 == "c" then
 			dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_ChangePlane.lua")
 
+		elseif choix1 == "k" then
+			CleanTriggersMenu()
+			choix1 = nil												--retour au menu, aucune mission n'est generee
+
 		elseif choix1 == "o" then
 
 			local tabIndexTools = {
@@ -833,6 +894,8 @@ repeat
 			break
 
 		end
+
+		if not tabIndex01[choix1] then choix1 = nil end					--saisie inconnue : on re-affiche le menu
 	until tabIndex01[choix1]
 
 	print("\n\n")
@@ -843,12 +906,7 @@ repeat
 		if DCEM_MachineMode then
 			print("##DCEM_CYCLE##"..tostring(MissionInstance))
 		end
-
-		--mode degrade : a partir de la 5e tentative infructueuse, on assouplit portee/
-		--firepower pour le draft du joueur plutot que de ne rien lui proposer (cf
-		--ATO_Generator_A_Debug.lua / ATO_Generator_C_Core.lua).
-		RelaxGeneration = (MissionInstance >= 5)
-
+		
 		-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_NextMission.lua")						--generate mission
 		Include("MAIN_NextMission.lua")
 		

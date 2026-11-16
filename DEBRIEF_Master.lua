@@ -335,6 +335,37 @@ end
 
 dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Include.lua")
 IncludeOnce("UTIL_Functions.lua")
+--wargame airlift : livraisons de la mission -> Active/wargame_logistics_result.lua (lu par DCE_Manager)
+--Les livraisons sont lues dans MissionEventsLog.lua (global "events", chargee plus haut) : entrees type = "airlift delivery"
+--ecrites en mission par DCE_Airlift.lua dans CustomLog. Aucune entree = 0 kg partout.
+--Le resultat est calcule ici mais ECRIT seulement apres acceptation du debrief (voir branche "y" plus bas).
+WgAirResult = nil
+do
+	local wgAir = campL and campL.wargame_airlift
+	if wgAir then
+		local result = { mission = campL.mission, deliveries = {}, air = {} }
+
+		for _, z in ipairs(wgAir.zones or {}) do
+			result.air[z.slot] = 0
+		end
+
+		local nEv = 0
+		if type(events) == "table" then
+			for _, ev in ipairs(events) do
+				if type(ev) == "table" and ev.type == "airlift delivery" and ev.slot then
+					local kg = tonumber(ev.kg) or 0
+					table.insert(result.deliveries, { slot = ev.slot, side = ev.side, kg = kg, by = ev.by, group = ev.group, t = ev.t })
+					result.air[ev.slot] = (result.air[ev.slot] or 0) + kg
+					nEv = nEv + 1
+				end
+			end
+		end
+		print("DEBRIEF wargame airlift: "..nEv.." livraison(s) lue(s) dans MissionEventsLog")
+
+		WgAirResult = result
+	end
+end
+
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/UTIL_Functions.lua")
 
 --TODO ceci ne fonctionne pas
@@ -414,6 +445,8 @@ dofile("Active/oob_scen.lua")
 -- dofile("../../../ScriptsMod."..VersionPackageICM.."/DEBRIEF_Text.lua")														--In this script the actual text is created. Script loaded after oob modifications above have been made.
 IncludeOnce("DC_UpdateTargetlist.lua")
 IncludeOnce("DEBRIEF_Text.lua")
+IncludeOnce("DEBRIEF_ExportMap.lua")
+
 
 local debriefFilePath = "Debriefing/Debriefing " .. camp.mission .. ".txt"
 
@@ -508,6 +541,7 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
 		"camp_status.lua",
 		"zoneSAR.lua",
 		"Mission_LL_Positions.lua",
+		"flightTrack.lua"
 	}
 
 	-- Créer le répertoire "mission_0n" s'il n'existe pas
@@ -544,6 +578,17 @@ print("\n\n")
 
 if input == "y" or input == "yes" then
 
+		--wargame airlift : le debrief est accepte, on ecrit le resultat pour DCE_Manager
+	if WgAirResult then
+		local wgOut = io.open("Active/wargame_logistics_result.lua", "w")
+		if wgOut then
+			wgOut:write("wargame_logistics_result = " .. TableSerialization(WgAirResult, 0))
+			wgOut:close()
+		else
+			print("DEBRIEF wargame airlift: ecriture impossible de Active/wargame_logistics_result.lua")
+		end
+	end
+	
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/MAIN_AcceptMission.lua")
 	IncludeOnce("MAIN_AcceptMission.lua")
 
@@ -556,6 +601,7 @@ else
 		os.remove("camp_status.lua")		--DISABLE FOR DEBUG
 		os.remove("zoneSAR.lua")			--DISABLE FOR DEBUG
 		os.remove("Mission_LL_Positions.lua")			--DISABLE FOR DEBUG
+		os.remove("flightTrack.lua")
 	end
 	os.exit()
 
@@ -1075,6 +1121,47 @@ if input == "y" or input == "yes" then
 
 		--generate next campaign mission
 
+		--==========================================================
+		-- WARGAME : avant de generer la mission suivante, DCE_Manager joue le tour du front
+		-- (pertes, combat, replis, avance). Seulement quand DCE_Manager pilote le script.
+		if os.getenv("DCEM_MACHINE_MODE") == "1" then
+			-- 1. le fichier doit refleter l'etat courant (resultats du debriefing deja integres)
+			local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open targetlist.lua")
+			tgtFile:write("targetlist = " .. TableSerialization(targetlist, 0))
+			tgtFile:close()
+
+			-- 2. DCE_Manager travaille sur le fichier, puis repond "ok" (ou "skip" en cas d'erreur)
+			print("##DCEM_PROMPT##wargame")
+			io.stdout:flush()
+			local wargameAnswer = io.stdin:read()
+			print("Wargame turn : " .. tostring(wargameAnswer))
+
+			-- 3. on relit le fichier : DCE_Manager a pu retirer, deplacer ou poser des formations
+			if wargameAnswer == "ok" then
+				dofile("Active/targetlist.lua")
+				if targetlist and targetlist.blue and not targetlist.blue[1] then TargetlistToNum(targetlist) end
+
+				-- flags d'objectif atteint posés par le wargame (un nom par ligne)
+				local fFlags = io.open("Active/wargame_flags.txt", "r")
+				if fFlags then
+					for line in fFlags:lines() do
+						local name = line:match("^%s*(.-)%s*$")
+						if name ~= "" then
+							camp.flag = camp.flag or {}
+							if name:sub(1, 1) == "-" then
+								camp.flag[name:sub(2)] = nil
+								print("Wargame flag cleared : " .. name:sub(2))
+							else
+								camp.flag[name] = true
+								print("Wargame flag : " .. name)
+							end
+						end
+					end
+					fFlags:close()
+				end
+			end
+		end
+
 		PlayerFlight = false																		--variable to control mission generation loop
 		Briefing_oob_text_red = Briefing_oob_text_red .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
 		Briefing_oob_text_blue = Briefing_oob_text_blue .. FormatTime(camp.time, "hh:mm") .. ", " .. tostring(camp.date.day) .. "." .. tostring(camp.date.month) .. "." .. tostring(camp.date.year).. ".\n"
@@ -1222,6 +1309,7 @@ if not Debug.debug then
 	os.remove("camp_status.lua")		--DISABLE FOR DEBUG
 	os.remove("zoneSAR.lua")			--DISABLE FOR DEBUG
 	os.remove("Mission_LL_Positions.lua")			--DISABLE FOR DEBUG
+	os.remove("flightTrack.lua")
 end
 
 if DCEM_MachineMode then

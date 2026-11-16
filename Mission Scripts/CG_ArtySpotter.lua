@@ -52,18 +52,20 @@ local artyZonePrefixName = "arty"		-- name of artillery zones, added in the miss
 local artyZones = {}
 -- camp.boundary[spotterSide]			-- another way of knowing whether a target can be hit by artillery is to define a border or front line. But this is in the DCE environment.
 
-local tableOfClient = {
-	MARKER_FOUND = false,
-	playerVec3 = { x = 0, y = 0, z = 0 },
-	targetVec3 = { x = 0, y = 0, z = 0 },
-	unitID = "",
-	groupID = "",
-	initiator = "",
-	adjustDistance = 0,					-- Adjust fire (from F10 menu)
-	adjustDirection = 0,				-- Adjust fire (from F10 menu)
-	artyCall = 0, 						-- pilot called arty (from F10 menu) 1 = single round, 2 = fire for effect 
-	menuItems = false,
-}
+local function newArtyTask()
+	return {
+		MARKER_FOUND = false,
+		playerVec3 = { x = 0, y = 0, z = 0 },
+		targetVec3 = { x = 0, y = 0, z = 0 },
+		unitID = "",
+		groupID = "",
+		initiator = "",
+		adjustDistance = 0,
+		adjustDirection = 0,
+		artyCall = 0,
+		menuItems = false,
+	}
+end
 
 local responseTimeVar = 5				--response time of the interlocutor, so that the answer is not immediate like a computer
 local artyDistance = 40000				--distance max between arty zone and target
@@ -1053,7 +1055,7 @@ local function onPlayerAddMarker(event)
 					-- Store position**********************************************************
 
 					if not artyTasks[initiatorName] then
-						artyTasks[initiatorName] = tableOfClient
+						artyTasks[initiatorName] = newArtyTask()
 					end
 
 					trigger.action.outTextForUnit( event.initiator:getID(), "Marker added", 5)
@@ -1105,12 +1107,12 @@ local function onPlayerAddMarker(event)
 
 					-- local initiatorName = event.initiator:getName()
 					local initiatorName = event.initiator:getPlayerName()
-					artyTasks[initiatorName].MARKER_FOUND = true
-					local playerUnit = event.initiator
 
 					if not artyTasks[initiatorName] then
-						artyTasks[initiatorName] = {}
+						artyTasks[initiatorName] = newArtyTask()
 					end
+					artyTasks[initiatorName].MARKER_FOUND = true
+					local playerUnit = event.initiator
 
 					artyTasks[initiatorName].initiator = event.initiator
 					artyTasks[initiatorName].unitID = event.initiator:getID()

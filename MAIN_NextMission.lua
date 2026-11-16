@@ -1,7 +1,335 @@
 --To generate a new mission file. Unzips template mission, defines content of next missions and packs a new mission file
 --Initiated by Debrief_Master.lua, BAT_FirstMission.lua or BAT_RedoMission.lua
-------------------------------------------------------------------------------------------------------- 
+-------------------------------------------------------------------------------------------------------
 
+----- MESURE MEMOIRE (etape 2 : on mesure seulement, rien d'autre ne change) -----
+-- Ecrit des lignes [MEM] dans la console ET dans Debug/Memory.log (ligne par ligne : le fichier survit a un plantage).
+-- Utile a CHAQUE passe, planteuse ou non : on compare les passes entre elles.
+--   MemMark("texte")      une ligne : memoire Lua utilisee, ecart depuis la ligne precedente
+--   MemSnapshot("texte")  nettoyage complet (GC) puis : dechets liberes, memoire de luae.exe, plus gros globaux
+-- Reglages dans MemTrace (actif = false coupe tout).
+if not MemTrace then
+	MemTrace = {
+		actif   = false,					--false = plus aucune ligne [MEM]
+		fichier = "Debug/Memory.log",	--log DEDIE a la memoire (uniquement des lignes [MEM]) ; nil = pas d'ecriture disque
+		console = true,					--false = rien dans la console, tout reste dans le fichier
+		top     = 12,					--nb de gros globaux listes dans un snapshot (0 = pas de liste, plus rapide)
+		systeme = true,					--lit aussi la memoire de luae.exe (commande Windows tasklist)
+		tickEvery = 100,				--MemTick() ecrit une ligne tous les N appels (suivi de la boucle du generateur)
+		limiteObjets = 1500000,			--MemSize/MemProbe : on arrete de compter apres N objets (le comptage lui-meme consomme de la memoire)
+		gcPause = nil,					--nil = reglage Lua par defaut (200). Essai : 100 = le ramasse-miettes se declenche plus tot (voir etape 2)
+		passe   = 0,
+		ticks   = 0,
+		dernierSys = 0,
+		dernier = 0,					--derniere valeur mesuree (Ko), pour l'ecart
+		pic     = 0,					--plus haute valeur vue dans la passe (Ko)
+		picLabel = "",
+	}
+
+	if MemTrace.gcPause then
+		collectgarbage("setpause", MemTrace.gcPause)
+	end
+
+	--vide le fichier au demarrage du process (les passes suivantes completent)
+	if MemTrace.fichier then
+		local f = io.open(MemTrace.fichier, "w")
+		if f then f:close() end
+	end
+end
+
+do
+	local function mo(ko)
+		return string.format("%.1f", ko / 1024)
+	end
+
+	--estimation en octets d'une table et de tout ce qu'elle contient (cycles geres par "vus")
+	local function taille(racine, vus)
+		local total = 0
+		local pile = { racine }
+		local n = 1
+		local nbObjets = 0
+		local tronque = false
+
+		while n > 0 do
+			if nbObjets > MemTrace.limiteObjets then
+				tronque = true
+				break
+			end
+			local t = pile[n]
+			pile[n] = nil
+			n = n - 1
+			total = total + 56								--l'en-tete d'une table
+			nbObjets = nbObjets + 1
+
+			for k, v in pairs(t) do
+				total = total + 40							--une entree
+				for _, x in ipairs({ k, v }) do
+					local tx = type(x)
+					if tx == "table" then
+						if not vus[x] then
+							vus[x] = true
+							n = n + 1
+							pile[n] = x
+						end
+					elseif tx == "string" then
+						if not vus[x] then
+							vus[x] = true
+							total = total + 24 + #x
+							nbObjets = nbObjets + 1
+						end
+					elseif tx == "function" then
+						total = total + 32
+					end
+				end
+			end
+		end
+
+		return total, tronque
+	end
+
+	--liste les plus gros globaux (estimation : un sous-tableau partage n'est compte que pour le 1er global rencontre)
+	local function topGlobaux(nbMax)
+		local vus = {}
+		for _, nom in ipairs({ "_G", "package", "string", "table", "math", "os", "io", "debug", "coroutine", "MemTrace" }) do
+			if type(_G[nom]) == "table" then vus[_G[nom]] = true end
+		end
+
+		local noms = {}
+		for nom, valeur in pairs(_G) do
+			if type(valeur) == "table" and not vus[valeur] then
+				table.insert(noms, nom)
+			end
+		end
+		table.sort(noms, function(a, b) return tostring(a) < tostring(b) end)		--ordre fixe : resultats comparables d'une passe a l'autre
+
+		local liste = {}
+		local somme = 0
+		for _, nom in ipairs(noms) do
+			if not vus[_G[nom]] then
+				vus[_G[nom]] = true
+				local o = taille(_G[nom], vus)
+				somme = somme + o
+				table.insert(liste, { nom = tostring(nom), octets = o })
+			end
+		end
+		table.sort(liste, function(a, b) return a.octets > b.octets end)
+
+		MemLine(string.format("   plus gros globaux (estimation, total des globaux ~ %s Mo) :", mo(somme / 1024)))
+		for i = 1, math.min(nbMax, #liste) do
+			MemLine(string.format("   %2d. %-30s ~ %8s Mo", i, liste[i].nom, mo(liste[i].octets / 1024)))
+		end
+	end
+
+	--memoire de luae.exe vue par Windows (Ko), ou nil. Plusieurs luae : on garde le plus gros.
+	local function memSysteme()
+		if not MemTrace.systeme then return nil end
+		local p = io.popen('tasklist /FI "IMAGENAME eq luae.exe" /FO CSV /NH 2>nul')
+		if not p then return nil end
+
+		local meilleur
+		for ligne in p:lines() do
+			local dernier = string.match(ligne, '"([^"]*)"%s*$')		--derniere colonne : "123 456 Ko"
+			if dernier then
+				local n = tonumber((string.gsub(dernier, "%D", "")))
+				if n and (not meilleur or n > meilleur) then meilleur = n end
+			end
+		end
+		p:close()
+		return meilleur
+	end
+
+	function MemLine(msg)
+		if not MemTrace or not MemTrace.actif then return end
+		local ligne = "[MEM] "..tostring(msg)
+		if MemTrace.console then print(ligne) end
+		if MemTrace.fichier then
+			local f = io.open(MemTrace.fichier, "a")
+			if f then
+				f:write(ligne.."\n")
+				f:close()
+			end
+		end
+	end
+
+	function MemMark(label)
+		if not MemTrace or not MemTrace.actif then return end
+		local ko = collectgarbage("count")
+		if ko > MemTrace.pic then
+			MemTrace.pic = ko
+			MemTrace.picLabel = tostring(label)
+		end
+		MemLine(string.format("passe %d | %-38s | %8s Mo | %+7.1f Mo", MemTrace.passe, tostring(label), mo(ko), (ko - MemTrace.dernier) / 1024))
+		MemTrace.dernier = ko
+
+		--memoire vue par Windows : a chaque nouveau palier de +200 Mo de memoire Lua (pas a chaque ligne : tasklist est lent)
+		if MemTrace.systeme and ko - MemTrace.dernierSys > 200 * 1024 then
+			MemTrace.dernierSys = ko
+			local sys = memSysteme()
+			MemLine(string.format("   luae.exe vu par Windows : %s Mo pour %s Mo de memoire Lua", sys and mo(sys) or "inconnu", mo(ko)))
+		end
+	end
+
+	--une ligne tous les MemTrace.tickEvery appels : a placer DANS une boucle pour voir la courbe de la memoire
+	function MemTick(label)
+		if not MemTrace or not MemTrace.actif then return end
+		MemTrace.ticks = MemTrace.ticks + 1
+		if MemTrace.ticks % MemTrace.tickEvery == 0 then
+			MemMark(tostring(label or "tick").." #"..MemTrace.ticks)
+		end
+	end
+
+	--taille estimee (Mo) d'une table, pour les variables locales que topGlobaux ne voit pas
+	function MemSize(t)
+		if type(t) ~= "table" then return 0 end
+		return (taille(t, {})) / 1024 / 1024
+	end
+
+	--"sonde" : memoire AVANT et APRES nettoyage complet (donc : dechets ou donnees vivantes ?),
+	--puis la taille de chaque table donnee { nom = table, ... }. A placer a un endroit precis du code.
+	function MemProbe(label, tables)
+		if not MemTrace or not MemTrace.actif then return end
+
+		local ok, err = pcall(function()
+			MemMark(tostring(label).." (avant nettoyage)")
+			local avant = collectgarbage("count")
+			collectgarbage("collect")
+			collectgarbage("collect")
+			local apres = collectgarbage("count")
+			MemLine(string.format("   SONDE %s : %s Mo avant nettoyage -> %s Mo VIVANTS apres (%s Mo de dechets)",
+				tostring(label), mo(avant), mo(apres), mo(avant - apres)))
+
+			if tables then
+				local noms = {}
+				for nom in pairs(tables) do table.insert(noms, nom) end
+				table.sort(noms)
+
+				local vus = {}
+				for _, nom in ipairs(noms) do
+					if type(tables[nom]) == "table" then
+						local o, tronque = taille(tables[nom], vus)
+						MemLine(string.format("      %-28s ~ %8s Mo%s", tostring(nom), mo(o / 1024), tronque and " (comptage tronque : au moins)" or ""))
+					end
+				end
+			end
+
+			MemTrace.dernier = collectgarbage("count")
+			MemTrace.dernierSys = MemTrace.dernier
+		end)
+
+		if not ok then
+			MemLine("sonde en erreur : "..tostring(err))
+		end
+	end
+
+	--qui pese quoi DANS les elements d'une liste (ex. draftSorties.blue) : taille estimee par champ, puis par sous-champ,
+	--sur un echantillon de max "echantillon" elements repartis dans la liste, extrapolee a toute la liste.
+	--Un objet partage entre plusieurs elements n'est compte qu'une fois (donc les vraies copies ressortent).
+	function MemFields(label, liste, echantillon)
+		if not MemTrace or not MemTrace.actif then return end
+
+		local ok, err = pcall(function()
+			if type(liste) ~= "table" or #liste == 0 then
+				MemLine("   CHAMPS "..tostring(label).." : liste vide")
+				return
+			end
+
+			local nb = #liste
+			local ech = echantillon or 150
+			if ech > nb then ech = nb end
+			local pas = nb / ech
+
+			local vus = {}
+			local parChamp = {}
+			local tronque = false
+
+			for i = 1, ech do
+				local el = liste[math.floor((i - 1) * pas) + 1]
+				if type(el) == "table" then
+					vus[el] = true
+					for k, v in pairs(el) do
+						if type(v) == "table" then
+							local o, tr = taille(v, vus)
+							if tr then tronque = true end
+							local cle = tostring(k)
+							parChamp[cle] = (parChamp[cle] or 0) + o
+
+							--un niveau de plus pour voir ce qu'il y a dedans
+							for k2, v2 in pairs(v) do
+								if type(v2) == "table" then
+									local o2 = taille(v2, {})
+									local cle2 = cle.."."..tostring(k2)
+									parChamp[cle2] = (parChamp[cle2] or 0) + o2
+								end
+							end
+						end
+					end
+				end
+			end
+
+			local noms = {}
+			for nom in pairs(parChamp) do noms[#noms + 1] = nom end
+			table.sort(noms, function(a, b) return parChamp[a] > parChamp[b] end)
+
+			local coef = nb / ech
+			MemLine(string.format("   CHAMPS %s : %d elements, echantillon %d (extrapole x%.1f)%s",
+				tostring(label), nb, ech, coef, tronque and " [comptage tronque]" or ""))
+			for i = 1, math.min(14, #noms) do
+				local o = parChamp[noms[i]]
+				MemLine(string.format("      %-34s ~ %8s Mo au total  (%6.1f Ko par element)", noms[i], mo(o * coef / 1024), o / ech / 1024))
+			end
+		end)
+
+		if not ok then
+			MemLine("MemFields en erreur : "..tostring(err))
+		end
+	end
+
+	function MemSnapshot(label)
+		if not MemTrace or not MemTrace.actif then return end
+
+		local ok, err = pcall(function()
+			local avant = collectgarbage("count")
+			collectgarbage("collect")
+			collectgarbage("collect")
+			local apres = collectgarbage("count")
+
+			local sys = memSysteme()
+			MemLine(string.format("passe %d | SNAPSHOT %s", MemTrace.passe, tostring(label)))
+			MemLine(string.format("   Lua : %s Mo avant nettoyage, %s Mo apres (donnees vivantes) -> %s Mo de dechets liberes",
+				mo(avant), mo(apres), mo(avant - apres)))
+			MemLine("   luae.exe vu par Windows : "..(sys and (mo(sys).." Mo") or "inconnu"))
+
+			if MemTrace.top > 0 then
+				topGlobaux(MemTrace.top)
+			end
+
+			MemTrace.dernier = collectgarbage("count")
+			MemTrace.dernierSys = MemTrace.dernier
+		end)
+
+		if not ok then
+			MemLine("snapshot en erreur : "..tostring(err))
+		end
+	end
+end
+
+--une ligne apres chaque Include() de cette passe (le wrapper est retire en fin de MAIN_NextMission)
+if not MemOrigInclude and type(Include) == "function" then
+	MemOrigInclude = Include
+end
+if MemOrigInclude and MemTrace.actif then
+	Include = function(fichier, ...)
+		local a, b, c = MemOrigInclude(fichier, ...)
+		MemMark("apres "..tostring(fichier))
+		return a, b, c
+	end
+end
+
+MemTrace.passe = MemTrace.passe + 1
+MemTrace.pic = 0
+MemTrace.ticks = 0
+MemTrace.dernierSys = 0
+MemSnapshot("debut de passe (avant chargement de base_mission)")
 
 local t0 = os.clock()
 local t_miz  = 0
@@ -66,17 +394,17 @@ if mission.version < 19 then --19ok 18bad
 	local msg = "(MainNM) ATTENTION: BaseMission.miz is too old. (prior to DCS version 2.7.0) try to save it again with the mission editor. Or ask the creator of this campaign to provide an update."
 
 	Attention(msg)
-	
+
 	os.execute 'pause'
 
 	if Debug.debug then
 	else
 		os.exit()
 	end
-	
+
 end
 
---parse la table original trigrules pour reperer les a_do_script_file 
+--parse la table original trigrules pour reperer les a_do_script_file
 -- et ainsi garde en mémoire les fichiers à remettre, exemple: ["file"] = "ResKey_Action_34"
 for trigN, trig in pairs(mission.trigrules) do
 	if trig and trig.actions then
@@ -151,8 +479,8 @@ end
 -- require("Active/oob_scen")
 local addTriggersZOne
 local destN = 0
-for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed scenery objects
-	if destN <= 5 and scen.x and scen.y then														--destroyed scenery object has x and z coordinates
+for scen_name, scen in pairs(oob_scen) do									--iterate through destroyed scenery objects
+	if destN <= 5 and scen.x and scen.y then																--destroyed scenery object has x and z coordinates
 
 		local isForest = false
 		if scen.sceneryTypeName and string.find(scen.sceneryTypeName, "FOREST")  then
@@ -210,7 +538,7 @@ for scen_name, scen in pairs(oob_scen) do											--iterate through destroyed 
 			destN = destN + 1
 		end
 	end
-	
+
 end
 
 if addTriggersZOne then
@@ -232,31 +560,31 @@ local function addFileTrigger(filename, cond0, predicate1, predicate2)
 
 	--attention, les sons sont à telecharger de cette maniere
 	--	[4] = "a_out_sound_c(21, getValueResourceByKey(\"ResKey_Action_2\"), 0);a_out_sound_c(8, getValueResourceByKey(\"ResKey_Action_3\"), 0);",
--- 	["rules"] = 
+-- 	["rules"] =
 -- 	{
 -- 	}, -- end of ["rules"]
 -- 	["comment"] = "Sounds",
 -- 	["eventlist"] = "",
 -- 	["predicate"] = "triggerStart",
--- 	["actions"] = 
+-- 	["actions"] =
 -- 	{
--- 		[1] = 
+-- 		[1] =
 -- 		{
 -- 			["file"] = "ResKey_Action_2",
 -- 			["countrylist"] = 21,
 -- 			["predicate"] = "a_out_sound_c",
--- 			["ai_task"] = 
+-- 			["ai_task"] =
 -- 			{
 -- 				[1] = "",
 -- 				[2] = "",
 -- 			}, -- end of ["ai_task"]
 -- 		}, -- end of [1]
--- 		[2] = 
+-- 		[2] =
 -- 		{
 -- 			["countrylist"] = 8,
 -- 			["file"] = "ResKey_Action_3",
 -- 			["predicate"] = "a_out_sound_c",
--- 			["ai_task"] = 
+-- 			["ai_task"] =
 -- 			{
 -- 				[1] = "",
 -- 				[2] = "",
@@ -295,8 +623,8 @@ local function addFileTrigger(filename, cond0, predicate1, predicate2)
 	mapResource["ResKey_Action_" .. mission.maxDictId] = filename
 	mission.trig.funcStartup[trig_n] = "if mission.trig.conditions[" .. trig_n .. "]() then mission.trig.actions[" .. trig_n .. "]() end"
 	mission.trig.flag[trig_n] = true
-	mission.trig.conditions[trig_n] = cond																			--"return(true)"
-	--						[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
+	mission.trig.conditions[trig_n] = cond																						--"return(true)"
+	--							[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 	if predicate2 == "a_out_sound_c" then
 		mission.trig.actions[trig_n] = "a_out_sound_c(\"\", getValueResourceByKey(\"ResKey_Action_" .. mission.maxDictId .. "\"), 0);"
 	else
@@ -356,7 +684,7 @@ function AddFileTriggerTempo(arg_filename, arg_time, arg_predicat0, arg_actionPr
 				}
 			}
 			--ref:		a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, true,\\\"all\\\",1)\");a_do_script(\"ctld.JTACAutoLase(
-			s = s.."a_do_script(\\\"ctld.JTACAutoLase(\\\'"..value.NameJTAC.."\\\', 1688, true,\\\"all\\\",1));"
+			s = s.."a_do_script(\\\"ctld.JTACAutoLase(\\\\'\"..value.NameJTAC..\"\\\\', 1688, true,\\\"all\\\",1));"
 		end
 
 		table.insert(table_trigrulesAction, trigrulesAction)
@@ -368,9 +696,9 @@ function AddFileTriggerTempo(arg_filename, arg_time, arg_predicat0, arg_actionPr
 		mapResource["ResKey_Action_" .. mission.maxDictId] = arg_filename
 		--							[1] = "a_do_script_file(getValueResourceByKey(\"ResKey_Action_6\"));",
 		mission.trig.actions[trig_n] = "a_do_script_file(getValueResourceByKey('ResKey_Action_"..mission.maxDictId.."')); mission.trig.func[" .. trig_n .. "]=nil;"
-		
+
 	else
-		--[3] = "a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, false,\\\"all\\\")\"); mission.trig.func[3]=nil;",		
+		--[3] = "a_do_script(\"ctld.JTACAutoLase('JTAC1', 1688, false,\\\"all\\\")\"); mission.trig.func[3]=nil;",
 		mission.trig.actions[trig_n] = s..' mission.trig.func[' .. trig_n .. ']=nil;'
 
 	end
@@ -455,13 +783,15 @@ local function makePayloadRestricted()
 end
 
 
-addFileTrigger("DCE_Util_Common.lua")										-- Chantier A DCE InGame : utilitaires génériques (avant tout le reste)
+addFileTrigger("DCE_Util_Common.lua")																-- Chantier A DCE InGame : utilitaires génériques (avant tout le reste)
+addFileTrigger("DCE_Convoys.lua")       -- Logistics wargame : spawn convois depuis campL.wargame_convoys
 addFileTrigger("camp_status.lua")
-addFileTrigger("DCE_RadioF10.lua")										-- Renomme depuis AddCommandRadioF10.lua
-addFileTrigger("DCE_Background.lua")										-- Chantier B2 DCE InGame : sous-systèmes tâche de fond (avoidArea, EWR, CarrierDeckMonitor...)
+addFileTrigger("DCE_Airlift.lua")       -- Logistics wargame : logistique aerienne (zones, stationnaire IA, menu F10 joueur)
+addFileTrigger("DCE_RadioF10.lua")																-- Renomme depuis AddCommandRadioF10.lua
+addFileTrigger("DCE_Background.lua")																-- Chantier B2 DCE InGame : sous-systèmes tâche de fond (avoidArea, EWR, CarrierDeckMonitor...)
 addFileTrigger("DCE_EventsTracker.lua")
-addFileTrigger("Fuel_Check.lua")													-- Norman99 Modification	M57
-addFileTrigger("ATC_ShutUp_GENERIC.lua")											-- Psyko Modification		M59
+addFileTrigger("Fuel_Check.lua")																				-- Norman99 Modification	M57
+addFileTrigger("ATC_ShutUp_GENERIC.lua")																		-- Psyko Modification		M59
 addFileTrigger("GCIdata.lua")
 addFileTrigger("DCE_GCIscript.lua")
 addFileTrigger("DCE_ARM_Defence_Script.lua")
@@ -474,7 +804,7 @@ addFileTrigger("DCE_AirGroundAttackScript.lua")
 addFileTrigger("DCE_bombOnRunway.lua")
 addFileTrigger("beacon.ogg", nil, nil, "a_out_sound_c")
 addFileTrigger("beaconsilent.ogg", nil, nil, "a_out_sound_c")
--- AddFileTrigger("CG_ArtySpotter.lua")												--https://www.digitalcombatsimulator.com/fr/files/3339128/
+-- AddFileTrigger("CG_ArtySpotter.lua")																		--https://www.digitalcombatsimulator.com/fr/files/3339128/
 
 
 
@@ -502,11 +832,11 @@ end
 --weather
 mission.weather = WeatherParams
 
-camp.SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck								-- modification M37.d SuperCarrier
-camp.CV_Vmax = Data_configuration.CV_Vmax												-- modification M37.d SuperCarrier
-camp.CV_windDeck = Data_configuration.CV_windDeck										-- modification M37.d SuperCarrier
-camp.CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding				-- modification M18.e despawn (e: option confMod)
-camp.SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind)					-- modification M36.d	MenuRadio request manual TurnIntoWind
+camp.SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck																-- modification M37.d SuperCarrier
+camp.CV_Vmax = Data_configuration.CV_Vmax																			-- modification M37.d SuperCarrier
+camp.CV_windDeck = Data_configuration.CV_windDeck																	-- modification M37.d SuperCarrier
+camp.CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding												-- modification M18.e despawn (e: option confMod)
+camp.SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind)												-- modification M36.d	MenuRadio request manual TurnIntoWind
 camp.debug = Debug.debug
 -- camp.makeCampaign = Debug.makeCampaign
 camp.debugInGamePopup = Debug.debugInGamePopup
@@ -528,7 +858,7 @@ for k=1, Multi.NbGroup do
 end
 
 
--- applique silenceATC si true et si auto (multi >= 2)									---- Psyko modification M59_a			silences the tower
+-- applique silenceATC si true et si auto (multi >= 2)																---- Psyko modification M59_a			silences the tower
 if mission_ini.silenceATC and type(mission_ini.silenceATC) == "boolean" then
 	camp.silenceATC = true
 elseif  mission_ini.silenceATC == "auto" and nbTotalClient >= 2 then
@@ -580,6 +910,7 @@ AssignCallnameSquad()
 -- Appel de la fonction principale
 CheckAndFixAllIds()
 
+MemMark("apres CheckAndFixAllIds")
 
 --ajoute des zones en cours de campagne
 --si le fichier add_zones.lua existe, on l'ouvre et on ajoute ses informations à la table mission.zones déjà existante
@@ -627,7 +958,7 @@ if MissionInstance >= 2 then
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_Weather.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_NavalEnvironment.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateSAR.lua")
-	
+
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/ATO_ThreatEvaluation.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_UpdateTargetlist.lua")
 	-- dofile("../../../ScriptsMod."..VersionPackageICM.."/DC_CheckTriggers.lua")
@@ -676,13 +1007,13 @@ end
 
 -- dofile("../../../ScriptsMod." .. VersionPackageICM .. "/ATO_FlightPlan.lua")
 
-	Include("ATO_RouteGenerator.lua")
-	-- Include("ATO_Generator.lua")
-	Include("ATO_Generator_A_Debug.lua")
-	Include("ATO_Generator_B_Eval.lua")
-	Include("ATO_Generator_C_Core.lua")
+   Include("ATO_RouteGenerator.lua")
+   Include("ATO_Generator.lua")	--point d'entree : charge les fichiers du dossier ATO_Generator\
 
 	Include("ATO_PlayerAssign.lua")
+
+	if HoDumpATO then HoDumpATO("APRES ATO_PlayerAssign : VERDICT (IA / joueur / client)", true) end
+	
 	Include("ATO_Timing.lua")
 	Include("ATO_FlightPlan.lua")
 
@@ -738,13 +1069,19 @@ Include("UTIL_Debug.lua")
 camp["groundthreats"] = groundthreats
 
 
-mission.currentKey = 1500000															--not clear how this works but is required for multiplyer clients to be available for selection on mission start
+mission.currentKey = 1500000																--not clear how this works but is required for multiplyer clients to be available for selection on mission start
 
 --########   1   ##############
 --########   1   ##############
 --check les doublons de name, groupId et unitId
 --########   1   ##############
 --########   1   ##############
+
+--unite "piste" (FARP, heliport) : son unitId est aussi l'airdromeId de db_airbases et la cle de son warehouse.
+--Il ne doit jamais etre change : en cas de doublon, c'est l'AUTRE unite qui est renumerotee.
+function IsPisteUnit(unit)
+	return unit.category == "Heliports" or string.find(tostring(unit.type), "FARP", 1, true) ~= nil
+end
 
 local groupId = {}
 local uniId = {}
@@ -776,7 +1113,7 @@ for _, side in pairs(mission.coalition) do
 							-- print("MainNM error, duplicate of |"..categorie.."| name |".. name[group_.name] .."|and|"..tostring(group_.name))
 						end
 
-						
+
 						if not groupId[group_.groupId] then
 							groupId[group_.groupId] = group_.groupId
 						else
@@ -795,11 +1132,19 @@ for _, side in pairs(mission.coalition) do
 								minUnitId = unit.unitId
 							end
 
-							if not  uniId[unit.unitId] then
-								uniId[unit.unitId] = unit.unitId
+							local holder = uniId[unit.unitId]			--unite qui porte deja cet id (table), ou nil
+							if not holder then
+								uniId[unit.unitId] = unit
+							elseif IsPisteUnit(unit) and not IsPisteUnit(holder) then
+								--la piste garde son id : c'est l'unite deja enregistree qui sera renumerotee
+								table.insert(unitIdError, holder.name )
+								uniId[unit.unitId] = unit
 							else
-								-- print("MainNM error, duplicate of |"..tostring(categorie).."| OLD uniId |".. tostring(uniId[unit.unitId]) .."|and|"..tostring(unit.name))
+								-- print("MainNM error, duplicate of |"..tostring(categorie)..| OLD uniId ...)
 								table.insert(unitIdError, unit.name )
+								if IsPisteUnit(unit) then
+									print("MainNM ATTENTION: unitId de piste en double |"..tostring(unit.name).."| id "..tostring(unit.unitId).." (deja porte par une autre piste)")
+								end
 							end
 
 						end
@@ -849,7 +1194,7 @@ for _ , refName in pairs(groupIdError) do
 
 	--change l'Id dans la mission
 	for _, side in pairs(mission.coalition) do																--iterate through sides
-		for _, country_ in pairs(side.country) do															--iterate through countries
+		for _, country_ in pairs(side.country) do																--iterate through countries
 			for _, categorie_ in pairs(country_) do
 				if type(categorie_) == "table" and categorie_.group then
 					for _, group in pairs(categorie_) do
@@ -897,6 +1242,8 @@ for _ , refNameB in pairs(unitIdError) do
 		testId =  maxUnitId + 1
 	end
 
+	uniId[testId] = testId			--id pris : le doublon suivant ne doit pas tomber dessus
+
 	if testId > maxUnitId then
 		maxUnitId = testId
 	end
@@ -905,7 +1252,7 @@ for _ , refNameB in pairs(unitIdError) do
 	end
 
 	for _, sideB in pairs(mission.coalition) do																--iterate through sides
-		for _, countryB in pairs(sideB.country) do															--iterate through countries
+		for _, countryB in pairs(sideB.country) do																--iterate through countries
 			for _, categorieB in pairs(countryB) do
 				if type(categorieB) == "table" and categorieB.group then
 					for _, groupsB in pairs(categorieB) do
@@ -928,6 +1275,12 @@ for _ , refNameB in pairs(unitIdError) do
 	end
 end
 
+--controle final des ids de pistes : db_airbases doit pointer sur les unitId REELS de la mission (a faire avant l'ecriture
+--de Active/db_airbases.lua, plus bas). WargameFarpCheckIds est definie dans DC_CheckTriggers.lua (absente a la 1re mission).
+if WargameFarpCheckIds then
+	WargameFarpCheckIds()
+end
+
 --########   2   ##############
 --check les doublons de name, groupId et unitId
 groupId = {}
@@ -935,7 +1288,7 @@ uniId = {}
 name = {}
 
 for _, side in pairs(mission.coalition) do																--iterate through sides
-	for _, country_ in pairs(side.country) do															--iterate through countries
+	for _, country_ in pairs(side.country) do																--iterate through countries
 		for _, categorie_ in pairs(country_) do
 			if type(categorie_) == "table" and categorie_.group then
 				for _, group in pairs(categorie_) do
@@ -979,7 +1332,7 @@ end
 
 if Debug.allUnhide then
 	for _, side in pairs(mission.coalition) do																--iterate through sides
-		for _, country_ in pairs(side.country) do															--iterate through countries
+		for _, country_ in pairs(side.country) do																--iterate through countries
 			for _, categorie_ in pairs(country_) do
 				if type(categorie_) == "table" and categorie_.group then
 					for _, groups in pairs(categorie_) do
@@ -1055,7 +1408,7 @@ if not (EndCampaign or camp.endCampaign )then
 end
 
 if PlayerFlight then
-	
+
 	if ListRequiredModules then
 		local infoShow = false
 		for _, module in pairs(ListRequiredModules) do
@@ -1085,7 +1438,7 @@ for baseName, base in pairs(db_airbases) do
 
 end
 
---ajoute dans la table campL.Aircraft_Carriers.side 
+--ajoute dans la table campL.Aircraft_Carriers.side
 -- les noms des CV, CVN et CLA, tout porte aéronef
 Aircraft_Carriers = {
 	red = {},
@@ -1151,6 +1504,125 @@ if aaaBlue or aaaRed then
     AddFileTriggerTempo("AAA_barrage.lua", 1.5, "triggerOnce", { [1] = {["Predicate"] = "a_do_script_file"}})
 end
 
+--wargame airlift : donnees pour la mission (zones, vols IA, charges) -> campL.wargame_airlift
+WG_AirliftData = nil
+if WG_AirliftBuildData then
+	local okWG, errWG = pcall(WG_AirliftBuildData)
+	if not okWG then
+		AddLog("WG_AirliftBuildData ERREUR: "..tostring(errWG))
+		WG_AirliftData = nil
+	end
+end
+
+--wargame airlift : les zones Load / Drop sont ecrites dans le .miz (trigger zones visibles dans l'editeur)
+--wargame airlift : les zones Load / Drop sont ecrites dans le .miz (trigger zones visibles dans l'editeur)
+--DCE_Airlift.lua les relit par leur nom avec trigger.misc.getZone
+--Les noms portent SCPT (proprietaire = scriptsMod) : WG_LOAD_SCPT_<slot> / WG_DROP_SCPT_<slot>
+if WG_AirliftData and mission.triggers and mission.triggers.zones then
+	for _, z in ipairs(WG_AirliftData.zones) do
+		z.zoneName = "WG_"..string.upper(z.kind).."_SCPT_"..z.slot
+		table.insert(mission.triggers.zones, {
+			["x"] = z.x,
+			["y"] = z.y,
+			["radius"] = z.radius,
+			["zoneId"] = GetFreeZoneId(),
+			["color"] = (z.kind == "load") and { [1] = 0, [2] = 0.6, [3] = 1, [4] = 0.2 } or { [1] = 1, [2] = 0.5, [3] = 0, [4] = 0.2 },
+			["hidden"] = false,
+			["name"] = z.zoneName,
+		})
+	end
+
+	--wargame airlift : degagement des points de chargement / depose (arbres et batiments).
+	--Zones cachees WG_CLEAR_SCPT_<LOAD|DROP>_<slot> + les memes actions DCS que celles d'une mission faite a la main :
+	--  arbres    : a_remove_scene_objects(zone, masque)        -> trigger "triggerStart" (au demarrage)
+	--  batiments : a_scenery_destruction_zone(zone, 100)       -> trigger "triggerOnce" apres WG_AIRLIFT_CLEAR_DESTROY_S secondes
+	--(meme ecriture que le bloc "Scenery Destruction" plus haut dans ce fichier)
+	local clearList = WG_AirliftData.clear
+	if clearList and #clearList > 0 then
+		local clearIds = {}
+		for _, c in ipairs(clearList) do
+			local zoneId = GetFreeZoneId()
+			c.zoneName = "WG_CLEAR_SCPT_"..string.upper(c.kind).."_"..c.slot
+			table.insert(mission.triggers.zones, {
+				["x"] = c.x,
+				["y"] = c.y,
+				["radius"] = c.radius,
+				["zoneId"] = zoneId,
+				["color"] = { [1] = 1, [2] = 0.2, [3] = 0.2, [4] = 0.1 },
+				["hidden"] = true,
+				["name"] = c.zoneName,
+			})
+			clearIds[#clearIds + 1] = zoneId
+		end
+
+		--arbres : au demarrage de la mission
+		if WG_AIRLIFT_CLEAR_TREES then
+			local mask = WG_AIRLIFT_CLEAR_TREES_MASK or 1
+			local trigN = #mission.trigrules + 1
+			local actionsStr = ""
+			local actionsRules = {}
+			for _, zoneId in ipairs(clearIds) do
+				actionsStr = actionsStr.."a_remove_scene_objects("..zoneId..", "..mask..");"
+				actionsRules[#actionsRules + 1] = {
+					["objects_mask"] = mask,
+					["predicate"] = "a_remove_scene_objects",
+					["zone"] = zoneId,
+				}
+			end
+			mission.trig.flag[trigN] = true
+			mission.trig.conditions[trigN] = "return(true)"
+			mission.trig.actions[trigN] = actionsStr
+			mission.trig.funcStartup[trigN] = "if mission.trig.conditions["..trigN.."]() then mission.trig.actions["..trigN.."]() end"
+			mission.trigrules[trigN] = {
+				["rules"] = {},
+				["eventlist"] = "",
+				["actions"] = actionsRules,
+				["predicate"] = "triggerStart",
+				["comment"] = "WG airlift : remove trees",
+			}
+		end
+
+		--batiments : apres un court delai
+		if WG_AIRLIFT_CLEAR_BUILDINGS then
+			local delay = WG_AIRLIFT_CLEAR_DESTROY_S or 5
+			local trigN = #mission.trigrules + 1
+			local actionsStr = ""
+			local actionsRules = {}
+			for _, zoneId in ipairs(clearIds) do
+				actionsStr = actionsStr.."a_scenery_destruction_zone("..zoneId..", 100);"
+				actionsRules[#actionsRules + 1] = {
+					["type"] = 0,
+					["destruction_level"] = 100,
+					["zone"] = zoneId,
+					["predicate"] = "a_scenery_destruction_zone",
+					["ai_task"] = {
+						[1] = "",
+						[2] = "",
+					},
+				}
+			end
+			mission.trig.flag[trigN] = true
+			mission.trig.conditions[trigN] = "return(c_time_after("..delay..") )"
+			mission.trig.actions[trigN] = actionsStr.." mission.trig.func["..trigN.."]=nil;"
+			mission.trig.func[trigN] = "if mission.trig.conditions["..trigN.."]() then mission.trig.actions["..trigN.."]() end"
+			mission.trigrules[trigN] = {
+				["rules"] = {
+					[1] = {
+						["predicate"] = "c_time_after",
+						["seconds"] = delay,
+					},
+				},
+				["eventlist"] = "",
+				["predicate"] = "triggerOnce",
+				["actions"] = actionsRules,
+				["comment"] = "WG airlift : destroy buildings",
+			}
+		end
+
+		AddLog("WG airlift: "..#clearList.." zone(s) de degagement ecrites (arbres="..tostring(WG_AIRLIFT_CLEAR_TREES)..", batiments="..tostring(WG_AIRLIFT_CLEAR_BUILDINGS)..")")
+	end
+end
+
 --création d'un camp pour camp_status InGame nettement plus leger
 local campL = {
 
@@ -1170,11 +1642,11 @@ local campL = {
 	--weather
 	weather = WeatherParams,
 
-	SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck,								-- modification M37.d SuperCarrier
-	CV_Vmax = Data_configuration.CV_Vmax,												-- modification M37.d SuperCarrier
-	CV_windDeck = Data_configuration.CV_windDeck,										-- modification M37.d SuperCarrier
-	CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding,				-- modification M18.e despawn (e: option confMod)
-	SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind),					-- modification M36.d	MenuRadio request manual TurnIntoWind
+	SC_FullPlaneOnDeck = mission_ini.SC_FullPlaneOnDeck,																-- modification M37.d SuperCarrier
+	CV_Vmax = Data_configuration.CV_Vmax,																			-- modification M37.d SuperCarrier
+	CV_windDeck = Data_configuration.CV_windDeck,																	-- modification M37.d SuperCarrier
+	CV_despawnAfterLanding = Data_configuration.CV_despawnAfterLanding,												-- modification M18.e despawn (e: option confMod)
+	SC_CarrierIntoWind = string.lower(mission_ini.SC_CarrierIntoWind),												-- modification M36.d	MenuRadio request manual TurnIntoWind
 
 	theatre = NameTheatreLower,
 	EjectedPilotFrequency = EjectedPilotFrequency,
@@ -1204,8 +1676,9 @@ local campL = {
 	Aircraft_Carriers = Aircraft_Carriers,
 	AAA_Barrage = AAA_Barrage,
 	MsgForPlayerInMsn = MsgForPlayerInMsn,
-
-
+	wargame_convoys = WG_ConvoysData or nil,	--convois logistiques wargame pour cette mission (nil si absent/non activé)
+	wargame_airlift = WG_AirliftData or nil,	--logistique aerienne wargame (zones, vols IA, charges) pour cette mission
+	flightTrack = mission_ini.flightTrack and true or false,	--trace des vols joueurs (conf_mod) : lu par DCE_InGame
 	-- if not camp.missionHistory then camp.missionHistory = {} end
 	-- camp.missionHistory[camp.mission] = camp.date
 }
@@ -1233,47 +1706,50 @@ UpdateConfMod(nil, camp.date, "MAIN_NextMission "..debug.getinfo(1).currentline)
 --on traite tous les fichiers uniquement si ça vaut le coup
 --bref, si DCE à trouver un siege au joueur
 if PlayerFlight then
-	
+
 	local c_miz = os.clock()
-		
+
+	MemMark("avant serialisation mission (.miz)")
+
+
 	----- create temporary content files of new mission file -----
 	misStr = "mission = " .. TableSerialization(mission, 0)
-	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")											--mission
+	local misFile = io.open("misFile.lua", "w") or error("Failed to open debug file")																	--mission
 	misFile:write(misStr)
 	misFile:close()
 
 	optStr = "options = " .. TableSerialization(options, 0)
-	local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")											--options
+	local optFile = io.open("optFile.lua", "w") or error("Failed to open debug file")																	--options
 	optFile:write(optStr)
 	optFile:close()
 
 	warStr = "warehouses = " .. TableSerialization(warehouses, 0)
-	local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")											--warehouses
+	local warFile = io.open("warFile.lua", "w") or error("Failed to open debug file")																	--warehouses
 	warFile:write(warStr)
 	warFile:close()
 
 	dicStr = "dictionary = " .. TableSerialization(dictionary, 0)
-	local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")											--dictionary
+	local dicFile = io.open("dicFile.lua", "w") or error("Failed to open debug file")																	--dictionary
 	dicFile:write(dicStr)
 	dicFile:close()
 
 	resStr = "mapResource = " .. TableSerialization(mapResource, 0)
-	local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")										--mapResource
+	local resFile = io.open("resFile.lua", "w")	 or error("Failed to open debug file")																	--mapResource
 	resFile:write(resStr)
 	resFile:close()
 
 	local gciStr = "GCI = " .. TableSerialization(GCI, 0)
-	local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")											--GCI data file (EWR radars, AWACS, interceptors)
+	local gciFile = io.open("GCIdata.lua", "w") or error("Failed to open debug file")																	--GCI data file (EWR radars, AWACS, interceptors)
 	gciFile:write(gciStr)
 	gciFile:close()
 
 	local cmpStr = "camp = " .. TableSerialization(camp, 0)
-	local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")								--campaign status file
+	local cmpFile = io.open("Active/camp_status.lua", "w") or error("Failed to open debug file")														--campaign status file
 	cmpFile:write(cmpStr)
 	cmpFile:close()
 
 	local cmpL_Str = "campL = " .. TableSerialization(campL, 0)
-	local cmpL_File = io.open("campL.lua", "w") or error("Failed to open debug file")								--campaign status file
+	local cmpL_File = io.open("campL.lua", "w") or error("Failed to open debug file")																	--campaign status file
 	cmpL_File:write(cmpL_Str)
 	cmpL_File:close()
 
@@ -1286,7 +1762,7 @@ if PlayerFlight then
 	if mission_ini.backupAllMissionFiles and mission_ini.backupAllMissionFiles == true then
 		if not Firstmission_flag then
 			NbMission = tostring(camp.mission - 1)
-			--en skipMission, la mission n'a pas �t� jou�e, donc c'est la suivante
+			--en skipMission, la mission n'a pas été jouée, donc c'est la suivante
 			if Skipmission_flag then
 				NbMission = NbMission + 1
 			end
@@ -1362,12 +1838,14 @@ if PlayerFlight then
 	miz:zipAddFile("l10n/DEFAULT/DCE_CustomTasksScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_CustomTasksScript.lua")
 	miz:zipAddFile("l10n/DEFAULT/DCE_AirGroundAttackScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_AirGroundAttackScript.lua")
 	miz:zipAddFile("l10n/DEFAULT/DCE_CarrierIntoWindScript.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_CarrierIntoWindScript.lua")
-	miz:zipAddFile("l10n/DEFAULT/DCE_Util_Common.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Util_Common.lua")						-- Chantier A DCE InGame
-	miz:zipAddFile("l10n/DEFAULT/DCE_RadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_RadioF10.lua")						-- Renomme depuis AddCommandRadioF10.lua (Modification M29)
-	miz:zipAddFile("l10n/DEFAULT/DCE_Background.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Background.lua")						-- Chantier B2 DCE InGame
+	miz:zipAddFile("l10n/DEFAULT/DCE_Util_Common.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Util_Common.lua")					-- Chantier A DCE InGame
+	miz:zipAddFile("l10n/DEFAULT/DCE_Convoys.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Convoys.lua")
+		miz:zipAddFile("l10n/DEFAULT/DCE_Airlift.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Airlift.lua")
+	miz:zipAddFile("l10n/DEFAULT/DCE_RadioF10.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_RadioF10.lua")					-- Renomme depuis AddCommandRadioF10.lua (Modification M29)
+	miz:zipAddFile("l10n/DEFAULT/DCE_Background.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Background.lua")					-- Chantier B2 DCE InGame
 	miz:zipAddFile("l10n/DEFAULT/Fuel_Check.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/Fuel_Check.lua")								-- Norman99 modification M57_a
 	miz:zipAddFile("l10n/DEFAULT/ATC_ShutUp_GENERIC.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ATC_ShutUp_GENERIC.lua")				-- Psyko modification M59_a
-	miz:zipAddFile("l10n/DEFAULT/DCE_Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Pedro.lua")										-- Pedro TEST
+	miz:zipAddFile("l10n/DEFAULT/DCE_Pedro.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_Pedro.lua")									-- Pedro TEST
 	-- miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "Active/camp_status.lua")
 	miz:zipAddFile("l10n/DEFAULT/camp_status.lua", "campL.lua")
 	-- miz:zipAddFile("l10n/DEFAULT/FlightPlan_Generator_Debug.txt", "Debug/FlightPlan_Generator_Debug.txt")
@@ -1379,23 +1857,23 @@ if PlayerFlight then
 
 	miz:zipAddFile("l10n/DEFAULT/DCE_bombOnRunway.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/DCE_bombOnRunway.lua")
 	miz:zipAddFile("l10n/DEFAULT/CG_ArtySpotter.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CG_ArtySpotter.lua")
-	
+
 	if AAA_Barrage then
 		miz:zipAddFile("l10n/DEFAULT/AAA_barrage.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/AAA_barrage.lua")
 	end
 
 	if not existing_files["l10n/DEFAULT/beacon.ogg"] then
-		miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")	
+		miz:zipAddFile("l10n/DEFAULT/beacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beacon.ogg")
 	end
 
 	miz:zipAddFile("l10n/DEFAULT/beaconsilent.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/beaconsilent.ogg")
 	miz:zipAddFile("l10n/DEFAULT/ejectionRadioBeacon.ogg", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/ejectionRadioBeacon.ogg")
 
 	if mission_ini.load_mist then
-		miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/mist.lua")											-- modification M60 CTLD
+		miz:zipAddFile("l10n/DEFAULT/mist.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/mist.lua")																-- modification M60 CTLD
 	end
 	if mission_ini.load_CTLD then
-		miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CTLD.lua")											-- modification M60 CTLD
+		miz:zipAddFile("l10n/DEFAULT/CTLD.lua", "../../../ScriptsMod."..VersionPackageICM.."/Mission Scripts/CTLD.lua")																-- modification M60 CTLD
 	end
 
 
@@ -1483,6 +1961,8 @@ if PlayerFlight then
 
 	miz:zipClose()
 
+	MemMark("apres creation du .miz")
+
 	t_miz = t_miz + (os.clock() - c_miz)
 
 end -- PlayerFlight onverture/fermeture du fichier .miz
@@ -1506,14 +1986,14 @@ end
 
 
 if Debug.debug then
-	local data_str = "campL = " .. TableSerialization(campL, 0)								--make a string
+	local data_str = "campL = " .. TableSerialization(campL, 0)																--make a string
 	local dataFile = io.open("Debug/campL.lua", "w") or error("Failed to open debug file")
-	dataFile:write(data_str)																		--save new data
+	dataFile:write(data_str)																											--save new data
 	dataFile:close()
 
-	data_str = "mapResource = " .. TableSerialization(mapResource, 0)								--make a string
+	data_str = "mapResource = " .. TableSerialization(mapResource, 0)																	--make a string
 	dataFile = io.open("Debug/mapResource.lua", "w") or error("Failed to open debug file")
-	dataFile:write(data_str)																		--save new data
+	dataFile:write(data_str)																											--save new data
 	dataFile:close()
 end
 
@@ -1521,24 +2001,24 @@ end
 table.sort(oob_air.blue, function(a, b) return a.type:upper() < b.type:upper() end)
 table.sort(oob_air.red, function(a, b) return a.type:upper() < b.type:upper() end)
 
-local air_str = "oob_air = " .. TableSerialization(oob_air, 0)								--make a string
+local air_str = "oob_air = " .. TableSerialization(oob_air, 0)																--make a string
 local airFile = io.open("Active/oob_air.lua", "w") or error("Failed to open debug file")
-airFile:write(air_str)																		--save new data
+airFile:write(air_str)																											--save new data
 airFile:close()
 
-local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)						--make a string
+local ground_str = "oob_ground = " .. TableSerialization(oob_ground, 0)																--make a string
 local groundFile = io.open("Active/oob_ground.lua", "w") or error("Failed to open debug file")
-groundFile:write(ground_str)																--save new data
+groundFile:write(ground_str)																									--save new data
 groundFile:close()
 
-local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)						--make a string
+local tgt_str = "targetlist = " .. TableSerialization(targetlist, 0)																--make a string
 local tgtFile = io.open("Active/targetlist.lua", "w") or error("Failed to open debug file")
-tgtFile:write(tgt_str)																		--save new data
+tgtFile:write(tgt_str)																											--save new data
 tgtFile:close()
 
-local scen_str = "oob_scen = " .. TableSerialization(oob_scen, 0)							--make a string
+local scen_str = "oob_scen = " .. TableSerialization(oob_scen, 0)																	--make a string
 local scenFile = io.open("Active/oob_scen.lua", "w") or error("Failed to open debug file")
-scenFile:write(scen_str)																	--save new data
+scenFile:write(scen_str)																										--save new data
 scenFile:close()
 
 local trigStr = "camp_triggers = " .. TableSerializationAG_triggers(camp_triggers, 0)
@@ -1546,15 +2026,17 @@ local trigFile = io.open("Active/camp_triggers.lua", "w") or error("Failed to op
 trigFile:write(trigStr)
 trigFile:close()
 
-local miss_str = "last_Mission = " .. TableSerialization(mission, 0, { writeNumericTable = true })						--make a string
+local miss_str = "last_Mission = " .. TableSerialization(mission, 0, { writeNumericTable = true })																--make a string
 local missFile = io.open("Active/last_Mission.lua", "w") or error("Failed to open debug file")
-missFile:write(miss_str)															--save new data
+missFile:write(miss_str)																								--save new data
 missFile:close()
 
 local loadout_str = "Loadouts_archive = " .. TableSerialization(LoadoutsList, 0)	--make a string
 local loadoutFile = io.open("Active/Loadouts_archive.lua", "w") or error("Failed to open debug file")
-loadoutFile:write(loadout_str)																--save new data
+loadoutFile:write(loadout_str)																									--save new data
 loadoutFile:close()
+
+if DbgBaseTrace then DbgBaseTrace("MAIN_NextMission: avant ecriture Active/db_airbases") end	-- DIAG
 
 local airbases_Str = "db_airbases = " .. TableSerialization(db_airbases, 0)
 trigFile = io.open("Active/db_airbases.lua", "w") or error("Failed to open debug file")
@@ -1562,13 +2044,15 @@ trigFile:write(airbases_Str)
 trigFile:close()
 
 if camp_ZoneSAR then
-	local ZoneSAR_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)					--make a string
+	local ZoneSAR_str = "camp_ZoneSAR = " .. TableSerialization(camp_ZoneSAR, 0)																--make a string
 	local ZoneSARFile = io.open("Active/camp_ZoneSAR.lua", "w") or error("Failed to open debug file")
-	ZoneSARFile:write(ZoneSAR_str)																	--save new data
+	ZoneSARFile:write(ZoneSAR_str)																										--save new data
 	ZoneSARFile:close()
 end
 
 t_lua2File = t_lua2File + (os.clock() - c_lua2File)
+
+MemMark("apres ecriture Active/*.lua")
 
 --reset TimeJump pour eviter les erreurs de mission suivante
 TimeJump = false
@@ -1715,4 +2199,7 @@ t_backup = t_backup + (os.clock() - c_backup)
 
 	-- print("MAIN_NM test fin")
 
-	
+	MemSnapshot("fin de passe")
+MemLine(string.format("passe %d | PIC observe : %.1f Mo (%s)", MemTrace.passe, MemTrace.pic / 1024, tostring(MemTrace.picLabel)))
+if MemOrigInclude then Include = MemOrigInclude end		--retire le wrapper de mesure
+
