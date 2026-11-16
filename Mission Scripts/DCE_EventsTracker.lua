@@ -866,6 +866,288 @@ local DCE_EventsTracker_Whitelist = {
     [world.event.S_EVENT_PLAYER_LEAVE_UNIT]            = true, -- log_entry "player leave unit"
 }
 
+-------------------------------------------------
+-- TRACES DES JOUEURS (avions / helicos) POUR LE DEBRIEFING
+-------------------------------------------------
+-- But : ecrire PENDANT la mission la trajectoire des unites pilotees par un joueur, pour que
+-- DCE_Manager dessine la trace sur la carte du debriefing.
+-- Option : campL.flightTracks = false coupe tout (aucun fichier, aucun timer). Absente ou true = actif.
+-- Fichier : PathDCE .. "MissionTracks.txt", la ou sont ecrits les autres fichiers de fin de mission.
+--
+-- Format : lignes simples separees par ";" (jamais de syntaxe Lua : une derniere ligne coupee
+-- par un crash est simplement ignoree par le lecteur).
+--   H;1                                     version du format
+--   U;<id>;<unite>;<joueur>;<type>;<camp>   une fois par "session" (une unite), camp = blue / red. joueur vide = IA (mode test)
+--   T;<t>;<id>;<x>;<y>;<z>                  un point. t = secondes entieres (meme base que le t de MissionEventsLog)
+--   F;<t>                                   derniere ligne, ecrite a la fin propre de la mission
+-- Coordonnees : convention des events (x = vec3.x nord, y = vec3.z est, z = altitude MSL), en metres entiers.
+-- Une nouvelle session (nouvel id) commence si : le joueur change, l'objet DCS change (respawn),
+-- ou l'unite n'a pas ete vue pendant plus de GAP secondes. Le lecteur ne doit donc pas relier deux ids.
+--
+-- Cout : toutes les PERIOD secondes, 2 appels coalition.getPlayers + quelques lectures par joueur.
+--   Les lignes restent en memoire et sont ecrites toutes les FLUSH_EVERY secondes en UN seul write + flush.
+--   Le fichier reste ouvert pendant toute la mission : jamais d'open/close en cours de partie.
+--   Un point n'est ecrit que si l'unite a bouge d'au moins 50 m depuis le dernier point ecrit,
+--   ou si MAX_WAIT secondes se sont ecoulees (un joueur au parking ne produit presque rien).
+-- Securite : tout est sous pcall, une erreur ici ne doit jamais gener le reste du script.
+-- MODE TEST : ALL_AIRCRAFT = true (juste en dessous) suit TOUS les avions / helicos, IA comprise.
+-- Une fois la validation faite, le passer a false pour ne suivre que les joueurs.
+
+local FlightTracks = {}
+
+do
+	local ALL_AIRCRAFT = true		-- TEST : true = tous les avions/helicos (IA comprise) ; false = joueurs seulement
+	local PERIOD = 5				-- secondes entre deux releves
+	local FLUSH_EVERY = 30			-- secondes entre deux ecritures dans le fichier
+	local MIN_MOVE2 = 50 * 50		-- distance mini (50 m) au carre : evite une racine carree
+	local MAX_WAIT = 60				-- secondes maxi sans ecrire de point pour une unite
+	local GAP = 12					-- unite non vue pendant plus que ca = nouvelle session
+	local MAX_FAIL = 10				-- releves complets rates de suite avant d'arreter la fonction
+
+	local file = nil				-- fichier ouvert (nil = fonction inactive)
+	local buf = {}					-- lignes en attente d'ecriture
+	local nbuf = 0
+	local sessions = {}				-- [nom d'unite] = session en cours
+	local lastId = 0
+	local lastFlush = 0
+	local sides = nil
+	local cats = nil				-- categories de groupes scannees en mode test (avions, helicos)
+	local failCount = 0				-- releves complets rates de suite
+	local errLogged = 0				-- erreurs "unite" deja loguees (evite d'inonder le log)
+	local nbLines = 0				-- statistiques, loguees a l'arret
+	local nbFlush = 0
+	local maxFlush = 0
+	local nbRun = 0					-- duree des releves (utile surtout en mode test)
+	local sumRun = 0
+	local maxRun = 0
+
+	-- le ; et les sauts de ligne casseraient le format
+	local function clean(s)
+		return (string.gsub(tostring(s or ""), "[;\r\n]", " "))
+	end
+
+	local function addLine(line)
+		nbuf = nbuf + 1
+		buf[nbuf] = line
+	end
+
+	-- arret : ferme le fichier et loggue un bilan (dont la duree maxi d'une ecriture, en ms)
+	local function shutdown(reason)
+		local f = file
+		file = nil
+		if f then pcall(f.close, f) end
+		local avgRun = 0
+		if nbRun > 0 then avgRun = sumRun / nbRun end
+		env.info("DCE_FlightTracks arret (" .. tostring(reason) .. ") | lignes=" .. nbLines
+			.. " ecritures=" .. nbFlush .. " ecriture_max=" .. string.format("%.1f", maxFlush * 1000) .. " ms"
+			.. " | releves=" .. nbRun .. " releve_moy=" .. string.format("%.1f", avgRun * 1000)
+			.. " ms releve_max=" .. string.format("%.1f", maxRun * 1000) .. " ms (0.0 = sous la resolution de l'horloge)")
+	end
+
+	-- Un write / flush a REUSSI s'il ne leve pas d'erreur et ne renvoie pas "nil + message".
+	-- Le Lua de DCS ne renvoie rien (ou nil) quand tout va bien : ne surtout pas exiger un retour "vrai".
+	local function writeFailed(ok, res, err)
+		if not ok then return true, res end					-- erreur levee (res = message)
+		if res == nil and err ~= nil then return true, err end	-- forme standard d'un echec : nil, message
+		return false, nil
+	end
+
+	-- ecrit d'un coup toutes les lignes en attente
+	local function flush()
+		if not file then return end
+		lastFlush = timer.getTime()
+		if nbuf == 0 then return end
+
+		local text = table.concat(buf, "\n") .. "\n"
+		nbLines = nbLines + nbuf
+		buf = {}
+		nbuf = 0
+
+		local t0 = os.clock()
+		local ok, res, werr = pcall(file.write, file, text)
+		local bad, why = writeFailed(ok, res, werr)
+		if not bad then
+			ok, res, werr = pcall(file.flush, file)
+			bad, why = writeFailed(ok, res, werr)
+		end
+		local dt = os.clock() - t0
+		nbFlush = nbFlush + 1
+		if dt > maxFlush then maxFlush = dt end
+
+		if bad then
+			shutdown("erreur d'ecriture : " .. tostring(why))
+		end
+	end
+
+	-- releve d'une unite (appelee sous pcall : si l'unite disparait entre deux appels, l'erreur est absorbee)
+	local function sample(u, camp, now)
+		if not u:isExist() then return end
+		local player = u:getPlayerName()
+		if not ALL_AIRCRAFT and (not player or player == "") then return end	-- mode normal : joueurs seulement
+		player = player or ""								-- mode test : une IA a un nom de joueur vide
+		local name = u:getName()
+		local p = u:getPoint()
+		if not name or not p then return end
+
+		local oid = u.id_									-- identifiant de l'objet : change si l'unite est recreee
+		local s = sessions[name]
+		if not s or s.oid ~= oid or s.player ~= player or now - s.seen > GAP then
+			lastId = lastId + 1
+			s = { id = lastId, oid = oid, player = player, seen = now }
+			sessions[name] = s
+
+			-- la categorie n'est lue qu'une fois par session (getDesc est lourd)
+			local desc = u:getDesc()
+			if desc and IsAirCategory(desc.category) then
+				local typeName = u:getTypeName()
+				addLine("U;" .. lastId .. ";" .. clean(name) .. ";" .. clean(player) .. ";" .. clean(typeName) .. ";" .. camp)
+				env.info("DCE_FlightTracks session " .. lastId .. " | " .. clean(name) .. " | " .. clean(player) .. " | " .. clean(typeName) .. " | " .. camp)
+			else
+				s.skip = true								-- pas un avion / helico : ignore pour toute la session
+			end
+		end
+		s.seen = now
+		if s.skip then return end
+
+		local mustWrite = false
+		if not s.lx then
+			mustWrite = true								-- premier point de la session
+		else
+			local dx = p.x - s.lx
+			local dy = p.z - s.ly
+			if dx * dx + dy * dy >= MIN_MOVE2 or now - s.lt >= MAX_WAIT then
+				mustWrite = true
+			end
+		end
+
+		if mustWrite then
+			s.lx, s.ly, s.lt = p.x, p.z, now
+			addLine(string.format("T;%d;%d;%d;%d;%d", math.floor(now), s.id,
+				math.floor(p.x + 0.5), math.floor(p.z + 0.5), math.floor(p.y + 0.5)))
+		end
+	end
+
+	-- erreur sur une unite ou un groupe : on la compte et on loggue seulement les premieres
+	local function noteError(err)
+		errLogged = errLogged + 1
+		if errLogged <= 5 then
+			env.info("DCE_FlightTracks erreur unite : " .. tostring(err))
+		end
+	end
+
+	-- releve d'une unite sous pcall : si elle disparait entre deux appels, l'erreur est absorbee
+	local function trySample(u, camp, now)
+		local ok, err = pcall(sample, u, camp, now)
+		if not ok then noteError(err) end
+	end
+
+	-- mode test : releve de toutes les unites d'un groupe
+	local function sampleGroup(grp, camp, now)
+		local units = grp:getUnits()
+		if units then
+			for k = 1, #units do
+				trySample(units[k], camp, now)
+			end
+		end
+	end
+
+	-- un releve complet (appele sous pcall par tick)
+	local function run()
+		local now = timer.getTime()
+		for i = 1, #sides do
+			local camp = sides[i].camp
+
+			-- les joueurs : toujours (une unite deja relevee dans le meme tick ne produit pas de doublon)
+			local list = coalition.getPlayers(sides[i].id)
+			if list then
+				for j = 1, #list do
+					trySample(list[j], camp, now)
+				end
+			end
+
+			-- mode test : tous les avions et helicos du camp
+			if ALL_AIRCRAFT then
+				for c = 1, #cats do
+					local groups = coalition.getGroups(sides[i].id, cats[c])
+					if groups then
+						for g = 1, #groups do
+							local ok, err = pcall(sampleGroup, groups[g], camp, now)
+							if not ok then noteError(err) end
+						end
+					end
+				end
+			end
+		end
+		if now - lastFlush >= FLUSH_EVERY then flush() end
+	end
+
+	local function tick()
+		if not file then return nil end						-- fin de mission ou arret : le timer s'eteint
+		local t0 = os.clock()
+		local ok, err = pcall(run)
+		local dt = os.clock() - t0
+		nbRun = nbRun + 1
+		sumRun = sumRun + dt
+		if dt > maxRun then maxRun = dt end
+		if ok then
+			failCount = 0
+		else
+			failCount = failCount + 1
+			if failCount <= 3 then
+				env.info("DCE_FlightTracks erreur releve : " .. tostring(err))
+			end
+			if failCount >= MAX_FAIL then
+				shutdown("trop d'erreurs de suite")
+				return nil
+			end
+		end
+		if file then return timer.getTime() + PERIOD end
+		return nil
+	end
+
+	-- demarrage (appele une fois, sous pcall, en bas du fichier)
+	function FlightTracks.start()
+		if campL and campL.flightTracks == false then
+			env.info("DCE_FlightTracks inactif (campL.flightTracks = false)")
+			return
+		end
+		if type(coalition.getPlayers) ~= "function" or (ALL_AIRCRAFT and type(coalition.getGroups) ~= "function") then
+			env.info("DCE_FlightTracks inactif : fonction coalition.getPlayers / getGroups absente")
+			return
+		end
+
+		local path = PathDCE .. "MissionTracks.txt"
+		local f, err = io.open(path, "w")					-- "w" : fichier vide a chaque chargement de mission
+		if not f then
+			env.info("DCE_FlightTracks ERREUR ouverture " .. tostring(path) .. " : " .. tostring(err))
+			return
+		end
+		f:write("H;1\n")
+		f:flush()
+
+		file = f
+		sides = {
+			{ id = coalition.side.RED,  camp = "red" },
+			{ id = coalition.side.BLUE, camp = "blue" },
+		}
+		cats = { Group.Category.AIRPLANE, Group.Category.HELICOPTER }
+		lastFlush = timer.getTime()
+		timer.scheduleFunction(tick, nil, timer.getTime() + PERIOD)
+		local mode = "joueurs seulement"
+		if ALL_AIRCRAFT then mode = "MODE TEST : tous les avions et helicos" end
+		env.info("DCE_FlightTracks actif (" .. mode .. ") : " .. path)
+	end
+
+	-- fin de mission (appele depuis S_EVENT_MISSION_END, AVANT le lancement du debriefing) :
+	-- derniere ecriture, ligne F, fermeture. Le fichier est complet et ferme quand DCE_Manager le copie.
+	function FlightTracks.close()
+		if not file then return end
+		addLine("F;" .. math.floor(timer.getTime()))
+		flush()
+		if file then shutdown("fin de mission") end
+	end
+end
+
 --###################  ######   #####################################
 --###################  MAIN   #####################################
 --###################  ######   #####################################
@@ -875,6 +1157,11 @@ function eventHandlerDCE:onEvent(event)
 	-- LOG DEBRIEF (temporaire)
 	if event and event.id == world.event.S_EVENT_MISSION_END then
 		env.info("DCE_DEBRIEF 0 S_EVENT_MISSION_END arrive dans eventHandlerDCE")
+
+		-- fermeture du fichier de traces des joueurs AVANT tout le reste (et avant le lancement du debriefing).
+		-- Sous pcall : ne doit jamais bloquer l'export de fin de mission.
+		local okFT, errFT = pcall(FlightTracks.close)
+		if not okFT then env.info("DCE_FlightTracks ERREUR fermeture : " .. tostring(errFT)) end
 	end
 
 	if campL.debug then
@@ -1463,7 +1750,7 @@ function eventHandlerDCE:onEvent(event)
 						if selPilotEject.pilotName then
 							selPilotEject.name = "Mis" ..
 							campL.mission ..
-							"_Pilot_" .. selPilotEject.pilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
+								"_Pilot_" .. selPilotEject.pilotName .. "_Nb" .. tostring(SumSoldierAliasPilot)
 						else
 							selPilotEject.name = "Mis"..campL.mission.."_Pilot_"..selPilotEject.initiator.."_Nb"..tostring(SumSoldierAliasPilot)
 						end
@@ -1527,7 +1814,7 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 		-- miguel modification M18.d destroy Plane Landing CV
-		elseif log_entry.type == "land" then										--hit event with initiator or any other event (excludes hit events without initiator, like collisions)
+		elseif log_entry.type == "land" then									--hit event with initiator or any other event (excludes hit events without initiator, like collisions)
 
 			if event.initiator then
 
@@ -1693,9 +1980,9 @@ function eventHandlerDCE:onEvent(event)
 				end
 			end
 
-		elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then												--hit event with initiator or any other event (excludes hit events without initiator, like collisions)
+		elseif log_entry.type and ((log_entry.type == "hit" and event.initiator) or log_entry.type ~= "hit" ) then								--hit event with initiator or any other event (excludes hit events without initiator, like collisions)
 
-			if event.initiator and initiatorObjCategory ~= 0 then																					--event has an initiator
+			if event.initiator and initiatorObjCategory ~= 0 then																		--event has an initiator
 
                 -- local initDesc = event.initiator:getDesc()
 				local catEntry = initiatorId and Cache_UnitCategoryByGetID[initiatorId]
@@ -1759,7 +2046,7 @@ function eventHandlerDCE:onEvent(event)
 			end
 
 
-			if event.target then																					--event has a target
+			if event.target then																			--event has a target
 
 				-- Object.Category
 				-- UNIT    1
@@ -1797,11 +2084,11 @@ function eventHandlerDCE:onEvent(event)
 					local catEntry = elementId and Cache_UnitCategoryByGetID[elementId]
 					local isHelo = (catEntry and catEntry.category == Unit.Category.HELICOPTER)
 
-					if log_entry.type == "hit" then															--log entry is a hit event
+					if log_entry.type == "hit" then														--log entry is a hit event
 						-- if unitCat and (unitCat == Unit.Category.AIRPLANE or unitCat == Unit.Category.HELICOPTER) then
 						if isHelo then
-							local life = event.target:getLife()															--get current life of unit
-							local init_life = event.target:getLife0()														--get initial life of unit
+							local life = event.target:getLife()														--get current life of unit
+							local init_life = event.target:getLife0()															--get initial life of unit
 							log_entry.health = math.ceil(100 / init_life * life)												--store unit health to log entry
 
 							local healthTemp = {
@@ -2329,17 +2616,17 @@ world.addEventHandler(eventHandlerDCE)
 
 
 --collect initial health of ships
-if campL.ShipHealth0 == nil then																					--table does not exist yet
-	campL.ShipHealth0 = {}																						--create table
+if campL.ShipHealth0 == nil then													--table does not exist yet
+	campL.ShipHealth0 = {}													--create table
 end
 for coalition_name,coal in pairs(env.mission.coalition) do														--iterate through coalitions in mission
-	for country_n,country in pairs(coal.country) do															--iterate through countries in coalitions
-		if country.ship then																				--country has ships
+	for country_n,country in pairs(coal.country) do														--iterate through countries in coalitions
+		if country.ship then													--country has ships
 			for group_n,group in pairs(country.ship.group) do													--iterate through groups in ships
 				for unit_n,unit in pairs(group.units) do													--iterate through units in group
-					local u = Unit.getByName(unit.name)														--get unit
-					if u then																			--unit exists
-						local health = u:getLife()															--get current health of unit
+					local u = Unit.getByName(unit.name)													--get unit
+					if u then													--unit exists
+						local health = u:getLife()													--get current health of unit
 						campL.ShipHealth0[unit.name] = health													--store initial ship health
 					end
 				end
@@ -2349,17 +2636,17 @@ for coalition_name,coal in pairs(env.mission.coalition) do														--iterat
 end
 
 --apply ship damage
-if campL.ShipHealth then																					--table with ship health exists
+if campL.ShipHealth then													--table with ship health exists
 	for name,health_stored in pairs(campL.ShipHealth) do														--iterate through ships in table
 		if health_stored < 66 and campL.ShipHealth0[name] > 10 then											--health is less than 100% and ship has more than 10 health points (do not do for exteremly small boats)
-			local u = Unit.getByName(name)															--get unit
-			if u then																			--unit exists
+			local u = Unit.getByName(name)													--get unit
+			if u then													--unit exists
 				local counter = 1
 				repeat
-					local h = u:getLife()															--get current health of unit
+					local h = u:getLife()													--get current health of unit
 					local h0 = campL.ShipHealth0[name]													--get maximum health of unit
 					local health_current = math.floor(h / h0 * 100)											--store health percentage of ship
-					local pointVec3 = u:getPoint()														--get position of ship
+					local pointVec3 = u:getPoint()													--get position of ship
 					local power = h0 / 100													--explosive power is relatve to ship strenght
 					--trigger.action.outText(counter .. " / Name: " .. name .. " / Power: " ..power .. " / Health: " .. health_current, 1)	--DEBUG
 					trigger.action.explosion(pointVec3, power)													--apply explosion
@@ -2466,6 +2753,10 @@ timer.scheduleFunction(despawnIA, nil, timer.getTime() + 10)
 timer.scheduleFunction(updateTrackedBombs, {}, timer.getTime() + 0.2)
 
 timer.scheduleFunction(purgeAirById, nil, timer.getTime() + 120)
+
+--traces des joueurs pour le debriefing (voir bloc "TRACES DES JOUEURS" plus haut dans le fichier)
+local okFT, errFT = pcall(FlightTracks.start)
+if not okFT then env.info("DCE_FlightTracks ERREUR au demarrage : " .. tostring(errFT)) end
 
 env.info("DCE_EventT END OF LOADING EventsTracker script ")
 

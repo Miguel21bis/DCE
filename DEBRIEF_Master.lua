@@ -541,6 +541,7 @@ if Debug.debug or mission_ini.backupAllMissionFiles then
 		"camp_status.lua",
 		"zoneSAR.lua",
 		"Mission_LL_Positions.lua",
+		"flightTrack.lua"
 	}
 
 	-- Créer le répertoire "mission_0n" s'il n'existe pas
@@ -600,6 +601,7 @@ else
 		os.remove("camp_status.lua")		--DISABLE FOR DEBUG
 		os.remove("zoneSAR.lua")			--DISABLE FOR DEBUG
 		os.remove("Mission_LL_Positions.lua")			--DISABLE FOR DEBUG
+		os.remove("flightTrack.lua")
 	end
 	os.exit()
 
@@ -1307,6 +1309,7 @@ if not Debug.debug then
 	os.remove("camp_status.lua")		--DISABLE FOR DEBUG
 	os.remove("zoneSAR.lua")			--DISABLE FOR DEBUG
 	os.remove("Mission_LL_Positions.lua")			--DISABLE FOR DEBUG
+	os.remove("flightTrack.lua")
 end
 
 if DCEM_MachineMode then

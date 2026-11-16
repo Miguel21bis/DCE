@@ -1,9 +1,10 @@
 --To export the incidents of the mission (kills, losses, ejections, destroyed ground objects, bomb impacts) for the events map of DCE_Manager
 --Initiated by DEBRIEF_Master.lua, right after DEBRIEF_Text.lua (oob_air / oob_ground / targetlist are already updated in memory here)
 --Writes: Debriefing/DebriefEvents <mission>.lua  (one file per mission, kept so old debriefs can be shown again on the map)
+--Copies: MissionTracks.txt (written in game by DCE_InGame : flight tracks of the players) -> Debriefing/DebriefTracks <mission>.txt  (copied as is, byte for byte)
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_ExportMap.lua"] = "1.1.0"
+versionDCE["DEBRIEF_ExportMap.lua"] = "1.5.0"
 -------------------------------------------------------------------------------------------------------
 
 --format du fichier (version = 1) :
@@ -19,7 +20,10 @@ versionDCE["DEBRIEF_ExportMap.lua"] = "1.1.0"
 --	flights = { ["Pack 1 - 469th TFS - Escort 1"] = { side, category, points = { {x, y}, ... }, units = { {name, client}, ... } }, ... }	--vols de la mission jouee
 --	players = { ["Pack 11 - 4th TFS - Escort 1"] = { "player name", ... }, ... }		--players (clients) of each flight, from the pilotName of the events
 --}
---kind : air_lost, ground_kill, ship_kill, static_kill, scenery_kill, eject, pilot_dead, pilot_sar, bomb
+--	samSites = { { name, label, side, x, y, range, hidden }, ... }	--sites SAM de la mission jouee (un par groupe, portee en metres)
+--	targetObjects = { { name, target, side, class, type, x, y, state, dist }, ... }	--elements de la target list (class static = batiments ajoutes, MapObject = batiments de la carte) a moins de 500 m d'un impact de bombe et pas detruits cette mission (state = alive, ou dead = deja detruit avant) ; side = proprietaire
+--	aaaZones = { { name, owner, x, y, radius }, ... }		--zones AAA_ZONE_<BLUE|RED>_* du script AAA_Barrage (owner = camp qui defend ; il tire sur l'autre)
+--kind : air_lost, ground_kill, ship_kill, static_kill, scenery_kill, eject, pilot_dead, pilot_sar, bomb, rescue (helico qui embarque un pilote), landing (helico / transport pose hors de sa base), damage (avion touche mais pas perdu ; health = vie restante en %)
 --scenery_kill : decor detruit ; "target" (nom de la cible de la target map) n'est rempli que si ce decor appartient a une cible
 --posSrc : eject (position exacte) / sar_approx (point d'atterrissage du pilote, approximatif) / oob_start (position de depart dans la mission, approximative) / scen (decor) / sar / impact
 --pilot_sar : "unit" = avion du pilote, "current" = vrai si le pilote vient de CETTE mission (sinon pilote d'une mission precedente, toujours a recuperer)
@@ -81,6 +85,28 @@ local function ExportMap()
 
 	--vols de la mission jouee : camp, plan de vol (waypoints) et avions (client = slot joueur) ; l'ancien fichier mission n'est plus necessaire pour les afficher
 	local flights = {}
+
+	--sites SAM (portees en metres, memes valeurs que la carte de mission de DCE_Manager) : un cercle par groupe, autour du lanceur qui porte le plus loin
+	local samTable = {
+		{ "5P85", "SA-10 / S-300PS", 75000 }, { "9A82", "SA-12 / S-300V", 75000 }, { "9A83", "SA-12 / S-300V", 75000 },
+		{ "Patriot ln", "Patriot", 80000 }, { "Hawk ln", "Hawk", 40000 }, { "S_75M", "SA-2", 45000 },
+		{ "5p73", "SA-3", 25000 }, { "9A310", "SA-11 Buk", 32000 }, { "2P25", "SA-6 Kub", 24000 },
+		{ "NASAMS_LN", "NASAMS", 30000 }, { "IRIST", "IRIS-T SLM", 40000 }, { "Tor 9A331", "SA-15 Tor", 12000 },
+		{ "HQ-7", "HQ-7", 12000 }, { "Osa 9A33", "SA-8 Osa", 10000 }, { "Roland ADS", "Roland", 8000 },
+		{ "2S6", "SA-19 Tunguska", 8000 }, { "rapier", "Rapier", 7000 }, { "M1097", "Avenger", 5500 },
+		{ "Strela-10M3", "SA-13 Strela-10", 5000 }, { "Igla", "SA-18 Igla", 5000 }, { "M6 Linebacker", "Linebacker", 4800 },
+		{ "Stinger", "Stinger", 4800 }, { "Strela-1 9P31", "SA-9 Strela-1", 4200 },
+	}
+	local function samRange(utype)
+		if type(utype) ~= "string" then return nil end
+		local low = string.lower(utype)
+		for _, row in ipairs(samTable) do
+			if string.find(low, string.lower(row[1]), 1, true) then return row[2], row[3] end
+		end
+		return nil
+	end
+	local samSites = {}
+	local aaaZones = {}
 	local function exportFlight(group, sideName, chapterName)
 		local fl = { side = sideName, category = chapterName, points = {}, units = {} }
 		local pts = group.route and group.route.points
@@ -115,6 +141,18 @@ local function ExportMap()
 							if (chapterName == "plane" or chapterName == "helicopter") and group.name then
 								flights[group.name] = exportFlight(group, sideName, chapterName)
 							end
+							if chapterName == "vehicle" then
+								local best, bestLabel, bx, by = 0, "", 0, 0
+								for _, u in pairs(group.units or {}) do
+									local label, range = samRange(u.type)
+									if label and range > best and u.x and u.y then
+										best, bestLabel, bx, by = range, label, u.x, u.y
+									end
+								end
+								if best > 0 then
+									table.insert(samSites, { name = group.name or "", label = bestLabel, side = sideName, x = bx, y = by, range = best, hidden = group.hidden and true or false })
+								end
+							end
 							for _, u in pairs(group.units or {}) do
 								if u.name then
 									unitInfo[u.name] = {
@@ -130,6 +168,21 @@ local function ExportMap()
 							end
 						end
 					end
+				end
+			end
+		end
+	end
+
+	--zones AAA du script AAA_Barrage : zones de declenchement AAA_ZONE_<BLUE|RED>_* (ancien format AAA_ZONE_<nom> = RED)
+	local zl = last_Mission and last_Mission.triggers and last_Mission.triggers.zones
+	if type(zl) == "table" then
+		for _, z in pairs(zl) do
+			if type(z) == "table" and type(z.name) == "string" and string.sub(z.name, 1, 9) == "AAA_ZONE_" then
+				local owner = z.name:match("^AAA_ZONE_(BLUE)_") or z.name:match("^AAA_ZONE_(RED)_") or "RED"
+				local zx = z.x or (z.point and z.point.x)
+				local zy = z.y or (z.point and z.point.z)
+				if zx and zy and z.radius then
+					table.insert(aaaZones, { name = z.name, owner = string.lower(owner), x = zx, y = zy, radius = z.radius })
 				end
 			end
 		end
@@ -169,6 +222,7 @@ local function ExportMap()
 	local lastHitter = {}
 	local posOf = {}																				--[victime] = { x, y, z, src, t } (premiere position valable)
 	local pilotOf = {}
+	local pilotKills = {}																			--[nom du pilote] = incident pilot_dead (pilote tue au sol)
 
 	--seuls ces events donnent la position de la victime elle-meme (pas hit/kill/shot : ce sont celles du tireur)
 	local posTypes = {
@@ -208,7 +262,26 @@ local function ExportMap()
 			local victim = (tp == "kill") and ev.target or ev.initiator
 			local sq = airSquad(victim)
 
-			if sq then
+			if sq and type(victim) == "string" and string.match(victim, "^Mis%d+_Pilot_") then
+				--pilote (parachute / au sol) tue : ce n'est pas un avion perdu (DCE le compte quand meme comme perte de l'escadron)
+				if not seen[victim] then
+					seen[victim] = true
+					local unitName = string.match(victim, "^Mis%d+_Pilot_(.-)_Nb%d+$")
+					local inc = {
+						t = ev.t,
+						kind = "pilot_dead",
+						name = victim,
+						unit = unitName,
+						flight = unitName and flightOf(unitName),
+						side = sq.side,
+						category = "pilot",
+						cause = tp,
+					}
+					setKiller(inc, (tp == "kill") and ev.initiator or lastHitter[victim], sq.side)
+					pilotKills[victim] = inc															--position : celle du pilote dans zoneSAR (plus bas)
+					add(inc)
+				end
+			elseif sq then
 				if not seen[victim] then
 					seen[victim] = true
 
@@ -462,6 +535,18 @@ local function ExportMap()
 		end
 	end
 
+	--pilote tue au sol : il prend la position de son point d'attente et n'est plus "en attente de secours"
+	local keepInc = {}
+	for _, inc in ipairs(incidents) do
+		if inc.kind == "pilot_sar" and pilotKills[inc.name] then
+			local pk = pilotKills[inc.name]
+			pk.x, pk.y, pk.z, pk.posSrc = inc.x, inc.y, inc.z, "sar"
+		else
+			table.insert(keepInc, inc)
+		end
+	end
+	incidents = keepInc
+
 	--avion perdu sans position : on prend le point d'atterrissage de son pilote (approximatif : le parachute derive)
 	for _, inc in ipairs(incidents) do
 		if inc.kind == "air_lost" and not inc.x then
@@ -491,6 +576,206 @@ local function ExportMap()
 				setKiller(inc, s.initiator, nil)
 				inc.side = inc.killerSide
 				add(inc)
+			end
+		end
+	end
+
+	----------------------------------------------------------------
+	-- sauvetages SAR / CSAR, atterrissages des helicos et transports hors de leur base, avions endommages
+	----------------------------------------------------------------
+	--position des pilotes recuperes : zoneSAR garde aussi les pilotes deja sauves (status = rescued)
+	local sarPos = {}
+	if type(zoneSAR) == "table" then
+		for _, list in pairs(zoneSAR) do
+			if type(list) == "table" then
+				for _, p in pairs(list) do
+					if type(p) == "table" and p.name and type(p.pos) == "table" and p.pos.x and p.pos.y then
+						sarPos[p.name] = p.pos
+					end
+				end
+			end
+		end
+	end
+
+	--sauvetage : un helico embarque un pilote (event embarkedEjectedPilot : initiator = helico, target = pilote "Mis<n>_Pilot_<avion ou joueur>_Nb<k>")
+	local rescued = {}
+	for e = 1, #events do
+		local ev = events[e]
+		if ev.type == "embarkedEjectedPilot" and type(ev.initiator) == "string" and type(ev.target) == "string" and not rescued[ev.target] then
+			rescued[ev.target] = true
+			local sq = airSquad(ev.initiator)
+			local ui = unitInfo[ev.initiator]
+			local who = ev.targetPilotName or ev.pilotName
+			if who == "nil" then who = nil end
+			local what = string.match(ev.target, "^Mis%d+_Pilot_(.-)_Nb%d+$")
+			local inc = {
+				t = ev.t,
+				kind = "rescue",
+				name = who or what or ev.target,													--pilote sauve (nom du joueur, sinon son avion)
+				flight = flightOf(ev.initiator),													--vol du helico sauveteur
+				side = (sq and sq.side) or (ui and ui.side),
+				category = (ui and ui.category) or "helicopter",
+				type = ui and ui.type,
+				unit = ev.initiator,																--le helico
+				pilot = who,
+				info = ev.target,
+			}
+			local p = sarPos[ev.target]
+			if p then
+				inc.x, inc.y, inc.z, inc.posSrc = p.x, p.y, p.z, "pickup"
+			end
+			add(inc)
+		end
+	end
+
+	--atterrissage d'un helico (ou d'un vol Transport / Airlift) ailleurs que sur sa base : un point par vol et par lieu
+	local function isTransport(name, ui)
+		local n = string.lower(name or "")
+		if string.find(n, "transport", 1, true) or string.find(n, "airlift", 1, true) then return true end
+		local tk = (ui and ui.task) and string.lower(tostring(ui.task)) or ""
+		return string.find(tk, "transport", 1, true) ~= nil
+	end
+
+	local landed = {}
+	for e = 1, #events do
+		local ev = events[e]
+		if ev.type == "land" and type(ev.initiator) == "string" and ev.x and ev.y and type(ev.place) == "string" then
+			local sq = airSquad(ev.initiator)
+			if sq then
+				local ui = unitInfo[ev.initiator]
+				local transport = isTransport(ev.initiator, ui)
+				if transport or (ui and ui.category == "helicopter") then
+					local atHome = false
+					local home = sq.unit and sq.unit.base
+					if type(home) == "string" and home ~= "" then
+						local a, b = string.lower(ev.place), string.lower(home)
+						atHome = (string.find(a, b, 1, true) ~= nil) or (string.find(b, a, 1, true) ~= nil)
+					end
+
+					local key = tostring(flightOf(ev.initiator)) .. "|" .. ev.place
+					if not atHome and not landed[key] then
+						landed[key] = true
+						local info = ev.place
+						if ev.placeTypeName and ev.placeTypeName ~= ev.place then info = info .. " (" .. tostring(ev.placeTypeName) .. ")" end
+						add({
+							t = ev.t,
+							kind = "landing",
+							name = ev.initiator,
+							flight = flightOf(ev.initiator),
+							side = sq.side,
+							category = (ui and ui.category) or "helicopter",
+							type = ev.type_name or (ui and ui.type),
+							pilot = pilotOf[ev.initiator],
+							x = ev.x, y = ev.y, z = ev.z, posSrc = "land",
+							cause = transport and "airlift" or "landing",
+							info = info,
+						})
+					end
+				end
+			end
+		end
+	end
+
+	--avions endommages (touches mais pas perdus) : la position du hit est celle de l'avion touche ; on garde le coup qui lui a laisse le moins de vie
+	local worst = {}
+	for e = 1, #events do
+		local ev = events[e]
+		if ev.type == "hit" and type(ev.target) == "string" and ev.x and ev.y and type(ev.health) == "number" and ev.health < 100 and not seen[ev.target] then
+			local w = worst[ev.target]
+			if not w or ev.health < w.health then worst[ev.target] = ev end
+		end
+	end
+	for victim, ev in pairs(worst) do
+		local sq = airSquad(victim)
+		if sq then
+			local ui = unitInfo[victim]
+			local inc = {
+				t = ev.t,
+				kind = "damage",
+				name = victim,
+				flight = flightOf(victim),
+				side = sq.side,
+				category = (ui and ui.category) or "plane",
+				type = ui and ui.type,
+				pilot = pilotOf[victim],
+				x = ev.x, y = ev.y, z = ev.z, posSrc = "hit",
+				health = ev.health,
+			}
+			setKiller(inc, ev.initiator, sq.side)
+			add(inc)
+		end
+	end
+
+	----------------------------------------------------------------
+	-- elements de la target list proches d'un bombardement : batiments ajoutes (class static) et batiments de la carte (class MapObject)
+	-- seulement ceux qui ne sont PAS detruits cette mission (les detruits sont deja des incidents scenery_kill / static_kill) : ce sont les cibles "ratees"
+	----------------------------------------------------------------
+	local NEAR_BOMB_M = 500																			--distance maxi entre un impact de bombe et l'element (metres)
+	local MAX_TARGET_OBJECTS = 3000
+	local targetObjects = {}
+	if targetlist then
+		local bombGrid = {}
+		local nBomb = 0
+		for _, inc in ipairs(incidents) do
+			if inc.kind == "bomb" and inc.x and inc.y then
+				local k = math.floor(inc.x / NEAR_BOMB_M) .. ":" .. math.floor(inc.y / NEAR_BOMB_M)
+				bombGrid[k] = bombGrid[k] or {}
+				table.insert(bombGrid[k], inc)
+				nBomb = nBomb + 1
+			end
+		end
+
+		--distance a l'impact le plus proche (nil si aucun a moins de NEAR_BOMB_M)
+		local function nearestBomb(x, y)
+			local cx, cy = math.floor(x / NEAR_BOMB_M), math.floor(y / NEAR_BOMB_M)
+			local best2 = NEAR_BOMB_M * NEAR_BOMB_M
+			local found = false
+			for dx = -1, 1 do
+				for dy = -1, 1 do
+					local list = bombGrid[(cx + dx) .. ":" .. (cy + dy)]
+					if list then
+						for _, b in ipairs(list) do
+							local ddx, ddy = b.x - x, b.y - y
+							local d2 = ddx * ddx + ddy * ddy
+							if d2 <= best2 then best2 = d2; found = true end
+						end
+					end
+				end
+			end
+			if found then return math.sqrt(best2) end
+			return nil
+		end
+
+		if nBomb > 0 then
+			local done = {}
+			for sideKey, targets in pairs(targetlist) do
+				local owner = (sideKey == "blue") and "red" or "blue"								--meme regle que plus haut
+				for _, target in pairs(targets) do
+					if type(target) == "table" and target.elements then
+						for _, el in pairs(target.elements) do
+							if type(el) == "table" and (el.class == "static" or el.class == "MapObject") and el.x and el.y and not el.dead_last
+								and #targetObjects < MAX_TARGET_OBJECTS then
+								local key = tostring(el.name) .. "|" .. tostring(math.floor(el.x)) .. "|" .. tostring(math.floor(el.y))
+								if not done[key] then
+									done[key] = true
+									local d = nearestBomb(el.x, el.y)
+									if d then
+										table.insert(targetObjects, {
+											name = el.name,
+											target = target.titleName or target.name,
+											side = owner,
+											class = el.class,
+											type = el.type,
+											x = el.x, y = el.y,
+											state = el.dead and "dead" or "alive",
+											dist = math.floor(d + 0.5),
+										})
+									end
+								end
+							end
+						end
+					end
+				end
 			end
 		end
 	end
@@ -538,6 +823,9 @@ local function ExportMap()
 		players = players,
 		unitPlayers = unitPlayers,
 		flights = flights,
+		samSites = samSites,
+		targetObjects = targetObjects,
+		aaaZones = aaaZones,
 	}
 
 	local path = "Debriefing/DebriefEvents " .. tostring(camp.mission) .. ".lua"
@@ -564,4 +852,34 @@ if not ok then
 		errFile:write(tostring(err))
 		errFile:close()
 	end
+end
+
+----------------------------------------------------------------------------------------------------
+-- traces de vol des joueurs : copie telle quelle de MissionTracks.txt (ecrit en jeu par DCE_InGame) vers Debriefing/DebriefTracks <mission>.txt
+-- (MissionTracks.txt est vide a chaque chargement de mission : on le copie ici avant la prochaine). Dans son propre pcall : un echec ici ne gene pas le debrief.
+----------------------------------------------------------------------------------------------------
+local TRACKS_SOURCE = "MissionTracks.txt"
+
+local function CopyTracks()
+	local src = io.open(TRACKS_SOURCE, "rb")
+	if not src then return end																	--pas de fichier (option coupee, ou aucun joueur) : rien a faire
+	local data = src:read("*a")
+	src:close()
+	if not data or #data == 0 then return end
+
+	local path = "Debriefing/DebriefTracks " .. tostring(camp.mission) .. ".txt"
+	local dst = io.open(path, "wb")
+	if not dst then
+		error("cannot write " .. path)
+	end
+	dst:write(data)
+	dst:close()
+	if Debug and Debug.debug then
+		print("DEBRIEF_ExportMap : tracks copied to " .. path .. " (" .. #data .. " bytes)")
+	end
+end
+
+local okT, errT = pcall(CopyTracks)
+if not okT then
+	print("DEBRIEF_ExportMap : tracks copy failed, debriefing continues. " .. tostring(errT))
 end

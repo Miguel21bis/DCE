@@ -1678,7 +1678,7 @@ local campL = {
 	MsgForPlayerInMsn = MsgForPlayerInMsn,
 	wargame_convoys = WG_ConvoysData or nil,	--convois logistiques wargame pour cette mission (nil si absent/non activé)
 	wargame_airlift = WG_AirliftData or nil,	--logistique aerienne wargame (zones, vols IA, charges) pour cette mission
-
+	flightTrack = mission_ini.flightTrack and true or false,	--trace des vols joueurs (conf_mod) : lu par DCE_InGame
 	-- if not camp.missionHistory then camp.missionHistory = {} end
 	-- camp.missionHistory[camp.mission] = camp.date
 }
