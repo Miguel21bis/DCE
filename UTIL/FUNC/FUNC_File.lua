@@ -74,12 +74,12 @@ end
 
 
 -- Safe helper: debug may be overridden in some environments, avoid calling nil
-
+--On ne demande plus que la ligne courante ("l"). Meme resultat, beaucoup moins cher.
 function SafeGetLine()
 
     if type(debug) == "table" and type(debug.getinfo) == "function" then
 
-        local info = debug.getinfo(2)
+        local info = debug.getinfo(2, "l")
 
         return info and info.currentline or 0
 
@@ -421,13 +421,27 @@ function LoadFileAndUpdate(from)
 	-- Réparation : un squad déjà présent dans Active/oob_air.lua mais sans roster (ajout manuel,
 	-- ou écrit par un outil externe comme DCE_Manager) ferait planter DC_CampaignSettings.
 	-- On crée ce qui manque avec les valeurs d'un squad neuf, et on le signale dans le log.
+	-- Réparation : un squad déjà présent dans Active/oob_air.lua mais sans roster (ajout manuel,
+	-- ou écrit par un outil externe comme DCE_Manager) ferait planter DC_CampaignSettings.
+	-- On crée ce qui manque avec les valeurs d'un squad neuf, et on le signale UNE SEULE FOIS dans le log.
+	local repairCount = { blue = 0, red = 0 }
+	local repairNames = {}
 	for repairSide, repairSquads in pairs(oob_air) do
 		if type(repairSquads) == "table" then
 			for repairN = 1, #repairSquads do
 				if EnsureSquadRoster(repairSquads[repairN]) then
-					AddLog("LoadFileAndUpdate: roster/score missing on squad "..tostring(repairSquads[repairN].name).." ("..tostring(repairSide)..") -> created with default values")
+					repairCount[repairSide] = (repairCount[repairSide] or 0) + 1
+					table.insert(repairNames, tostring(repairSquads[repairN].name))
 				end
 			end
+		end
+	end
+	local repairTotal = #repairNames
+	if repairTotal > 0 then
+		AddLog("LoadFileAndUpdate: roster/score manquants sur "..repairTotal.." squad(s) -> valeurs par defaut creees")
+		-- le detail (noms des squads) reste disponible en mode debug seulement
+		if Debug.debug then
+			print("LoadFileAndUpdate roster/score crees pour : "..table.concat(repairNames, ", "))
 		end
 	end
 

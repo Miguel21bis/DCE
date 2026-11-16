@@ -50,9 +50,17 @@ HO_TRACE_DIR = "Debug/Wargame/ScriptsModPart"
 HO_TRACE_FILE = HO_TRACE_DIR.."/HumainOnly_Trace.log"
 HO_TraceStarted = HO_TraceStarted or false
 
---ecrit une ligne (ouvre / ferme a chaque fois : le fichier survit a un plantage)
-function HoLog(msg)
-	if not HO_TRACE then return end
+--PERF (etape A) : avant, HoLog ouvrait puis fermait le fichier a CHAQUE ligne.
+--Maintenant les lignes sont gardees en memoire et ecrites par paquets (une seule ouverture / fermeture par paquet).
+--Le fichier reste ferme entre deux paquets (pas de verrou Windows pour DCE_Manager).
+--HoFlush() est appele : en fin de HoHeader, en fin de HoDumpATO, en fin de PruneHumainOnlyAI, et tous les HO_TRACE_BUFFER lignes.
+--Seul risque : si le process est tue brutalement, on peut perdre au plus HO_TRACE_BUFFER lignes (baisser la valeur pour plus de securite).
+HO_TRACE_BUFFER = 200
+HoBuffer = {}
+
+--ecrit les lignes en attente
+function HoFlush()
+	if #HoBuffer == 0 then return end
 
 	local mode = "a"
 	if not HO_TraceStarted then
@@ -64,8 +72,22 @@ function HoLog(msg)
 	local f = io.open(HO_TRACE_FILE, mode)
 	if f then
 		HO_TraceStarted = true
-		f:write(tostring(msg).."\n")
+		f:write(table.concat(HoBuffer, "\n"))
+		f:write("\n")
 		f:close()
+	end
+
+	HoBuffer = {}
+end
+
+--ajoute une ligne au paquet en attente
+function HoLog(msg)
+	if not HO_TRACE then return end
+
+	HoBuffer[#HoBuffer + 1] = tostring(msg)
+
+	if #HoBuffer >= HO_TRACE_BUFFER then
+		HoFlush()
 	end
 end
 
@@ -109,6 +131,9 @@ function HoHeader()
 		end
 	end
 	if nb == 0 then HoLog("(aucun squad humainOnly dans oob_air)") end
+
+	HoFlush()
+
 end
 
 --liste les vols de l'ATO qui appartiennent a un squad humainOnly.
@@ -184,6 +209,7 @@ function HoDumpATO(titre, apresAssign)
 			end
 		end
 	end
+	HoFlush()
 end
 
 -- ============================================================================
@@ -319,8 +345,11 @@ function PruneHumainOnlyAI()
 		end
 	end
 
+	HoFlush()
+	
 	if nbRemoved == 0 then return end
 	HoLog("  PRUNE : "..nbRemoved.." vol(s) IA retire(s) des squads humainOnly")
+	HoFlush()
 	if AddLog then AddLog("PruneHumainOnlyAI: "..nbRemoved.." AI flight(s) removed from humainOnly squads") end
 
 	--renumerotation des references a un numero de package
@@ -1363,11 +1392,6 @@ for sideName, units in pairs(oob_air) do
 								i_timmer01 = i_timmer01 +1
 								
 								if sideName == target_sideName then																--if the target is hostile
-									local totalTarget = 0
-									
-									for target_name, target in pairs(targets) do
-										totalTarget = totalTarget + 1
-									end
 
 									local iTarget = 0
 									for targetN, target in pairs(targets) do											--iterate through all hostile targets

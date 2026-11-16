@@ -496,6 +496,20 @@ function validateStep(ctx, stepName)
 	return true
 end
 
+--PERF (etape A) : la table des priorites etait recreee a CHAQUE rejectStep (des milliers d'appels par passe) ; elle est maintenant creee une seule fois.
+local rejectPriorityByStep = {
+	task = 1,
+	target = 2,
+	loadout = 3,
+	firepower = 4,
+	weather = 5,
+	range = 6,
+	route = 7,
+	sortie = 8,
+	support = 9,
+	aircraft = 10,
+}
+
 function rejectStep(draft, step, reason, data, bloc, line)
 
 	if not draft.rejectReasons then
@@ -503,11 +517,8 @@ function rejectStep(draft, step, reason, data, bloc, line)
 	end
 
 	if not draft.rejectStats then
-	draft.rejectStats = {}
+		draft.rejectStats = {}
 	end
-
-	-- draft.rejectStats[reason] =
-	-- 	(draft.rejectStats[reason] or 0) + 1
 
 	local rejectKey =
 	tostring(step) .. "|" .. tostring(reason)
@@ -523,26 +534,13 @@ function rejectStep(draft, step, reason, data, bloc, line)
 		bloc = bloc,
 	}
 
-	local rejectPriority = {
-		task = 1,
-		target = 2,
-		loadout = 3,
-		firepower = 4,
-		weather = 5,
-		range = 6,
-		route = 7,
-		sortie = 8,
-		support = 9,
-		aircraft = 10,
-	}
-
 	local currentPriority = 0
 
 	if draft.finalReject then
-		currentPriority = rejectPriority[draft.finalReject.step] or 0
+		currentPriority = rejectPriorityByStep[draft.finalReject.step] or 0
 	end
 
-	local newPriority = rejectPriority[step] or 0
+	local newPriority = rejectPriorityByStep[step] or 0
 
 	if not draft.finalReject or newPriority >= currentPriority then
 
@@ -555,7 +553,6 @@ function rejectStep(draft, step, reason, data, bloc, line)
 		}
 	end
 
-	
 end
 
 function getDominantRejectReason(draft)

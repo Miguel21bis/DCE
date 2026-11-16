@@ -4,7 +4,7 @@
 --Copies: MissionTracks.txt (written in game by DCE_InGame : flight tracks of the players) -> Debriefing/DebriefTracks <mission>.txt  (copied as is, byte for byte)
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["DEBRIEF_ExportMap.lua"] = "1.5.0"
+versionDCE["DEBRIEF_ExportMap.lua"] = "1.6.0"
 -------------------------------------------------------------------------------------------------------
 
 --format du fichier (version = 1) :
@@ -14,6 +14,7 @@ versionDCE["DEBRIEF_ExportMap.lua"] = "1.5.0"
 --		{ id, t, kind, name, flight, side, category, type, pilot,
 --		  x, y, z, posSrc,                              --position DCS (x = nord, y = est), nil si inconnue
 --		  killer, killerFlight, killerSide, killerType, killerCategory, friendly,
+--		  killerX, killerY, killerGroup,				--tueur au SOL (vehicule, navire, statique) : sa position de depart dans la mission et son groupe (voir groundGroups)
 --		  target, element, status, weapon, mass, cause, info },
 --	},
 --	unitPlayers = { ["Pack 11 - 4th TFS - Escort 1-2"] = "player name", ... }		--player of each aircraft
@@ -22,6 +23,7 @@ versionDCE["DEBRIEF_ExportMap.lua"] = "1.5.0"
 --}
 --	samSites = { { name, label, side, x, y, range, hidden }, ... }	--sites SAM de la mission jouee (un par groupe, portee en metres)
 --	targetObjects = { { name, target, side, class, type, x, y, state, dist }, ... }	--elements de la target list (class static = batiments ajoutes, MapObject = batiments de la carte) a moins de 500 m d'un impact de bombe et pas detruits cette mission (state = alive, ou dead = deja detruit avant) ; side = proprietaire
+--	groundGroups = { ["group name"] = { side, units = { { name, type, x, y }, ... } }, ... }	--groupes au sol qui ont detruit un avion ou autre chose (killerGroup) : tous leurs elements, positions de depart
 --	aaaZones = { { name, owner, x, y, radius }, ... }		--zones AAA_ZONE_<BLUE|RED>_* du script AAA_Barrage (owner = camp qui defend ; il tire sur l'autre)
 --kind : air_lost, ground_kill, ship_kill, static_kill, scenery_kill, eject, pilot_dead, pilot_sar, bomb, rescue (helico qui embarque un pilote), landing (helico / transport pose hors de sa base), damage (avion touche mais pas perdu ; health = vie restante en %)
 --scenery_kill : decor detruit ; "target" (nom de la cible de la target map) n'est rempli que si ce decor appartient a une cible
@@ -82,6 +84,7 @@ local function ExportMap()
 	-- index des unites de la mission jouee (last_Mission) : type, categorie, tache, position de depart
 	----------------------------------------------------------------
 	local unitInfo = {}
+	local groupUnits = {}																			--[nom du groupe] = { side, units = { {name, type, x, y} } } (sol seulement)
 
 	--vols de la mission jouee : camp, plan de vol (waypoints) et avions (client = slot joueur) ; l'ancien fichier mission n'est plus necessaire pour les afficher
 	local flights = {}
@@ -153,9 +156,17 @@ local function ExportMap()
 									table.insert(samSites, { name = group.name or "", label = bestLabel, side = sideName, x = bx, y = by, range = best, hidden = group.hidden and true or false })
 								end
 							end
+							if (chapterName == "vehicle" or chapterName == "ship" or chapterName == "static") and group.name then
+								local gu = { side = sideName, units = {} }
+								for _, u in pairs(group.units or {}) do
+									if u.name and u.x and u.y then table.insert(gu.units, { name = u.name, type = u.type, x = u.x, y = u.y }) end
+								end
+								groupUnits[group.name] = gu
+							end
 							for _, u in pairs(group.units or {}) do
 								if u.name then
 									unitInfo[u.name] = {
+										group = group.name,
 										type = u.type,
 										category = chapterName,										--plane / helicopter / vehicle / ship / static
 										side = sideName,
@@ -781,6 +792,21 @@ local function ExportMap()
 	end
 
 	----------------------------------------------------------------
+	-- tueurs au sol : position de depart et groupe (pour afficher le groupe, avec le tueur mis en avant)
+	----------------------------------------------------------------
+	local groundGroups = {}
+	for _, inc in ipairs(incidents) do
+		local ki = inc.killer and unitInfo[inc.killer]
+		if ki and (ki.category == "vehicle" or ki.category == "ship" or ki.category == "static") and ki.x and ki.y then
+			inc.killerX, inc.killerY = ki.x, ki.y
+			inc.killerGroup = ki.group
+			if ki.group and groupUnits[ki.group] and not groundGroups[ki.group] then
+				groundGroups[ki.group] = groupUnits[ki.group]
+			end
+		end
+	end
+
+	----------------------------------------------------------------
 	-- tri par heure, puis ecriture
 	----------------------------------------------------------------
 	table.sort(incidents, function(a, b)
@@ -826,6 +852,7 @@ local function ExportMap()
 		samSites = samSites,
 		targetObjects = targetObjects,
 		aaaZones = aaaZones,
+		groundGroups = groundGroups,
 	}
 
 	local path = "Debriefing/DebriefEvents " .. tostring(camp.mission) .. ".lua"

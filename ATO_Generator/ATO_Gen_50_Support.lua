@@ -26,6 +26,9 @@ end
 SUPPORT_LOADOUT_PREFER_SHORT_RANGE = false
 
 -- Ajoute effectivement un support au draft
+-- Ajoute effectivement un support au draft
+--PERF (etape A) : tous les textes de debug (debuGenTxt1545 / txtDebug) ne sont plus construits que si isDebugModeB est vrai.
+--Avant, ils etaient assembles par concatenation a CHAQUE appel, meme quand personne ne les ecrivait. Aucun autre changement.
 function addSupportToDraft(
 	draft,
 	unitSupport,
@@ -43,7 +46,7 @@ function addSupportToDraft(
 	wk,
 	uniqueBonus
 		)
-	 -- multiPlaneSet_B, 
+	 -- multiPlaneSet_B,
 
 	TrackPlayability(unitSupport.player, "escort_target_range")									--track playabilty criterium has been met
 
@@ -64,7 +67,10 @@ function addSupportToDraft(
 		return
 	end
 
-	local debuGenTxt1545 = "\n"..(tostring(draft.id).." AtoG II_support() S1 pass B_17  ")
+	local debuGenTxt1545 = ""
+	if isDebugModeB then
+		debuGenTxt1545 = "\n"..(tostring(draft.id).." AtoG II_support() S1 pass B_17  ")
+	end
 
 	--determine number of escorts
 	local escort_num = 0
@@ -85,24 +91,28 @@ function addSupportToDraft(
 
 		if escort_num > 4 then
 			escort_num = 4
-		end	
+		end
 
 		--TODO revoir ça
 		-- if totalPlanePerTask[side][task] and totalPlanePerTask[side][task]/2 >= escort_num then
 		-- 	draft.score = draft.score + (1 * draft.loadout.firepower) * draft.target.priority
 		-- end
 
-		debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II_support() S2 pass_SEAD B "..unitSupport.type.." "..sptTask.." "..escort_num.." NbTotalSupport: "..draft.support[sptTask]["NbTotalSupport"].." draft.score: "..draft.score)
-		debuGenTxt1545 = debuGenTxt1545.."\n"..("-------------------- escort_num: "..(draft.route.threats.SEAD_offset / uSupportLoadout.firepower).. "= SEAD_Offset: "..draft.route.threats.SEAD_offset.." /firepower "..uSupportLoadout.firepower
+		if isDebugModeB then
+			debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II_support() S2 pass_SEAD B "..unitSupport.type.." "..sptTask.." "..escort_num.." NbTotalSupport: "..draft.support[sptTask]["NbTotalSupport"].." draft.score: "..draft.score)
+			debuGenTxt1545 = debuGenTxt1545.."\n"..("-------------------- escort_num: "..(draft.route.threats.SEAD_offset / uSupportLoadout.firepower).. "= SEAD_Offset: "..draft.route.threats.SEAD_offset.." /firepower "..uSupportLoadout.firepower
 												)
+		end
 
 	elseif sptTask == "Escort" then
 
 		if draft.support[sptTask]["escort_max"] ~= 999 then
 			escort_num = draft.support[sptTask]["escort_max"] - draft.support[sptTask]["NbTotalSupport"]	-- modification M11.x : Multiplayer	(x: EscorteTot-max)
 
-			debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II_support() S3 pass_Escort B "..unitSupport.type.." "..sptTask
-						.." escort_num: "..escort_num.." = escort_max  "..draft.support[sptTask]["escort_max"].." - NbTotalSupport?: "..draft.support[sptTask]["NbTotalSupport"])
+			if isDebugModeB then
+				debuGenTxt1545 = debuGenTxt1545.."\n"..(tostring(draft.id).." AtoG II_support() S3 pass_Escort B "..unitSupport.type.." "..sptTask
+							.." escort_num: "..escort_num.." = escort_max  "..draft.support[sptTask]["escort_max"].." - NbTotalSupport?: "..draft.support[sptTask]["NbTotalSupport"])
+			end
 
 		else
 
@@ -124,16 +134,18 @@ function addSupportToDraft(
 				draft.support[sptTask]["escort_max"] = escort_max
 			end
 
-			debuGenTxt1545 = debuGenTxt1545.."\r\n"..(tostring(draft.id).." AtoG II_support() S4 pass_Escort I "..unitSupport.type.." "..sptTask.." escort_num: "..escort_num)
+			if isDebugModeB then
+				debuGenTxt1545 = debuGenTxt1545.."\r\n"..(tostring(draft.id).." AtoG II_support() S4 pass_Escort I "..unitSupport.type.." "..sptTask.." escort_num: "..escort_num)
+			end
 
 		end
 
 	elseif sptTask == "Escort Jammer" then
-		escort_num = 1																	--escort jamming by single aircraft
+		escort_num = 1																		--escort jamming by single aircraft
 	elseif sptTask == "Flare Illumination" then
-		escort_num = 1																	--flare illumination by single aircraft
+		escort_num = 1																		--flare illumination by single aircraft
 	elseif sptTask == "Laser Illumination" then
-		escort_num = 1																	--laser illumination by single aircraft
+		escort_num = 1																		--laser illumination by single aircraft
 	elseif sptTask == "Strike" and not overideMP_B then
 		-- escort_num = 4
 		--CORRECTION (bug 9) : le resultat etait une fraction d'avion (ex: 2.5), alors que les autres taches arrondissent.
@@ -149,7 +161,9 @@ function addSupportToDraft(
 		escort_num = AcftAvail[unitSupport.name].available						--reduce requested escorts to number of available escorts
 		escort_num = math.floor(escort_num / 2) * 2										--round down to even number
 
-		debuGenTxt1545 = debuGenTxt1545.."\r\n"..(tostring(draft.id).." AtoG II_support() S5 pass_Escort "..unitSupport.type.." "..sptTask.." escort_num: "..escort_num.." available: "..AcftAvail[unitSupport.name].available)
+		if isDebugModeB then
+			debuGenTxt1545 = debuGenTxt1545.."\r\n"..(tostring(draft.id).." AtoG II_support() S5 pass_Escort "..unitSupport.type.." "..sptTask.." escort_num: "..escort_num.." available: "..AcftAvail[unitSupport.name].available)
+		end
 
 	end
 
@@ -163,7 +177,9 @@ function addSupportToDraft(
 		end
 	end
 
-	debuGenTxt1545 = debuGenTxt1545.."\r\n"..(tostring(draft.id).." AtoG II_support() S6 pass_Escort "..unitSupport.type.." "..sptTask.." "..escort_num)
+	if isDebugModeB then
+		debuGenTxt1545 = debuGenTxt1545.."\r\n"..(tostring(draft.id).." AtoG II_support() S6 pass_Escort "..unitSupport.type.." "..sptTask.." "..escort_num)
+	end
 
 	local txtDebug = ""
 
@@ -171,15 +187,19 @@ function addSupportToDraft(
 
 	if mpSupportTask_Check  then
 
-		txtDebug = txtDebug .. " passeA ".."\n"
+		if isDebugModeB then
+			txtDebug = txtDebug .. " passeA ".."\n"
+		end
 
 		local mpMainTask_Check = getMultiPlaneTask(side, draft.name, draft.type, draft.task)
 		local mpSupport_Data = getMultiPlane(side, unitSupport.name, unitSupport.type)
 
 		if mpMainTask_Check then
-			if mpSupport_Data then 
+			if mpSupport_Data then
 				mpSupport_Data.NbPlane = math.max(0, mpSupport_Data.NbPlane - draft.number)
-				txtDebug = txtDebug .. "    AtoG II_support() S7 NbPlane: "..mpSupport_Data.NbPlane.." draft.task: "..tostring(draft.task).."\n"
+				if isDebugModeB then
+					txtDebug = txtDebug .. "    AtoG II_support() S7 NbPlane: "..mpSupport_Data.NbPlane.." draft.task: "..tostring(draft.task).."\n"
+				end
 			end
 		end
 
@@ -187,31 +207,39 @@ function addSupportToDraft(
 
 		-- mpSupportTask_Check = getMultiPlaneTask(side, unitSupport.name, unitSupport.type, sptTask)
 
-		txtDebug =  txtDebug.."    AtoG II_support() S8 mpSupportTask_Check: "
-		.."mpSupport_Data "..tostring(mpSupport_Data)
-		.."mpSupportTask_Check "..tostring(mpSupportTask_Check)
-		.."side "..tostring(side)
-		.."unitSupport.name "..tostring(unitSupport.name)
-		.."unitSupport.type "..tostring(unitSupport.type)
-		.."sptTask "..tostring(sptTask)
-		.."\r\n"
+		if isDebugModeB then
+			txtDebug =  txtDebug.."    AtoG II_support() S8 mpSupportTask_Check: "
+			.."mpSupport_Data "..tostring(mpSupport_Data)
+			.."mpSupportTask_Check "..tostring(mpSupportTask_Check)
+			.."side "..tostring(side)
+			.."unitSupport.name "..tostring(unitSupport.name)
+			.."unitSupport.type "..tostring(unitSupport.type)
+			.."sptTask "..tostring(sptTask)
+			.."\r\n"
+		end
 
 		if mpSupport_Data and mpSupportTask_Check then
 			escort_num = mpSupport_Data.InitNbPlane
-			txtDebug =  txtDebug.."    AtoG II_support() S9 escort_num: "..escort_num.."\r\n"
+			if isDebugModeB then
+				txtDebug =  txtDebug.."    AtoG II_support() S9 escort_num: "..escort_num.."\r\n"
+			end
 		end
 
 		if escort_num >= 1 then
 			draft.score = draft.score * 1.2 + 1000
 			draft.scoreAdd =  draft.scoreAdd + 1000
 			draft.scoreCoef =  draft.scoreCoef * 1.2
-			txtDebug = txtDebug.."    AtoG II_support() S10 "..draft.score.."\r\n"
+			if isDebugModeB then
+				txtDebug = txtDebug.."    AtoG II_support() S10 "..draft.score.."\r\n"
+			end
 		end
 
-		txtDebug = txtDebug.."    AtoG II_support() S11 "..draft.score.."\r\n"
+		if isDebugModeB then
+			txtDebug = txtDebug.."    AtoG II_support() S11 "..draft.score.."\r\n"
 
-		txtDebug = txtDebug.."    AtoG II_support() S12 NbPlane "..multiPlaneSet[side][unitSupport.type][unitSupport.name].NbPlane.."\r\n"
-		-- txtDebug = " 	AtoG II_support() S13 InitNbPlaneByTask: "..tostring(multiPlaneSet[side][unitSupport.type][unitSupport.name].InitNbPlaneByTask).." /n/r "..txtDebug
+			txtDebug = txtDebug.."    AtoG II_support() S12 NbPlane "..multiPlaneSet[side][unitSupport.type][unitSupport.name].NbPlane.."\r\n"
+			-- txtDebug = " 	AtoG II_support() S13 InitNbPlaneByTask: "..tostring(multiPlaneSet[side][unitSupport.type][unitSupport.name].InitNbPlaneByTask).." /n/r "..txtDebug
+		end
 
 		-- Marquer l'unité comme vérifiée
 		multiPlaneSet[side][unitSupport.type][unitSupport.name].checked = true
@@ -241,7 +269,9 @@ function addSupportToDraft(
 			-- uniqueBonus = true
 			draft.uniqueBonusApplied = true
 
-			txtDebug =  "    AtoG II_support() S14 uniqueBonus "..draft.score.." /n/r "..txtDebug
+			if isDebugModeB then
+				txtDebug =  "    AtoG II_support() S14 uniqueBonus "..draft.score.." /n/r "..txtDebug
+			end
 		end
 
 		if isDebugModeB then
@@ -271,12 +301,12 @@ function addSupportToDraft(
 	-- 	draft.support[task] = {}
 	-- end
 
-	--add escort table to sortie															
+	--add escort table to sortie
 	-- draft.support[sptTask]["NbTotalSupport"] = draft.support[sptTask]["NbTotalSupport"] + escort_num
 	-- draft.support[sptTask]["escort_max"] = escort_max
 	local futureNbTotalSupport = draft.support[sptTask]["NbTotalSupport"] + escort_num
 
-	--regarde si l'enregistrement n'a pas encore eu lieu, sinon bloque avec la variable free_slot 
+	--regarde si l'enregistrement n'a pas encore eu lieu, sinon bloque avec la variable free_slot
 	--ceci doit etre vide draft.support[task][unitSupport.type]
 	local free_slot = (draft.support[sptTask][unitSupport.type] == nil)
 
@@ -354,10 +384,10 @@ function addSupportToDraft(
 			if tGround.offset > 0 then														--if threat can be offset by SEAD
 				if escort_offset >= tGround.offset then										--some SEAD aircraft remain to offset the threat
 					route_threat_recalc = escort_offset - tGround.offset							--use these SEAD aircraft to offset and ignore the therat
-				else																	--no SEAD aircraft remain unassignedd
+				else																		--no SEAD aircraft remain unassignedd
 					route_threat_recalc = route_threat_recalc + tGround.level					--sum route ground threat levels
 				end
-			else																		--threat cannot be offset by SEAD
+			else																			--threat cannot be offset by SEAD
 				route_threat_recalc = route_threat_recalc + tGround.level						--sum route ground threat levels
 			end
 		end
@@ -437,7 +467,7 @@ function addSupportToDraft(
 
 	if isDebugModeB then
 		debugLog(draft.id.." AtoG II_support() S19 pass B_22 draft.type: "..draft.type.." escort_num: "..tostring(escort_num)
-		.." supportType: "..unitSupport.type.." Task: "..sptTask.." target_name: "..tostring(draft.target_name)  
+		.." supportType: "..unitSupport.type.." Task: "..sptTask.." target_name: "..tostring(draft.target_name)
 		.." |score: "..tostring(draft.score))
 	end
 

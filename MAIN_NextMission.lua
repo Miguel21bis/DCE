@@ -1078,6 +1078,14 @@ mission.currentKey = 1500000																--not clear how this works but is re
 --########   1   ##############
 
 --unite "piste" (FARP, heliport) : son unitId est aussi l'airdromeId de db_airbases et la cle de son warehouse.
+-- Principe : rien n'est supprime. Les doublons sont corriges PAR GROUPE (par reference, plus par nom) :
+--   la 1ere occurrence (ordre fixe : cote, pays, categorie) garde son id / son nom, les suivantes sont
+--   incrementees : groupId = max+1, max+2...  ;  nom = "<nom>_2", "<nom>_3"...
+--   Les pistes (FARP, heliports) et les unites qui ont un warehouse gardent leur unitId : c'est l'autre
+--   unite qui est renumerotee. Les noms des pistes et des navires ne sont jamais renommes.
+-- Les locals groupId / uniId / name sont conserves : le bloc "########   2" juste apres les reaffecte.
+--=====================================================================================================
+--unite "piste" (FARP, heliport) : son unitId est aussi l'airdromeId de db_airbases et la cle de son warehouse.
 --Il ne doit jamais etre change : en cas de doublon, c'est l'AUTRE unite qui est renumerotee.
 function IsPisteUnit(unit)
 	return unit.category == "Heliports" or string.find(tostring(unit.type), "FARP", 1, true) ~= nil
@@ -1086,192 +1094,169 @@ end
 local groupId = {}
 local uniId = {}
 local name = {}
-local groupIdError = {}
-local minGroupId = 999999
-local maxGroupId = 0
-local unitIdError = {}
-local minUnitId = 999999
-local maxUnitId = 0
 
-for _, side in pairs(mission.coalition) do
-	for _, country_ in pairs(side.country) do
-		for _, categorie_ in pairs(country_) do
-			if type(categorie_) == "table" and categorie_.group then
-				for _, group in pairs(categorie_) do
-					for _, group_ in pairs(group) do
+do
+	--cles triees : meme resultat a chaque passe (pairs() n'a pas d'ordre fixe)
+	local function sortedKeys(t)
+		local keys = {}
+		for k in pairs(t) do keys[#keys + 1] = k end
+		table.sort(keys, function(a, b)
+			if type(a) == "number" and type(b) == "number" then return a < b end
+			return tostring(a) < tostring(b)
+		end)
+		return keys
+	end
 
-						if group_.groupId > maxGroupId then
-							maxGroupId = group_.groupId
-						end
-						if group_.groupId < minGroupId then
-							minGroupId = group_.groupId
-						end
+	--unite dont l'id ne doit pas changer : piste, ou unite qui a un warehouse
+	local function IsProtected(unit)
+		if IsPisteUnit(unit) then return true end
+		return warehouses and warehouses.warehouses and warehouses.warehouses[unit.unitId] ~= nil
+	end
 
-						if not  name[group_.name] then
-							name[group_.name] = group_.name
-						else
-							-- print("MainNM error, duplicate of |"..categorie.."| name |".. name[group_.name] .."|and|"..tostring(group_.name))
-						end
-
-
-						if not groupId[group_.groupId] then
-							groupId[group_.groupId] = group_.groupId
-						else
-							-- print("MainNM error, duplicate of |"..categorie.."| OLD GroupId |".. GroupId[group_.groupId].."|and|"..tostring(group_.name) )
-
-							table.insert(groupIdError, group_.name )
-						end
-
-						--TODO ajouter ici une condition pour que les unitId des pistes (FARP et autres) ne soient pas changé
-						for _, unit in ipairs(group_.units) do
-
-							if unit.unitId > maxUnitId then
-								maxUnitId = unit.unitId
-							end
-							if unit.unitId < minUnitId then
-								minUnitId = unit.unitId
-							end
-
-							local holder = uniId[unit.unitId]			--unite qui porte deja cet id (table), ou nil
-							if not holder then
-								uniId[unit.unitId] = unit
-							elseif IsPisteUnit(unit) and not IsPisteUnit(holder) then
-								--la piste garde son id : c'est l'unite deja enregistree qui sera renumerotee
-								table.insert(unitIdError, holder.name )
-								uniId[unit.unitId] = unit
-							else
-								-- print("MainNM error, duplicate of |"..tostring(categorie)..| OLD uniId ...)
-								table.insert(unitIdError, unit.name )
-								if IsPisteUnit(unit) then
-									print("MainNM ATTENTION: unitId de piste en double |"..tostring(unit.name).."| id "..tostring(unit.unitId).." (deja porte par une autre piste)")
-								end
-							end
-
-						end
+	--liste a plat de tous les groupes de la mission
+	local groups = {}
+	for _, sideName in ipairs(sortedKeys(mission.coalition)) do
+		local side = mission.coalition[sideName]
+		for _, countryN in ipairs(sortedKeys(side.country)) do
+			local country = side.country[countryN]
+			for _, catName in ipairs(sortedKeys(country)) do
+				local cat = country[catName]
+				if type(cat) == "table" and type(cat.group) == "table" then
+					for _, g in ipairs(cat.group) do
+						groups[#groups + 1] = { g = g, cat = catName, side = sideName }
 					end
 				end
 			end
 		end
 	end
-end
-print()
---renumerote automatiquement le groupId en doublon
-for _ , refName in pairs(groupIdError) do
 
-	local nTentative = 0
-	local found = false
-	local testId = 1
-	if minGroupId > 1 then
-		repeat
-			testId = math.random(1,minGroupId)
-			if not groupId[testId] then
-				found = true
+	local nbGroupId, nbGroupName, nbUnitId, nbUnitName = 0, 0, 0, 0
+	local parCat = {}
+	local function compte(cat) parCat[cat] = (parCat[cat] or 0) + 1 end
+	local function trace(msg) if Debug and Debug.debug then print(msg) end end
+
+	-----------------------------------------------------------------------------------------------
+	-- groupId
+	-----------------------------------------------------------------------------------------------
+	local takenG, seenG, maxG = {}, {}, 0
+	for _, e in ipairs(groups) do
+		local id = e.g.groupId
+		if type(id) == "number" then
+			takenG[id] = true
+			if id > maxG then maxG = id end
+		end
+	end
+	for _, e in ipairs(groups) do
+		local g = e.g
+		if type(g.groupId) ~= "number" or seenG[g.groupId] then
+			local old = g.groupId
+			repeat maxG = maxG + 1 until not takenG[maxG]
+			takenG[maxG] = true
+			g.groupId = maxG
+			nbGroupId = nbGroupId + 1
+			compte(e.cat)
+			trace("MainNM groupId en double renumerote : |"..tostring(g.name).."| "..tostring(old).." -> "..tostring(g.groupId).." ("..e.side.."."..e.cat..")")
+		end
+		seenG[g.groupId] = true
+	end
+
+	-----------------------------------------------------------------------------------------------
+	-- noms de groupes
+	-----------------------------------------------------------------------------------------------
+	local takenN, seenN = {}, {}
+	for _, e in ipairs(groups) do
+		if type(e.g.name) == "string" then takenN[e.g.name] = true end
+	end
+	for _, e in ipairs(groups) do
+		local g = e.g
+		if type(g.name) == "string" then
+			if seenN[g.name] then
+				local old, n, cand = g.name, 2, nil
+				repeat cand = old.."_"..n; n = n + 1 until not takenN[cand]
+				takenN[cand] = true
+				g.name = cand
+				nbGroupName = nbGroupName + 1
+				compte(e.cat)
+				trace("MainNM nom de groupe en double renomme : |"..old.."| -> |"..cand.."| ("..e.side.."."..e.cat..")")
 			end
-			nTentative = nTentative + 1
-		until found or nTentative > 50
+			seenN[g.name] = true
+		end
 	end
 
-	if not found then
-		repeat
-			testId = math.random(minGroupId,maxGroupId)
-			if not groupId[testId] then
-				found = true
-			end
-			nTentative = nTentative + 1
-		until found or nTentative > 500
-	end
-
-	if not found then
-		testId =  maxGroupId + 1
-	end
-
-	if testId > maxGroupId then
-		maxGroupId = testId
-	end
-	if testId < minGroupId then
-		minGroupId = testId
-	end
-
-	--change l'Id dans la mission
-	for _, side in pairs(mission.coalition) do																--iterate through sides
-		for _, country_ in pairs(side.country) do																--iterate through countries
-			for _, categorie_ in pairs(country_) do
-				if type(categorie_) == "table" and categorie_.group then
-					for _, group in pairs(categorie_) do
-						for _, group_ in pairs(group) do
-							if group_.name == refName then
-								-- print("MainNM MISSION update NEW GroupId |"..testId.."| GroupName |".. group_.name)
-								group_.groupId = testId
-							end
-						end
-					end
-				end
+	-----------------------------------------------------------------------------------------------
+	-- unitId (les pistes / warehouses d'abord : ils gardent leur id)
+	-----------------------------------------------------------------------------------------------
+	local takenU, seenU, maxU = {}, {}, 0
+	for _, e in ipairs(groups) do
+		for _, u in ipairs(e.g.units or {}) do
+			if type(u.unitId) == "number" then
+				takenU[u.unitId] = true
+				if u.unitId > maxU then maxU = u.unitId end
 			end
 		end
 	end
-end
-print()
-
---renumerote automatiquement le uniId en doublon
-for _ , refNameB in pairs(unitIdError) do
-
-	local nTentative = 0
-	local found = false
-	local testId = 1
-	if minUnitId > 1 then
-		repeat
-			testId = math.random(1,minUnitId)
-			if not uniId[testId] then
-				found = true
-			end
-			nTentative = nTentative + 1
-		until found or nTentative > 50
-	end
-
-	if not found then
-		repeat
-			testId = math.random(minUnitId,maxUnitId)
-			if not uniId[testId] then
-				found = true
-			end
-			nTentative = nTentative + 1
-		until found or nTentative > 500
-	end
-
-	if not found then
-		testId =  maxUnitId + 1
-	end
-
-	uniId[testId] = testId			--id pris : le doublon suivant ne doit pas tomber dessus
-
-	if testId > maxUnitId then
-		maxUnitId = testId
-	end
-	if testId < minUnitId then
-		minUnitId = testId
-	end
-
-	for _, sideB in pairs(mission.coalition) do																--iterate through sides
-		for _, countryB in pairs(sideB.country) do																--iterate through countries
-			for _, categorieB in pairs(countryB) do
-				if type(categorieB) == "table" and categorieB.group then
-					for _, groupsB in pairs(categorieB) do
-						for _, groupB in pairs(groupsB) do
-
-							for _, unitB in ipairs(groupB.units) do
-								if unitB.name == refNameB then
-									-- print("MainNM update MISSION NEW uniId |"..testId.."| groupName |".. groupB.name.."| unitName |".. unitB.name)
-									unitB.unitId = testId
-
-									-- print("MainNM new uniId? "..tostring(categorieB[_groupB][groupNB].units[unitNB].unitId))
-								end
-							end
-
-						end
-					end
+	for _, e in ipairs(groups) do
+		for _, u in ipairs(e.g.units or {}) do
+			if IsProtected(u) then
+				if seenU[u.unitId] then
+					print("MainNM ATTENTION: unitId de piste/warehouse en double |"..tostring(u.name).."| id "..tostring(u.unitId).." (deja porte par une autre piste)")
 				end
+				seenU[u.unitId] = true
 			end
 		end
+	end
+	for _, e in ipairs(groups) do
+		for _, u in ipairs(e.g.units or {}) do
+			if not IsProtected(u) then
+				if type(u.unitId) ~= "number" or seenU[u.unitId] then
+					local old = u.unitId
+					repeat maxU = maxU + 1 until not takenU[maxU]
+					takenU[maxU] = true
+					u.unitId = maxU
+					nbUnitId = nbUnitId + 1
+					compte(e.cat)
+					trace("MainNM unitId en double renumerote : |"..tostring(u.name).."| (groupe |"..tostring(e.g.name).."|) "..tostring(old).." -> "..tostring(u.unitId))
+				end
+				seenU[u.unitId] = true
+			end
+		end
+	end
+
+	-----------------------------------------------------------------------------------------------
+	-- noms d'unites (pistes et navires : jamais renommes, d'autres tables les referencent par nom)
+	-----------------------------------------------------------------------------------------------
+	local takenUN, seenUN = {}, {}
+	for _, e in ipairs(groups) do
+		for _, u in ipairs(e.g.units or {}) do
+			if type(u.name) == "string" then takenUN[u.name] = true end
+		end
+	end
+	for _, e in ipairs(groups) do
+		for _, u in ipairs(e.g.units or {}) do
+			if type(u.name) == "string" then
+				if seenUN[u.name] and not IsProtected(u) and e.cat ~= "ship" then
+					local old, n, cand = u.name, 2, nil
+					repeat cand = old.."_"..n; n = n + 1 until not takenUN[cand]
+					takenUN[cand] = true
+					u.name = cand
+					nbUnitName = nbUnitName + 1
+					compte(e.cat)
+					trace("MainNM nom d'unite en double renomme : |"..old.."| -> |"..cand.."| (groupe |"..tostring(e.g.name).."|, "..e.side.."."..e.cat..")")
+				end
+				seenUN[u.name] = true
+			end
+		end
+	end
+
+	-----------------------------------------------------------------------------------------------
+	-- resume (visible dans la BugList si quelque chose a ete corrige)
+	-----------------------------------------------------------------------------------------------
+	local total = nbGroupId + nbGroupName + nbUnitId + nbUnitName
+	if total > 0 then
+		local cats = {}
+		for _, c in ipairs(sortedKeys(parCat)) do cats[#cats + 1] = c.."="..parCat[c] end
+		AddLog("MainNM doublons corriges dans la mission : groupId "..nbGroupId..", nom de groupe "..nbGroupName
+			..", unitId "..nbUnitId..", nom d'unite "..nbUnitName.." (par categorie : "..table.concat(cats, ", ")..")")
 	end
 end
 
