@@ -2242,56 +2242,52 @@ Action = {}
 	--TemplateActive
 	--@doc    Activates a ground template (.stm) from the Templates folder: new ground groups, moving front.
 	--@doc    With a list of files, one is picked at random.
+	--@doc    A group already imported by a template is only updated (route, positions). Names and ids are keys for DCS: a new group or unit whose name is already used is renamed (suffix _T2, _T3...), base_mission keeps its names, and every new group and unit gets an id above the highest id in use.
+	--@doc    In debug mode, a renamed name that is also referenced in db_airbases, a trigger or the targetlist is reported in the BugList.
 	--@category Ground, Ship, Template
 	--@param  tabFile     | source=/Templates/*.stm | Template file, or a list of files
 	--@example Action.TemplateActive("front_1.stm")
 	function Action.TemplateActive(tabFile)
-		if debugKT then print("	--> function Action.TemplateActive "..tostring( tabFile)) end
+		if debugKT then print("\t--> function Action.TemplateActive "..tostring( tabFile)) end
 
 		local file
+		local debugMode = (Debug and Debug.debug) and true or false
 
-		--cherche la valeur UnitID la plus haute
-		local CurrentUnitId = 0
-		local CurrentGroupId = 0
+		----------------------------------------------------------------------
+		-- Ce qui est deja pris dans toute la mission : mission de base, oob_ground,
+		-- warehouses, db_airbases, compteurs de FUNC_Ids.
+		-- maxId = plus grand id (groupe OU unite) : les nouveaux ids sont pris AU-DESSUS,
+		-- jamais dans un trou en bas de plage (un id reutilise pourrait en recouper un autre).
+		----------------------------------------------------------------------
+		local used = { groupNames = {}, unitNames = {}, baseGroupNames = {} }
+		local maxId = 0
 
-		-- local function findGroup(Group_name, category)
-		local function findGroup(groupName, sideName, countryId, category)
-			for O_sideName, O_countries in pairs(oob_ground) do							--iterate through sides
-				if O_sideName == sideName  then
-					for O_country_n, O_country in pairs(O_countries) do						--iterate through countries
-						if O_country.id == countryId and O_country[category] and O_country[category].group then		--country has vehicles
-							for g = 1, #O_country[category].group do
-								if O_country[category].group[g].name  == groupName then
-									return true
-								end
-							end
-						end
-					end
-				end
-			end
+		local function markId(v)
+			v = tonumber(v)
+			if v and v > maxId then maxId = v end
 		end
 
-		local function movedXY(Unit, Category)
-			local foundInGround = false
-			for Oside_name, Oside in pairs(oob_ground) do							--iterate through sides
-				for Ocountry_n, Ocountry in pairs(Oside) do						--iterate through countries
-					if Ocountry[Category] then							--country has vehicles
-						for g = 1, #Ocountry[Category].group do
-							for u = 1, #Ocountry[Category].group[g].units do			--iterate through units
-								if Ocountry[Category].group[g].units[u].name == Unit.name then
-
-									if not Ocountry[Category].group[g].units[u].dead then
-										-- print("DcCt update movedXY "..Unit.name.." "..Ocountry[Category].group[g].units[u].heading)
-										Ocountry[Category].group[g].units[u].x = Unit.x
-										Ocountry[Category].group[g].units[u].y = Unit.y
-										Ocountry[Category].group[g].units[u].heading = Unit.heading
-
-										if u == 1 then
-											Ocountry[Category].group[g].heading = Unit.heading				--M40.e
-											Ocountry[Category].group[g].x = Unit.x							--M40.e
-											Ocountry[Category].group[g].y = Unit.y							--M40.e
-											foundInGround = true
-											-- print("[1]DcCt update movedXY "..Unit.name.." "..Ocountry[Category].group[g].units[u].heading)
+		--meme structure side > country > categorie > group > units pour mission.coalition et oob_ground
+		local function scanGroups(root, isMission)
+			if type(root) ~= "table" then return end
+			for _, side in pairs(root) do
+				if type(side) == "table" then
+					local countries = side.country or side
+					for _, country in pairs(countries) do
+						if type(country) == "table" then
+							for _, class in pairs(country) do
+								if type(class) == "table" and type(class.group) == "table" then
+									for _, group in pairs(class.group) do
+										if type(group) == "table" then
+											markId(group.groupId)
+											if group.name then
+												used.groupNames[group.name] = true
+												if isMission then used.baseGroupNames[group.name] = true end	--noms de la mission de base
+											end
+											for _, unit in pairs(group.units or {}) do
+												markId(unit.unitId)
+												if unit.name then used.unitNames[unit.name] = true end
+											end
 										end
 									end
 								end
@@ -2302,21 +2298,208 @@ Action = {}
 			end
 		end
 
-		function SetRouteXY(Groupname, Category, Route )
-			local foundInGround = false
-			for Oside_name, Oside in pairs(oob_ground) do							--iterate through sides
-				for Ocountry_n, Ocountry in pairs(Oside) do						--iterate through countries
-					if Ocountry[Category] then							--country has vehicles
-						for g = 1, #Ocountry[Category].group do
-							if Ocountry[Category].group[g].name == Groupname then
-								Ocountry[Category].group[g].route = Route
+		scanGroups(mission and mission.coalition, true)
+		scanGroups(oob_ground, false)
+
+		if type(warehouses) == "table" then
+			for _, section in pairs({ warehouses.warehouses, warehouses.airports }) do
+				if type(section) == "table" then
+					for k in pairs(section) do markId(k) end
+				end
+			end
+		end
+
+		if type(db_airbases) == "table" then
+			for _, b in pairs(db_airbases) do
+				if type(b) == "table" then
+					markId(b.airdromeId)
+					markId(b.helipadId)
+				end
+			end
+		end
+
+		if type(AllIdGroup) == "table" then
+			for k in pairs(AllIdGroup) do markId(k) end
+		end
+		if type(AllIdUnit) == "table" then
+			for k in pairs(AllIdUnit) do markId(k) end
+		end
+
+		local nextId = maxId
+		local firstNewId
+
+		--nouvel id au-dessus du maximum global, declare aussi dans FUNC_Ids pour que GenerateIDxxx ne le redonne pas
+		local function newGroupId(groupName)
+			nextId = nextId + 1
+			if not firstNewId then firstNewId = nextId end
+			if type(AllIdGroup) == "table" then AllIdGroup[nextId] = groupName end
+			return nextId
+		end
+
+		local function newUnitId(unitName, unitType)
+			nextId = nextId + 1
+			if not firstNewId then firstNewId = nextId end
+			if type(AllIdUnit) == "table" then AllIdUnit[nextId] = { name = unitName, type = unitType } end
+			if unitName and type(UnitByName) == "table" then UnitByName[unitName] = nextId end
+			return nextId
+		end
+
+		--premier nom libre : nom, nom_T2, nom_T3...
+		local function freeName(baseName, taken)
+			if not taken[baseName] then return baseName end
+			local n = 2
+			while taken[baseName.."_T"..n] do
+				n = n + 1
+			end
+			return baseName.."_T"..n
+		end
+
+		----------------------------------------------------------------------
+		-- Rapport de bugs (mode debug uniquement) : ecrits dans BugList par AddLog
+		----------------------------------------------------------------------
+		--ou ce nom est-il reference (db_airbases, triggers de campagne, targetlist) ?
+		local function findReferences(name)
+			local refs = {}
+			local function add(txt)
+				if #refs < 6 then table.insert(refs, txt) end
+			end
+
+			if type(db_airbases) == "table" then
+				for key, b in pairs(db_airbases) do
+					if key == name then
+						add("db_airbases[\""..tostring(key).."\"]")
+					elseif type(b) == "table" and (b.unitname == name or b.name == name) then
+						add("db_airbases[\""..tostring(key).."\"].unitname/name")
+					end
+				end
+			end
+
+			if type(camp_triggers) == "table" then
+				local q1 = "\""..name.."\""
+				local q2 = "'"..name.."'"
+				for tKey, trig in pairs(camp_triggers) do
+					if type(trig) == "table" then
+						local texts = { trig.condition }
+						if type(trig.action) == "table" then
+							for _, a in pairs(trig.action) do table.insert(texts, a) end
+						else
+							table.insert(texts, trig.action)
+						end
+						for _, text in pairs(texts) do
+							if type(text) == "string" and (string.find(text, q1, 1, true) or string.find(text, q2, 1, true)) then
+								add("trigger "..tostring(trig.name or tKey))
+								break
 							end
 						end
 					end
 				end
 			end
+
+			if type(targetlist) == "table" then
+				for sideName, targets in pairs(targetlist) do
+					if type(targets) == "table" then
+						for _, target in pairs(targets) do
+							if type(target) == "table" then
+								if target.name == name or target.titleName == name then
+									add("targetlist."..tostring(sideName).." |"..tostring(target.titleName or target.name).."|")
+								end
+								for _, element in pairs(target.elements or {}) do
+									if type(element) == "table" and (element.name == name or element.fromGroupName == name or element.fromUnitName == name) then
+										add("targetlist."..tostring(sideName).." |"..tostring(target.titleName or target.name).."| element")
+										break
+									end
+								end
+							end
+						end
+					end
+				end
+			end
+
+			return refs
 		end
 
+		--nom renomme : bug a reporter s'il est reference ailleurs (la reference vise alors l'element de base_mission)
+		local function reportRename(kind, oldName, newName)
+			if not debugMode then return end
+			local refs = findReferences(oldName)
+			if #refs > 0 then
+				AddLog("DcCT TemplateActive BUG "..tostring(file)..": nom de "..kind.." |"..tostring(oldName).."| deja utilise, renomme en |"..tostring(newName)
+					.."| mais le nom est reference par : "..table.concat(refs, " ; ")
+					.." -> la reference vise l'element de base_mission, verifier le contenu de la campagne")
+			else
+				print("DcCT TemplateActive "..tostring(file)..": nom de "..kind.." |"..tostring(oldName).."| deja utilise, renomme en |"..tostring(newName).."|")
+			end
+		end
+
+		local function sameFirstUnitPlace(g, groupData)
+			local a = g.units and g.units[1]
+			local b = groupData.units and groupData.units[1]
+			if a and b and a.x and a.y and b.x and b.y then
+				return math.abs(a.x - b.x) < 1 and math.abs(a.y - b.y) < 1
+			end
+			return false
+		end
+
+		-- Cherche dans oob_ground le groupe que ce groupe du template doit mettre a jour (nil = nouveau groupe a importer).
+		-- 1) un groupe deja importe par un template (templateSource) : retrouve par son nom, ou par son nom d'origine s'il a ete renomme
+		-- 2) un groupe sans marque (ancien import, ou groupe de la mission de base) de meme nom :
+		--    pour un static, seulement si ce nom n'existe pas dans la mission de base, ou s'il est deja au meme endroit.
+		--    Sinon c'est un autre groupe qui porte le meme nom : le template sera importe sous un nom libre.
+		--    Autres categories : meme nom = meme groupe (comportement d'avant).
+		local function findGroup(groupName, sideName, countryId, category, groupData)
+			local candidates = {}
+			if type(oob_ground[sideName]) ~= "table" then return nil end
+
+			for _, O_country in pairs(oob_ground[sideName]) do
+				if type(O_country) == "table" and O_country.id == countryId and O_country[category] and O_country[category].group then
+					for _, g in ipairs(O_country[category].group) do
+						table.insert(candidates, g)
+					end
+				end
+			end
+
+			for _, g in ipairs(candidates) do
+				if g.templateSource and (g.name == groupName or g.templateOrigName == groupName) then
+					return g
+				end
+			end
+
+			for _, g in ipairs(candidates) do
+				if not g.templateSource and g.name == groupName then
+					if category ~= "static" or not used.baseGroupNames[groupName] or sameFirstUnitPlace(g, groupData) then
+						return g
+					end
+				end
+			end
+
+			return nil
+		end
+
+		--groupe deja dans oob_ground : on ne change que la route et la position des unites (ids et noms inchanges)
+		local function mergeGroup(existing, groupData)
+			if groupData.route then
+				existing.route = groupData.route
+			end
+
+			for _, tUnit in ipairs(groupData.units or {}) do
+				for u, eUnit in ipairs(existing.units or {}) do
+					if eUnit.name == tUnit.name or eUnit.templateOrigName == tUnit.name then
+						if not eUnit.dead then
+							eUnit.x = tUnit.x
+							eUnit.y = tUnit.y
+							eUnit.heading = tUnit.heading
+
+							if u == 1 then
+								existing.heading = tUnit.heading
+								existing.x = tUnit.x
+								existing.y = tUnit.y
+							end
+						end
+						break
+					end
+				end
+			end
+		end
 
 		-- cree une table identifiant des noms de pays
 		local countryNameToN = {
@@ -2364,6 +2547,8 @@ Action = {}
 
 		-- tmp_dictionary = Deepcopy(staticTemplate.localization.DEFAULT)
 
+		local nNew, nMerged, nGroupRenamed, nUnitRenamed = 0, 0, 0, 0
+
 		--store group and unit names in oob_ground instead of pointers to dict table
 		for sideName, countries in pairs(tmp_ground) do
 			for countryN, country in pairs(countries) do
@@ -2373,26 +2558,74 @@ Action = {}
 							local groupname = groupData.name
 
 							--TODO attention, un nom identique existe peut etre dans les autres SIDE
-							local groupAlreadyExist = findGroup(groupname, sideName, country.id, category)
+							local existing = findGroup(groupname, sideName, country.id, category, groupData)
 							groupData.name = groupname
 
-							if groupAlreadyExist then
-								SetRouteXY(groupname, category, groupData.route )
-							end
+							if existing then
+								--deja present : mise a jour de la route et des positions
+								mergeGroup(existing, groupData)
+								nMerged = nMerged + 1
 
-							for unitN, unit in ipairs(groupData.units) do
-								local unitname = unit.name
-								unit.name = unitname
-								if groupAlreadyExist then
-									movedXY(unit, category )
-								else
-									unit.unitId = GenerateIDUnit(unitname, unit.type)
+							else
+								--nouveau groupe : nom unique, ids au-dessus du maximum global
+								local isHeliport = false
+								for unitN, unit in ipairs(groupData.units) do
+									if unit.category == "Heliports" then isHeliport = true end
+								end
 
-									if unit.category == "Heliports" then
+								--nom de groupe deja pris (mission de base, oob_ground, autre template) : le groupe importe est renomme
+								local groupRenamed = false
+								if used.groupNames[groupname] then
+									local newName = freeName(groupname, used.groupNames)
+									groupData.templateOrigName = groupname
+									groupData.name = newName
+									groupRenamed = true
+									nGroupRenamed = nGroupRenamed + 1
+									reportRename("groupe", groupname, newName)
+
+									if isHeliport and debugMode then
+										AddLog("DcCT TemplateActive GROS BUG "..tostring(file)..": le groupe heliport/FARP |"..tostring(groupname)
+											.."| existe deja, renomme en |"..newName.."| : aucune entree db_airbases n'est creee ni modifiee pour lui, cette piste n'est pas utilisable (verifier le contenu de la campagne)")
+									end
+								end
+								used.groupNames[groupData.name] = true
+
+								local nUnitRenamedGroup = 0
+
+								for unitN, unit in ipairs(groupData.units) do
+									local unitname = unit.name
+
+									--nom d'unite deja pris : l'unite importee est renommee
+									if unitname and used.unitNames[unitname] then
+										local newUnitName = freeName(unitname, used.unitNames)
+										unit.templateOrigName = unitname
+										unit.name = newUnitName
+										reportRename("unite", unitname, newUnitName)
+										unitname = newUnitName
+										nUnitRenamed = nUnitRenamed + 1
+										nUnitRenamedGroup = nUnitRenamedGroup + 1
+									end
+									if unitname then used.unitNames[unitname] = true end
+
+									unit.unitId = newUnitId(unitname, unit.type)
+
+									if unit.category == "Heliports" and not groupRenamed then
+										--(groupe renomme : pas d'entree db_airbases, voir plus haut)
 
 										local oldEntry = db_airbases[groupData.name]
 
-										if type(oldEntry) == "table" and oldEntry.wargameFarp then
+										if type(oldEntry) == "table" and oldEntry.airdromeId and oldEntry.airdromeId ~= unit.unitId then
+											--l'id du FARP est la reference de son warehouse : on ne touche ni l'entree ni le warehouse
+											if debugMode then
+												local whText = "pas de warehouse"
+												if type(warehouses) == "table" and type(warehouses.warehouses) == "table" and warehouses.warehouses[oldEntry.airdromeId] then
+													whText = "warehouse existant pour l'ancien id"
+												end
+												AddLog("DcCT TemplateActive GROS BUG "..tostring(file)..": FARP |"..tostring(groupData.name).."| db_airbases.airdromeId "..tostring(oldEntry.airdromeId)
+													.." different de l'unitId de l'heliport importe "..tostring(unit.unitId).." ("..whText..") : le lien avec le warehouse est casse")
+											end
+
+										elseif type(oldEntry) == "table" and oldEntry.wargameFarp then
 											--FARP pilote par le wargame (DCE_Manager) : on complete l'entree existante,
 											--on n'efface pas wargameFarp / wargamePlan / wargameBeach / x / y / inactive / side
 											oldEntry.airdromeId = unit.unitId
@@ -2430,12 +2663,14 @@ Action = {}
 											}
 										end
 									end
-
 								end
-							end
 
-							if not groupAlreadyExist then
-								groupData.groupId = GenerateIDGroup()
+								if nUnitRenamedGroup > 0 and debugMode then
+									print("DcCT TemplateActive "..tostring(file)..": groupe |"..tostring(groupData.name).."| "..nUnitRenamedGroup.." nom(s) d'unite renomme(s) avec _T<n>")
+								end
+
+								groupData.groupId = newGroupId(groupData.name)
+								groupData.templateSource = file						--marque : groupe venu d'un template (retrouve a la mission suivante)
 
 								local newCountryN = countryNameToN[sideName][country.name]
 
@@ -2470,6 +2705,7 @@ Action = {}
 								end
 
 								table.insert(oob_ground[sideName][newCountryN][category]["group"], groupData)
+								nNew = nNew + 1
 								-- print("DcCT D category "..tostring(category).." g.name "..tostring(groupData.name))
 							end
 						end
@@ -2478,7 +2714,15 @@ Action = {}
 
 			end
 		end
+
+		if debugMode then
+			print("DcCT TemplateActive "..tostring(file)..": "..nNew.." groupe(s) importe(s), "..nMerged.." deja present(s) mis a jour, "
+				..nGroupRenamed.." nom(s) de groupe et "..nUnitRenamed.." nom(s) d'unite renomme(s)"
+				..(firstNewId and (", nouveaux ids a partir de "..firstNewId) or ""))
+		end
 	end
+
+
 
 
 	--@doc    Deactivates the ground groups of a template (.stm) from the Templates folder.

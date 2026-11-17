@@ -5,7 +5,59 @@
 --Utilise les globales de Main : multiPlaneSet, draftSorties, baseFARP, priorityMaxValue, targetAssignedFirepower, status_counter_sorties ; et celles de ATO_Gen_20_Eligibility.lua.
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Gen_30_Sorties.lua"] = "1.21.139"
+versionDCE["ATO_Gen_30_Sorties.lua"] = "1.21.141"
+--1.21.141 : trace MP (MP_TRACE) : fichier Debug/Wargame/ScriptsModPart/MP_Trace.log, ecrit seulement en multijoueur (Multi.NbGroup >= 1).
+--1.21.140 : MP, un seul draft par (squad, loadout, variante) avec TOUT le nombre demande par le joueur (avant : boucle par paquets de 4 -> 6 demandes = 6 + 2 avions),
+--           nombre force EXACTEMENT a la demande, sans limite de stock (MP_IGNORE_STOCK). Les drafts MP ne comptent plus dans targetAssignedFirepower
+--           (le complement IA est calcule dans ATO_Gen_60_Package.lua, MP_COMPLEMENT). Chercher "MP_ONE_DRAFT" / "MP_IGNORE_STOCK".
+if MP_IGNORE_STOCK == nil then MP_IGNORE_STOCK = true end
+
+--MP_TRACE : journal dedie a la generation multijoueur (pourquoi tant de vols sur la cible MP ?). Mettre MP_TRACE = false pour couper.
+--Fichier : Campaigns\<campagne>\Debug\Wargame\ScriptsModPart\MP_Trace.log (ecrase au 1er passage, complete aux passes suivantes)
+if MP_TRACE == nil then MP_TRACE = true end
+MP_TRACE_DIR = "Debug/Wargame/ScriptsModPart"
+MP_TRACE_FILE = MP_TRACE_DIR.."/MP_Trace.log"
+
+function MpTrace(msg)
+	if not MP_TRACE then return end
+	if not (Multi and Multi.NbGroup and Multi.NbGroup >= 1) then return end
+
+	local mode = "a"
+	if not MP_TraceStarted then
+		mode = "w"
+		local dir = string.gsub(MP_TRACE_DIR, "/", "\\")
+		os.execute('if not exist "'..dir..'" mkdir "'..dir..'"')
+	end
+
+	local f = io.open(MP_TRACE_FILE, mode)
+	if f then
+		MP_TraceStarted = true
+		f:write(tostring(msg).."\n")
+		f:close()
+	end
+end
+
+--true si ce nom de cible est la cible MP choisie par le joueur pour ce camp
+function MpIsTarget(sideName, targetName)
+	return Multi ~= nil and Multi.Target ~= nil and Multi.Target[sideName] ~= nil and Multi.Target[sideName] == targetName
+end
+
+--resume lisible des supports d'un draft : "Escort:421st TFS x4, Strike:615th TFS x4(B)"
+function MpTraceSupports(draft)
+	local out = {}
+	if draft and draft.support then
+		for supportTask, tbl in pairs(draft.support) do
+			if type(tbl) == "table" then
+				for k, v in pairs(tbl) do
+					if type(v) == "table" and v.name then
+						out[#out + 1] = tostring(supportTask)..":"..tostring(v.name).." x"..tostring(v.number)..(v.overideMP_B and "(B)" or "")
+					end
+				end
+			end
+		end
+	end
+	return table.concat(out, ", ")
+end	--true : le nombre d'avions demande par un client n'est pas limite par le stock du squad
 -------------------------------------------------------------------------------------------------------
 --1.21.139 : MP, le nombre d'avions demande par le joueur (Multi.Group[k].NbPlane) etait compare a multiPlaneSet[..].NbPlane,
 --           qui vaut 0 des l'initialisation (ATO_Gen_Main.lua) : le relevement ne se faisait jamais (UH-1H CSAR x3 -> 1, C-130J Transport x4 -> 2 ou 3).
@@ -285,6 +337,13 @@ local function buildDraftSorties(
 		draftSorties[sideName][#draftSorties[sideName] + 1] = draftSortiesEntry
 		if MemTick then MemTick("A draft") end
 
+		if MpIsTarget(sideName, target.titleName) then
+			MpTrace("DRAFT_CREE id="..tostring(draftSortiesEntry.id).." squad="..tostring(unit.name).." type="..tostring(unit.type).." task="..tostring(task)
+				.." loadout="..tostring(currentLoadout.name).." fp_loadout="..tostring(currentLoadout.firepower)
+				.." number="..tostring(draftSortiesEntry.number).." main_overideMP="..tostring(draftSortiesEntry.main_overideMP)
+				.." variant="..tostring(draftContext.state.variant).." score="..tostring(draftSortiesEntry.score).." multipack="..tostring(multipack))
+		end
+
 		table.insert(
 			pendingPackages[target.titleName].sorties,
 			draftSortiesEntry.id
@@ -341,9 +400,9 @@ local function buildDraftSorties(
 
 		elseif draftContext.overideMP_A then
 
-			local splitSize = 4
-
-			draftContext.state.futureAircraftAssign = draftContext.state.futureAircraftAssign - splitSize
+			--MP_ONE_DRAFT : un seul draft porte tout le nombre demande par le joueur (addFlight le decoupe ensuite en vols de 4 maximum).
+			--Avant : paquets de 4 -> une demande de 6 donnait un draft de 6 puis un draft de 2.
+			draftContext.state.futureAircraftAssign = 0
 		else
 			draftContext.state.futureAircraftAssign = 0
 		end
@@ -395,6 +454,12 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 			end
 
 			draftContext.clientPlayer = true
+		end
+
+		if MpIsTarget(sideName, target_name) then
+			MpTrace("ELIGIBLE squad="..tostring(unit.name).." type="..tostring(unit.type).." task="..tostring(task).." loadout="..tostring(currentLoadout.name)
+				.." mpTask_Check="..tostring(mpTask_Check ~= nil).." mp_Data="..tostring(mp_Data ~= nil).." overideMP_A="..tostring(draftContext.overideMP_A)
+				.." mpRequestedNb="..tostring(getMultiRequestedNb(sideName, unit.name, unit.type, task, mp_Data)))
 		end
 
 		if isDebugModeA3 then
@@ -859,10 +924,15 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 
 							--M11.z
 							--MP_REQUESTED : on force le nombre demande par le joueur (avant : compare a mp_Data.NbPlane qui vaut 0 -> jamais applique).
-							--La limite reste le stock reel du squad (AcftAvail[].available) : on ne cree jamais d'avion.
+							--Stock : voir MP_IGNORE_STOCK en tete de fichier (true = le client n est pas limite par le stock).
 							local mpRequestedNb = getMultiRequestedNb(sideName, unit.name, unit.type, task, mp_Data)
-							if mpRequestedNb > 0 and draftContext.state.futureAircraftAssign < mpRequestedNb then
-								draftContext.state.futureAircraftAssign = math.min(mpRequestedNb, math.floor(AcftAvail[unit.name].available))
+							if mpRequestedNb > 0 then
+								--MP_IGNORE_STOCK : le nombre demande par le client est applique tel quel (ni plus, ni moins) ; le complement IA est fait plus tard
+								if MP_IGNORE_STOCK then
+									draftContext.state.futureAircraftAssign = mpRequestedNb
+								else
+									draftContext.state.futureAircraftAssign = math.min(mpRequestedNb, math.floor(AcftAvail[unit.name].available))
+								end
 								logTmp = logTmp .. " /d "
 								debugMulti = debugMulti.."\n"..("AtoG_overideMP_A passe C MP_REQUESTED "..unit.type.." demande: "..tostring(mpRequestedNb).." aircraft_assign: "..tostring(draftContext.state.futureAircraftAssign))
 							end
@@ -903,7 +973,10 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 						local generatedFirepower = currentLoadout.firepower * assignedAircraft
 
 						--TODO ici, il ne faut mettre que les targets qui ont un packMax
-						targetAssignedFirepower[target_name] = (targetAssignedFirepower[target_name] or 0) + generatedFirepower
+						--les drafts MP ne comptent pas ici (1 par loadout/variante = cumul faux) ; leur firepower est suivie dans createATO_table (mpTargetFp)
+						if not draftContext.overideMP_A then
+							targetAssignedFirepower[target_name] = (targetAssignedFirepower[target_name] or 0) + generatedFirepower
+						end
 
 						if isDebugModeA3 then
 							debugLog(
@@ -917,7 +990,7 @@ function processEligibleLoadout(draftContext, sideName, task, target, target_nam
 							debugLog(
 								"draftId"..draftId.." AtoG passe A_30 = = = = = = = = = = = = >>>>>>  buildDraftSorties() PACKAGE COMPLETE "
 								..target_name.." targetAssignedFirepower/target.firepower.max: "
-								..targetAssignedFirepower[target_name] .."/" ..target.firepower.max
+								..tostring(targetAssignedFirepower[target_name] or 0) .."/" ..target.firepower.max
 							)
 						end
 

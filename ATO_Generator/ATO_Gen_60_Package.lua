@@ -5,7 +5,18 @@
 --Ce fichier utilise les globales debuGenTxt, denom_NeDonnePasTOUT, multipackByTargetName, status_counter_ATO definies dans ATO_Gen_Main.lua AVANT cet Include, et cree la globale ATO.
 -------------------------------------------------------------------------------------------------------
 if not versionDCE then versionDCE = {} end
-versionDCE["ATO_Gen_60_Package.lua"] = "1.21.137"
+versionDCE["ATO_Gen_60_Package.lua"] = "1.21.141"
+--1.21.141 : MP_CIBLE_RESERVEE (pas de package IA classique sur la cible MP), complement hors plafond prorata, candidats complement = drafts sans vol cree.
+--1.21.140 : trace MP (MpTrace, voir ATO_Gen_30_Sorties.lua) : decision de chaque draft sur la cible MP, vols crees, complements.
+--1.21.138 : MP (client) + complement IA. Chercher "MP_SERVED" et "MP_COMPLEMENT" pour retrouver les modifications.
+--  - MP_SERVED : un squad MP n'est servi qu'UNE fois par cible/tache (le draft de meilleur score gagne), jusqu'au nombre demande par le joueur
+--    (avant : 1 draft par loadout x variante de route = 3 vols de 4 pour une demande de 4).
+--  - MP_COMPLEMENT : si le nombre MP est inferieur au besoin de la cible, des avions IA completent le package
+--    (meme squad d'abord, puis les autres squads), dans la limite du stock et de la part par tache.
+--  - MP_NO_STRIKE_SUPPORT : plus de vol "Strike" de support (+4 avions) sur un vol principal MP (cause des 4 avions en trop).
+--  - MP_IGNORE_STOCK (defini dans ATO_Gen_30_Sorties.lua) : le nombre demande par le client n'est plus limite par le stock.
+MP_NEED_RATIO = MP_NEED_RATIO or 0.5		--besoin d'une cible en firepower pour un MP : min + (max - min) * ratio (0 = min, 1 = max)
+MP_COMPLEMENT_TASKS = MP_COMPLEMENT_TASKS or { ["Strike"] = true, ["Anti-ship Strike"] = true, ["Runway Attack"] = true }	--taches ou l'IA complete le MP
 -------------------------------------------------------------------------------------------------------
 
 if Debug.debug then
@@ -117,13 +128,20 @@ ATO = {
 --MP_SAME_PACK : numero de package deja cree pour un vol principal MP, par camp + cible + tache
 --(2e type d'appareil sur la meme cible MP -> meme package, donc memes frequences radio)
 local mpPackByTarget = {}
+local mpServed = {}		--MP_SERVED : avions deja servis par cle side|squad|type|tache|cible
+local mpTargetFp = {}		--MP_COMPLEMENT : firepower deja apportee (client + IA) par cle side|cible|tache
 
 function createATO_table(draftPriority)
 	for side, drafts in pairs(draftPriority) do
 		if drafts and drafts ~= nil then
+			if Multi and Multi.Target and Multi.Target[side] then
+				MpTrace("=== createATO_table side="..tostring(side).." cible MP="..tostring(Multi.Target[side]).." nb drafts dans ce tour="..tostring(#drafts))
+			end
+
 			for draftN, draft in pairs(drafts) do															--iterate through all draft sorties beginning with the highest scored
 
 				if MemTick then MemTick("C draft") end
+				draft.mpSeen = true		--MP_COMPLEMENT : ce draft a deja ete traite (ne peut plus servir de complement)
 
 				local override_MP_C = false
 
@@ -190,6 +208,50 @@ function createATO_table(draftPriority)
 					end
 				end
 
+				--MP_SERVED : combien d'avions le joueur a demande pour ce squad + type + tache, et combien sont deja servis.
+				--Les drafts MP du meme squad sur la meme cible (un par loadout / variante de route) arrivent tries par score :
+				--le premier accepte consomme la demande, les suivants sont ecartes.
+				local mpKey = nil
+				local mpRemainingReq = nil
+				local mpAlreadyServed = false
+				if draft.main_overideMP and not draft.mpConsumed then
+					mpKey = tostring(side).."|"..tostring(draft.name).."|"..tostring(draft.type).."|"..tostring(draft.task).."|"..tostring(draft.target_name)
+					local mpRequestedTotal = getMultiRequestedNb(side, draft.name, draft.type, draft.task, getMultiPlane(side, draft.name, draft.type))
+					if mpRequestedTotal <= 0 then mpRequestedTotal = draft.number end
+					mpRemainingReq = mpRequestedTotal - (mpServed[mpKey] or 0)
+					if mpRemainingReq <= 0 then mpAlreadyServed = true end
+				end
+
+				if MpIsTarget(side, draft.target_name) then
+					MpTrace("ATO_DRAFT id="..tostring(draft.id).." squad="..tostring(draft.name).." type="..tostring(draft.type).." task="..tostring(draft.task)
+						.." loadout="..tostring(draft.loadout and draft.loadout.name).." score="..tostring(draft.score).." number="..tostring(draft.number)
+						.." main_overideMP="..tostring(draft.main_overideMP).." overideMP_B="..tostring(draft.overideMP_B)
+						.." mpKey="..tostring(mpKey).." deja_servi="..tostring(mpKey and mpServed[mpKey] or 0).." reste_demande="..tostring(mpRemainingReq)
+						.." mpAlreadyServed="..tostring(mpAlreadyServed).." mpConsumed="..tostring(draft.mpConsumed)
+						.." nbPack="..tostring(multipackByTargetName[draft.target_name] and multipackByTargetName[draft.target_name]["nbPack"])
+						.." supports=["..MpTraceSupports(draft).."]")
+				end
+
+				--MP_CIBLE_RESERVEE : sur la cible choisie en multijoueur, pour une tache d'attaque, seul le package MP (+ son complement IA)
+				--est cree. Les drafts IA classiques (score gonfle par les supports client) ne creent pas un 2e package.
+				local mpReservedTarget = (not draft.main_overideMP) and (not draft.mpConsumed)
+					and MP_COMPLEMENT_TASKS[draft.task] and MpIsTarget(side, draft.target_name)
+
+				if draft.mpConsumed then
+					--MP_COMPLEMENT : ce draft a deja fourni des avions IA au package MP de sa cible
+				elseif mpReservedTarget then
+					table.insert(draft["rejected"], {
+						sujet = draft.id.." MP_CIBLE_RESERVEE (la cible est servie par la demande MP + complement IA)",
+						cause = { tostring(draft.target_name) },
+						ligne = SafeGetLine(),
+					})
+				elseif mpAlreadyServed then
+					table.insert(draft["rejected"], {
+						sujet = draft.id.." MP DEJA SERVI (un seul vol par squad/tache/cible pour la demande du joueur)",
+						cause = { tostring(mpKey) },
+						ligne = SafeGetLine(),
+					})
+				else
 				if draft.loadout.minscore == nil or draft.score >= draft.loadout.minscore then					--draft sortie has no minimum score requirement or minimum score requirement is satisified
 
 					-- if draft.multipack > 0 then												--target does not have a requirment for a specific number of packages, or still needs more packages
@@ -230,7 +292,7 @@ function createATO_table(draftPriority)
 
 							--enough aircraft are available to satisfy minimum firepower requirement for target
 							-- if (available * draft.loadout.firepower >= draft.target.firepower.min and draft.number * draft.loadout.firepower >= draft.target.firepower.min) or passPackmax_C then
-							local firepowerPackOK = (available_Main * draft.loadout.firepower >= draft.target.firepower.min ) or passPackmax_C
+							local firepowerPackOK = (available_Main * draft.loadout.firepower >= draft.target.firepower.min ) or passPackmax_C or (MP_IGNORE_STOCK and draft.main_overideMP)
 
 							--mode degrade : a partir de la 5e tentative infructueuse, on ignore ce manque de
 							--firepower pour le draft du joueur plutot que de ne rien lui proposer (cf
@@ -254,6 +316,7 @@ function createATO_table(draftPriority)
 								local firepowerPackMultiOK =
 									draft.target.firepower.packmin == nil
 									or available_Main * draft.loadout.firepower >= (draft.target.firepower.packmin - 1) * draft.target.firepower.max + draft.target.firepower.min
+									or (MP_IGNORE_STOCK and draft.main_overideMP)
 
 								if not firepowerPackMultiOK and RelaxGeneration and isPlayerRelatedDraft(draft) and available_Main > 0 then
 
@@ -294,6 +357,11 @@ function createATO_table(draftPriority)
 										end
 
 										--check if there are enough supports available if supports are required
+										--MP_SERVED : jamais plus que ce que le joueur a demande (et pas encore servi)
+										if mpRemainingReq and request_Main_Nb > mpRemainingReq then
+											request_Main_Nb = mpRemainingReq
+										end
+
 										local support_available = true
 										local need = {}																								--collect the total number of aircraft needed from each unit to complete the package
 										need[draft.name] = request_Main_Nb
@@ -386,7 +454,7 @@ function createATO_table(draftPriority)
 
 										--TODO bizarre, il s agit du nb d avion du main, pas du support
 										for unitname,_ in pairs(need) do
-											if need[unitname] > avail[unitname] then															--more aircraft are needed from this unit across all package tasks than are available
+											if need[unitname] > avail[unitname] and not (MP_IGNORE_STOCK and draft.main_overideMP) then															--more aircraft are needed from this unit across all package tasks than are available
 												support_available = false																		--not enough support available
 												local tabRejected = {}
 												tabRejected["sujet"]  = draft.id.." type: "..draft.type.." AVION SUPPORT?Main? INSUFFISANT()support_available if need[unitname] > avail[unitname]"
@@ -941,7 +1009,7 @@ function createATO_table(draftPriority)
 													--MP_OVERDRIVE : demande multijoueur (vol principal ou support demande par le client) -> pas de plafond par la part
 													--prorata, mais les avions pris sont comptes dans prorataUsed (voir MP_Overdrive plus haut).
 													--Le stock reel est toujours respecte : 'assigned' ne depasse jamais AcftAvail[squad].unassigned (limite en amont).
-													local mpOverdrive = MP_Overdrive(side, draft, arg_Role, arg_Entry)
+													local mpOverdrive = MP_Overdrive(side, draft, arg_Role, arg_Entry) or arg_Entry.mpComplement
 
 													if mpOverdrive then
 
@@ -1053,6 +1121,12 @@ function createATO_table(draftPriority)
 													if ATO[side][pack_n][arg_Role] and ATO[side][pack_n][arg_Role] ~= nil then
 														table.insert(ATO[side][pack_n][arg_Role], flight)
 
+												if MpIsTarget(side, draft.target_name) then
+													MpTrace("  VOL_CREE pack="..tostring(pack_n).." role="..tostring(arg_Role).." squad="..tostring(flight.name).." type="..tostring(flight.type)
+														.." x"..tostring(flight.number).." playable="..tostring(flight.playable).." id="..tostring(flight.id)
+														.." complement_IA="..tostring(arg_Entry.mpComplement == true).." draft_parent="..tostring(draft.id))
+												end
+
 														if HO_TRACE and HumainOnlyUnit(HoUnit(flight.name)) then
 															HoLog("  VOL_CREE side="..tostring(side).." pack="..tostring(pack_n).." role="..tostring(arg_Role).." index="..tostring(#ATO[side][pack_n][arg_Role]).." id="..tostring(flight.id).." squad="..tostring(flight.name).." task="..tostring(flight.task).." cible="..tostring(flight.target_name).." nb_avions="..tostring(flight.number).." playable="..tostring(flight.playable).." tot_from="..tostring(flight.tot_from).." reste_a_assigner="..tostring(arg_Assign))
 														end
@@ -1079,7 +1153,7 @@ function createATO_table(draftPriority)
 														debugLog(draft.id.." AtoG passe C_13 |||AFTER insert/create ATO table||| type "..draft.type.." number "..assigned.." "..arg_Entry.task)
 													end
 
-													if draft.main_overideMP and mpTask_Check then
+													if draft.main_overideMP and mpTask_Check and not arg_Entry.mpComplement then
 
 														-- multiPlaneSet[side][draft.type][draft.name].NbPlane = multiPlaneSet[side][draft.type][draft.name].NbPlane - assigned
 
@@ -1110,6 +1184,13 @@ function createATO_table(draftPriority)
 
 													AcftAvail[arg_Entry.name].assigned = AcftAvail[arg_Entry.name].assigned + assigned
 													AcftAvail[arg_Entry.name].unassigned = AcftAvail[arg_Entry.name].unassigned - assigned		--remove assigned aircraft from total number of available aircraft for this unit
+													--MP_IGNORE_STOCK : un vol client peut depasser le stock du squad ; on ramene le compteur a 0 (l'IA n'aura plus rien sur ce squad)
+													if AcftAvail[arg_Entry.name].unassigned < 0 then
+														if Debug.debug then
+															debugLog(draft.id.." AtoG MP_STOCK_DEPASSE squad: "..tostring(arg_Entry.name).." stock negatif ramene a 0 (vol client de "..tostring(assigned).." avions)")
+														end
+														AcftAvail[arg_Entry.name].unassigned = 0
+													end
 													arg_Assign = arg_Assign - assigned													--continue loop until are aircraft are assigned
 
 													if HO_TRACE and HumainOnlyUnit(HoUnit(arg_Entry.name)) then
@@ -1133,12 +1214,101 @@ function createATO_table(draftPriority)
 											draftForFlight.number = request_Main_Nb
 
 											addFlight(request_Main_Nb, "main", draftForFlight)
+											draft.atoMainAdded = true
 											--********************************************************************************************
 
 											--vol principal reellement ajoute a l'ATO : si ce package a beneficie du mode
 											--degrade (RelaxGeneration), c'est le point fiable pour l'annoncer (cf le meme
 											--hook au niveau du 1er circuit, processEligibleLoadout / buildDraftSorties).
 											AnnounceRelaxedLimits(draft.name, draft.target_name, draft.loadout.name)
+
+											--MP_SERVED + MP_COMPLEMENT : le vol client est en place. On compte ce qui est servi, puis, si le nombre demande
+											--ne couvre pas le besoin de la cible, des avions IA completent le package (meme squad d'abord, puis les autres).
+											if mpKey then
+												mpServed[mpKey] = (mpServed[mpKey] or 0) + request_Main_Nb
+
+												local tKey = tostring(side).."|"..tostring(draft.target_name).."|"..tostring(draft.task)
+												mpTargetFp[tKey] = (mpTargetFp[tKey] or 0) + request_Main_Nb * draft.loadout.firepower
+
+												if MP_COMPLEMENT_TASKS[draft.task] and draft.target.firepower then
+													local fpMin = draft.target.firepower.min or 0
+													local fpMax = draft.target.firepower.max or fpMin
+													local needFp = fpMin + (fpMax - fpMin) * MP_NEED_RATIO
+													local remainFp = needFp - mpTargetFp[tKey]
+
+													if Debug.debug then
+														debugLog(draft.id.." AtoG MP_COMPLEMENT cible: "..tostring(draft.target_name).." besoin firepower: "..tostring(needFp)
+															.." deja apporte: "..tostring(mpTargetFp[tKey]).." reste: "..tostring(remainFp))
+													end
+
+													--ajoute un vol IA issu de "entry" (draft source), limite par le stock et la part par tache
+													local function addMpComplement(entry)
+														local fp = entry.loadout and entry.loadout.firepower
+														if not fp or fp <= 0 or not AcftAvail[entry.name] then return end
+
+														local nb = math.ceil((remainFp - 0.0001) / fp)
+														local stock = math.floor(AcftAvail[entry.name].unassigned)
+														if nb > stock then nb = stock end
+														if nb <= 0 then return end
+
+														local copy = DeepCopy(entry)
+														copy.mpComplement = true
+														copy.main_overideMP = false
+														copy.playable = false
+														copy.number = nb
+														if entry == draft then copy.id = tostring(draft.id).."_IA" end
+
+														local assignedBefore = AcftAvail[copy.name].assigned
+														addFlight(nb, "main", copy)
+														local done = AcftAvail[copy.name].assigned - assignedBefore
+
+														if MpIsTarget(side, draft.target_name) then
+															MpTrace("  MP_COMPLEMENT essai squad="..tostring(copy.name).." demande="..tostring(nb).." stock="..tostring(stock).." fp="..tostring(fp).." reste_fp_avant="..tostring(remainFp).." ajoutes="..tostring(done))
+														end
+
+														if done > 0 then
+															remainFp = remainFp - done * fp
+															mpTargetFp[tKey] = mpTargetFp[tKey] + done * fp
+															entry.mpConsumed = true
+															if Debug.debug then
+																debugLog(draft.id.." AtoG MP_COMPLEMENT +"..tostring(done).." "..tostring(copy.type).." IA squad: "..tostring(copy.name).." reste: "..tostring(remainFp))
+															end
+														end
+													end
+
+													local usedSquads = {}
+
+													--1) meme squad, meme loadout que le vol client
+													usedSquads[draft.name] = true
+													if remainFp > 0.0001 then
+														addMpComplement(draft)
+														draft.mpConsumed = nil		--le draft client lui-meme n'est pas a ecarter (deja traite)
+													end
+
+													--2) autres squads : leurs drafts IA (non traites) sur la meme cible et la meme tache, les mieux notes d'abord
+													if remainFp > 0.0001 and draftSorties and draftSorties[side] then
+														local cands = {}
+														for _, d2 in ipairs(draftSorties[side]) do
+															if d2 ~= draft and not d2.main_overideMP and not d2.atoMainAdded and not d2.mpConsumed
+															and d2.target_name == draft.target_name and d2.task == draft.task
+															and not usedSquads[d2.name]
+															and (d2.loadout.minscore == nil or d2.score >= d2.loadout.minscore) then
+																cands[#cands + 1] = d2
+															end
+														end
+
+														table.sort(cands, function(a, b) return (a.score or 0) > (b.score or 0) end)
+
+														for _, d2 in ipairs(cands) do
+															if remainFp <= 0.0001 then break end
+															if not usedSquads[d2.name] then
+																usedSquads[d2.name] = true
+																addMpComplement(d2)
+															end
+														end
+													end
+												end
+											end
 
 											-- for taskSupport, supportPart in pairs(draft.support) do										--iterate through all package support
 											-- Ça stabilise :
@@ -1155,6 +1325,17 @@ function createATO_table(draftPriority)
 											table.sort(orderedSupportTasks)
 
 											if mpMerged then orderedSupportTasks = {} end		--MP_SAME_PACK : supports deja portes par le 1er draft du package
+
+											--MP_NO_STRIKE_SUPPORT : un vol principal MP (Strike...) ne recoit PAS de vol "Strike" en support. Ce support (addSupportToDraft)
+											--rajoutait 4 avions du meme squad client (escort_num = 4 avec overideMP_B) en plus des avions demandes par le joueur.
+											--Le complement de firepower est maintenant fait par MP_COMPLEMENT (plus haut), selon le besoin reel de la cible.
+											if draft.main_overideMP and MP_COMPLEMENT_TASKS[draft.task] then
+												local keptSupportTasks = {}
+												for _, keptTask in ipairs(orderedSupportTasks) do
+													if keptTask ~= "Strike" then keptSupportTasks[#keptSupportTasks + 1] = keptTask end
+												end
+												orderedSupportTasks = keptSupportTasks
+											end
 
 											for _, taskSupport in ipairs(orderedSupportTasks) do
 												local supportPart = draft.support[taskSupport]
@@ -1261,6 +1442,15 @@ function createATO_table(draftPriority)
 					local cause = { [1] = tostring(draft.loadout.minscore), [2]  = tostring(draft.score), }
 					rejectDraft(draft, sujet, cause, SafeGetLine())
 
+				end
+				end	--fin MP_SERVED / MP_COMPLEMENT (if draft.mpConsumed / elseif mpAlreadyServed / else)
+
+				if MpIsTarget(side, draft.target_name) then
+					local rejTxt = {}
+					for _, rej in ipairs(draft["rejected"] or {}) do
+						rejTxt[#rejTxt + 1] = tostring(rej.sujet)
+					end
+					MpTrace("ATO_DRAFT_FIN id="..tostring(draft.id).." vol_principal_ajoute="..tostring(draft.atoMainAdded == true).." rejets("..#rejTxt..")="..table.concat(rejTxt, " || "))
 				end
 
 				if isDebugModeC and next(escortRejectReasons) then
