@@ -12,6 +12,62 @@ if Debug.debug then
 	print("START ATO_Gen_Main.lua "..versionDCE["ATO_Gen_Main.lua"].." =-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
 end
 
+--PERF etape 3a : chronometre de DeepCopy, SANS rien changer ailleurs (actif seulement si Debug.debug).
+--Il ecrit, en fin de generation, les 10 endroits du code qui copient le plus (fichier:ligne, nombre d'appels, temps cumule).
+--DeepCopyReport() (appelee en fin de ATO_Gen_Main.lua) remet le DeepCopy d'origine : aucun residu apres la generation.
+local genT0 = os.clock()
+DeepCopyStats = {}
+
+if Debug.debug and not DeepCopyOrig then
+	DeepCopyOrig = DeepCopy
+
+	local function DeepCopyProfiled(orig, copies)
+		if copies ~= nil or type(orig) ~= "table" then return DeepCopyOrig(orig, copies) end		--appel recursif ou valeur simple : on ne compte pas
+
+		local info = debug.getinfo(2, "Sl")
+		local key = info and (tostring(info.short_src)..":"..tostring(info.currentline)) or "?"
+		local st = DeepCopyStats[key]
+		if not st then st = { n = 0, t = 0 } ; DeepCopyStats[key] = st end
+
+		DeepCopy = DeepCopyOrig		--pas de surcout sur les appels recursifs pendant la copie
+		local t0 = os.clock()
+		local result = DeepCopyOrig(orig)
+		st.t = st.t + (os.clock() - t0)
+		st.n = st.n + 1
+		DeepCopy = DeepCopyProfiled
+		return result
+	end
+
+	DeepCopy = DeepCopyProfiled
+end
+
+function DeepCopyReport()
+	if not DeepCopyOrig then return end
+	DeepCopy = DeepCopyOrig
+	DeepCopyOrig = nil
+
+	local list, total, totalN = {}, 0, 0
+	for key, st in pairs(DeepCopyStats) do
+		list[#list + 1] = { key = key, n = st.n, t = st.t }
+		total = total + st.t
+		totalN = totalN + st.n
+	end
+	table.sort(list, function(a, b) return a.t > b.t end)
+
+	local txt = string.format("PERF DeepCopy : %d appels, %.2f s cumulees sur %.2f s de generation (os.clock, precision ~1 ms : les petites copies comptent ~0)", totalN, total, os.clock() - genT0)
+	for i = 1, math.min(10, #list) do
+		txt = txt..string.format("\n   %7.2f s  %7d appels  %s", list[i].t, list[i].n, list[i].key)
+	end
+	print(txt)
+
+	--fichier dedie (ajout a chaque tentative), au meme endroit que les autres fichiers Debug du generateur
+	local f = io.open("Debug/Perf_DeepCopy.log", "a")
+	if f then
+		f:write("---- "..os.date("%Y-%m-%d %H:%M:%S").." | passe "..tostring(GeneratorPass).." ----\n"..txt.."\n")
+		f:close()
+	end
+end
+
 -- ============================================================================
 -- REGLAGE : réduction du minscore selon la couverture escorte
 -- ============================================================================
@@ -1745,6 +1801,55 @@ for i, v in ipairs(oob_air["red"]) do
 end
 oob_air["red"] = shuffled
 
+-- ===== BLOC 1 : a inserer JUSTE AVANT la ligne "--inversion des 2 boucles draft_sortie en premier..." (Part B) =====
+--PERF (etape 2) : la liste des loadouts de support ne depend que de (type d'avion, pays, tache de support).
+--Avant : elle etait reconstruite et retriee pour CHAQUE couple (draft x squad de support x tache).
+--Maintenant : construite une seule fois par (type|pays|tache), meme filtre, meme tri (sortSupportLoadouts), memes references vers les loadouts globaux.
+--Le cache est local a ce passage du fichier (le fichier est re-inclus a chaque tentative de generation : cache neuf a chaque fois).
+local supportLoadoutCache = {}
+
+local function getSupportLoadouts(unitSupport, sptTask)
+
+	local cacheKey = tostring(unitSupport.type).."|"..tostring(unitSupport.country).."|"..tostring(sptTask)
+	local cached = supportLoadoutCache[cacheKey]
+	if cached then return cached end
+
+	local uSupportloadouts = {}														--table to hold all loadouts for this aircraft type and task
+
+	for loadout_name, ltable in pairs((LoadoutsList[unitSupport.type] and LoadoutsList[unitSupport.type][sptTask]) or {}) do			--iterate through all loadouts for the aircraft type and task
+		ltable.name = loadout_name
+		if ltable.standoff == nil then ltable.standoff = 0 end
+
+		local countryEligible = false
+		if ltable.country == nil  then
+			countryEligible = true
+		elseif type(ltable.country) == "string" then
+			if string.lower(ltable.country) == string.lower(unitSupport.country) or string.lower(ltable.country) == "all" then
+				countryEligible = true
+			end
+
+		elseif type(ltable.country) == "table" then
+			for n, countryLabel in pairs(ltable.country) do
+				if string.lower(countryLabel) == string.lower(unitSupport.country) or string.lower(countryLabel) == "all" then
+					countryEligible = true
+					break
+				end
+			end
+		end
+
+		if countryEligible then
+			uSupportloadouts[#uSupportloadouts+1] = ltable
+		end
+	end
+
+	-- trie par standoff
+	--avant : table.sort(uSupportloadouts, function(a,b) return a.standoff > b.standoff end)
+	sortSupportLoadouts(uSupportloadouts)
+
+	supportLoadoutCache[cacheKey] = uSupportloadouts
+	return uSupportloadouts
+end
+
 --inversion des 2 boucles draft_sortie en premier, oob_air ensuite, pour homogeniser les chances de sortie de tous les escadrons support
 for sideName, draftT in pairs(draftSorties) do
 	for draft_n, draft in ipairs(draftT) do
@@ -2035,38 +2140,8 @@ for sideName, draftT in pairs(draftSorties) do
 							if isDebugModeB then debugLog(draft.id.." AtoG II pass B_05  " ) end
 
 							--get possible loadouts
-							local uSupportloadouts = {}														--table to hold all loadouts for this aircraft type and task
-
-							for loadout_name, ltable in pairs((LoadoutsList[unitSupport.type] and LoadoutsList[unitSupport.type][sptTask]) or {}) do			--iterate through all loadouts for the aircraft type and task
-								ltable.name = loadout_name
-								if ltable.standoff == nil then ltable.standoff = 0 end
-
-								local countryEligible = false
-								if ltable.country == nil  then
-									countryEligible = true
-								elseif type(ltable.country) == "string" then
-									if string.lower(ltable.country) == string.lower(unitSupport.country) or string.lower(ltable.country) == "all" then
-										countryEligible = true
-									end
-
-								elseif type(ltable.country) == "table" then
-									for n, countryLabel in pairs(ltable.country) do
-										if string.lower(countryLabel) == string.lower(unitSupport.country) or string.lower(countryLabel) == "all" then
-											countryEligible = true
-											break
-										end
-									end
-								end
-
-								if countryEligible then
-									uSupportloadouts[#uSupportloadouts+1] = ltable
-								end
-
-							end
-
-							-- trie par standoff
-							--avant : table.sort(uSupportloadouts, function(a,b) return a.standoff > b.standoff end)
-							sortSupportLoadouts(uSupportloadouts)
+							--liste des loadouts de support (cache : voir getSupportLoadouts)
+							local uSupportloadouts = getSupportLoadouts(unitSupport, sptTask)
 
 							for l = 1, #uSupportloadouts do													--iterate through all available loadouts				
 
@@ -2694,50 +2769,42 @@ table.sort(targetListPrio["blue"], function(a,b) return a > b  end)
 table.sort(targetListPrio["red"], function(a,b) return a > b  end)
 
 
-
--- for sidePrio, tableauPrio in pairs(targetListPrio) do
--- 	for tableN, value_prio in pairs(tableauPrio) do
-
--- 		for draftN, draft in pairs(draftSorties[sidePrio]) do
--- 			-- if draft.priorityIni == value_prio then
--- 			if draft.targetPriority == value_prio then
--- 				table.insert(newDraftByPriority[sidePrio], draft)
--- 			end
-
--- 		end
-
--- 		table.sort(newDraftByPriority[sidePrio], function(a,b) return a.score > b.score  end)
-
--- 		createATO_table(newDraftByPriority)
-
--- 		if Debug.Generator.affiche and newDraftByPriority ~= nil then
--- 			debugLog("\n"..debuGenTxt.." \n Side: "..sidePrio.."  tablePrio "..tostring(value_prio).."\n")
--- 			showAtoSort(newDraftByPriority, value_prio)
--- 		end
-
--- 		newDraftByPriority = {
--- 			blue = {},
--- 			red = {},
--- 		}
--- 	end
--- end
-
 -- ============================================================================
 -- PREFERENCE loadout de portee juste suffisante -- code deplace dans le dossier ATO_Generator\
 -- ============================================================================
 --Les REGLAGES LOADOUT_RANGE_* sont maintenant en tete de ATO_Gen_90_RangePref.lua
 Include("ATO_Generator/ATO_Gen_90_RangePref.lua")	--reglages, log dedie, sortDraftsByScoreAndRange, rangePrefReport
 
+-- ===== BLOC 3 : remplace la boucle "for sidePrio, tableauPrio in pairs(targetListPrio) do" (Part C, juste apres l'Include de ATO_Gen_90_RangePref.lua) =====
+--PERF (etape 2) : avant, pour CHAQUE niveau de priorite on reparcourait TOUS les drafts du camp (niveaux x drafts).
+--Maintenant : un seul passage range les drafts par priorite (meme ordre d'insertion qu'avant : ordre du tableau trie),
+--puis chaque niveau recupere sa liste toute faite. Le tri (sortDraftsByScoreAndRange) et createATO_table sont inchanges.
+--Les drafts dont targetPriority n'est dans aucun niveau de targetListPrio ne sont jamais traites (comme avant).
+local draftsByPriority = { blue = {}, red = {} }
+for sideBucket, drafts in pairs(draftSorties) do
+	local byPrio = {}
+	draftsByPriority[sideBucket] = byPrio
+	for draftN, draft in pairs(drafts) do
+		local p = draft.targetPriority
+		if p ~= nil and p == p then
+			local list = byPrio[p]
+			if not list then
+				list = {}
+				byPrio[p] = list
+			end
+			list[#list + 1] = draft
+		end
+	end
+end
+
 for sidePrio, tableauPrio in pairs(targetListPrio) do
 	for tableN, value_prio in pairs(tableauPrio) do
 
-		for draftN, draft in pairs(draftSorties[sidePrio]) do
-			-- if draft.priorityIni == value_prio then
-			if draft.targetPriority == value_prio then
-				table.insert(newDraftByPriority[sidePrio], draft)
-			end
-
-		end
+		newDraftByPriority = {
+			blue = {},
+			red = {},
+		}
+		newDraftByPriority[sidePrio] = (draftsByPriority[sidePrio] and draftsByPriority[sidePrio][value_prio]) or {}
 
 		--avant : table.sort(newDraftByPriority[sidePrio], function(a,b) return a.score > b.score  end)
 		sortDraftsByScoreAndRange(newDraftByPriority[sidePrio])
@@ -3015,6 +3082,8 @@ if Debug.debug then
 	campFile:close()
 
 end
+
+DeepCopyReport()		--PERF 3a : bilan des DeepCopy (log + console), remet le DeepCopy d'origine
 
 --trace humainOnly : etat de l'ATO a la fin du generateur (avant l'affectation du joueur)
 HoDumpATO("FIN generateur (avant ATO_PlayerAssign) : vols candidats", false)

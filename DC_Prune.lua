@@ -9,7 +9,10 @@
 -------------------------------------------------------------------------------------------------------
 -- last modification: cleancode_c
 if not versionDCE then versionDCE = {} end
-versionDCE["DC_Prune.lua"] = "1.7.27"
+versionDCE["DC_Prune.lua"] = "1.7.30"
+--1.7.30 : decors a mots-cles (bag, wall, sand...) : rayon de protection autour des PointOfInterest dependant de l'agressivite (10 km / agressivite)
+--1.7.29 : PruneAggressiveness = 0 (ou absent / non numerique) = AUCUN prune (avant, 0 desactivait seulement la regle de distance : les decors statiques, les avions statiques, etc. etaient quand meme supprimes)
+--1.7.28 : elements NAM / VIETCONG (mot-cle "vc_", regle "particularite NAM GC22") en suspens : actifs seulement si mission_ini.PruneScriptConf.PruneNAM == true
 -------------------------------------------------------------------------------------------------------
 
 if Debug.debug then
@@ -22,8 +25,15 @@ local pruneAggressiveness =		mission_ini.PruneScriptConf.PruneAggressiveness
 local pruneStatic =				mission_ini.PruneScriptConf.PruneStatic
 local pruneSam =				mission_ini.PruneScriptConf.ForcedPruneSam
 
+--NAM / VIETCONG : EN SUSPENS. Tout ce qui est specifique a la campagne Vietnam (mot-cle "vc_" + regle "particularite NAM GC22" Multi / VC_Khe-Sanh)
+--est desactive tant que PruneNAM n'est pas vrai. Pour le reactiver : mission_ini.PruneScriptConf.PruneNAM = true (conf_mod), sans toucher a ce fichier.
+--Desactive, les unites "vc_" sont traitees comme n'importe quelle unite sol (gardees si proches d'un waypoint / d'une cible, sinon pruned).
+--(Piste pour plus tard : activation en fonction de la distance.)
+local pruneNAM =				mission_ini.PruneScriptConf.PruneNAM == true
+
 -- Liste des mots-clés à pruner
-local pruneKeywords = { "bag", "wall", "sand", "camouflage", "barrier", "container", "tent", "cargo", "soldier" , "vc_" }
+local pruneKeywords = { "bag", "wall", "sand", "camouflage", "barrier", "container", "tent", "cargo", "soldier" }
+if pruneNAM then pruneKeywords[#pruneKeywords + 1] = "vc_" end		--NAM : VietCong (en suspens)
 -- local pruneKeywords = { "bag", "wall", "sand", "barrier", "container", "cargo" }
 -- local pruneKeywords = { }
 -- Liste des mots-clés à garder
@@ -211,8 +221,8 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 	-- puis dans keepGroundUnit :
 	elseif isPruneKeyword(lowCaseName) then
 
-		--[[particularité NAM GC22]]
-		if Multi and Multi.NbGroup and Multi.NbGroup >= 1 then
+		--[[particularité NAM GC22 : EN SUSPENS (PruneNAM = false par defaut, voir en tete de fichier)]]
+		if pruneNAM and Multi and Multi.NbGroup and Multi.NbGroup >= 1 then
 			if string.find(lowCaseName, "vc_") then
 
 				-- Exception : ne prune pas si c'est VC_Khe-Sanh
@@ -228,10 +238,12 @@ local function keepGroundUnit(unit, unitSide, allWaypoints, allGroundGroupId, ca
 		--[[particularité NAM GC22]]
 
 		-- Vérifie la proximité d'un PointOfInterest
+		-- 1.7.30 : le rayon de protection depend de l'agressivite (10 km a 1, 100 km a 0.1, 3.3 km a 3 ou plus)
+		local poiRadius = 10000 / math.min(math.max(tonumber(pruneAggressiveness) or 1, 0.1), 3)
 		for nPOI, POI in pairs(PointOfInterest) do
 			local distance = GetDistance(POI, unit)
 			-- print("DC_P_T0 ---distance: "..math.floor(distance/1000))
-			if distance < 10000 then
+			if distance < poiRadius then
 				-- print("DC_P_T1 ---K----> Keep POI: "..lowCaseName)
 				return true -- keep POI
 			end
@@ -522,7 +534,11 @@ end
 
 
 -- Tomsk modification V9 Integration de Prune Script
-if pruneScript == true then
+--1.7.29 : PruneAggressiveness = 0 (ou absent / non numerique) = aucun prune (voir l'en-tete du fichier)
+if pruneScript == true and (tonumber(pruneAggressiveness) or 0) <= 0 then
+	print("Prune desactive : PruneAggressiveness = "..tostring(pruneAggressiveness).." (0 = aucun prune)")
+
+elseif pruneScript == true then
 	local _Count = NbPlane()
 	print ("Number of plane Before Prune: ".._Count.NbPlane.." PlaneStatic: ".._Count.NbPlaneStatic.." Nb Helic: ".._Count.NbHeli.." HeliStatic ".._Count.NbHeliStatic)
 	prune()
